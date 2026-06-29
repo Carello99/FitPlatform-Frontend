@@ -1,0 +1,676 @@
+{
+  "user": {
+    "name": "Marco",
+    "level": 7,
+    "levelTitle": "Atleta",
+    "xp": 2840,
+    "xpNext": 3500,
+    "streak": 12,
+    "weight": 74.2
+  },
+  "schede": [
+    {
+      "id": "push",
+      "name": "Push Power",
+      "focus": "Petto · Spalle · Tricipiti",
+      "duration": 52,
+      "level": 2,
+      "accent": "amber",
+      "icon": "ti-barbell",
+      "tag": "In corso",
+      "desc": "Costruisci forza e volume sulla parte superiore con focus sulla spinta.",
+      "exercises": [
+        {
+          "name": "Panca piana bilanciere",
+          "sets": 4,
+          "reps": "8-10",
+          "rest": 90,
+          "muscle": "Petto",
+          "icon": "ti-barbell"
+        },
+        {
+          "name": "Spinte manubri inclinata",
+          "sets": 3,
+          "reps": "10-12",
+          "rest": 75,
+          "muscle": "Petto",
+          "icon": "ti-barbell"
+        },
+        {
+          "name": "Lento avanti manubri",
+          "sets": 4,
+          "reps": "8-10",
+          "rest": 90,
+          "muscle": "Spalle",
+          "icon": "ti-arrow-up"
+        },
+        {
+          "name": "Alzate laterali",
+          "sets": 3,
+          "reps": "12-15",
+          "rest": 60,
+          "muscle": "Spalle",
+          "icon": "ti-arrows-horizontal"
+        },
+        {
+          "name": "French press",
+          "sets": 3,
+          "reps": "10-12",
+          "rest": 60,
+          "muscle": "Tricipiti",
+          "icon": "ti-stretching"
+        },
+        {
+          "name": "Push-down ai cavi",
+          "sets": 3,
+          "reps": "12-15",
+          "rest": 45,
+          "muscle": "Tricipiti",
+          "icon": "ti-cable"
+        }
+      ]
+    },
+    {
+      "id": "pull",
+      "name": "Pull Day",
+      "focus": "Dorso · Bicipiti",
+      "duration": 48,
+      "level": 2,
+      "accent": "cyan",
+      "icon": "ti-stretching-2",
+      "tag": "",
+      "desc": "Sviluppa ampiezza e spessore della schiena con trazioni e rematori.",
+      "exercises": [
+        {
+          "name": "Trazioni alla sbarra",
+          "sets": 4,
+          "reps": "6-8",
+          "rest": 90,
+          "muscle": "Dorso",
+          "icon": "ti-stretching-2"
+        },
+        {
+          "name": "Rematore bilanciere",
+          "sets": 4,
+          "reps": "8-10",
+          "rest": 90,
+          "muscle": "Dorso",
+          "icon": "ti-barbell"
+        },
+        {
+          "name": "Lat machine presa larga",
+          "sets": 3,
+          "reps": "10-12",
+          "rest": 75,
+          "muscle": "Dorso",
+          "icon": "ti-cable"
+        },
+        {
+          "name": "Curl bilanciere",
+          "sets": 3,
+          "reps": "10-12",
+          "rest": 60,
+          "muscle": "Bicipiti",
+          "icon": "ti-barbell"
+        },
+        {
+          "name": "Curl manubri alternato",
+          "sets": 3,
+          "reps": "12",
+          "rest": 45,
+          "muscle": "Bicipiti",
+          "icon": "ti-barbell"
+        }
+      ]
+    },
+    {
+      "id": "legs",
+      "name": "Leg Builder",
+      "focus": "Quadricipiti · Femorali · Glutei",
+      "duration": 60,
+      "level": 3,
+      "accent": "violet",
+      "icon": "ti-run",
+      "tag": "",
+      "desc": "La seduta più intensa della settimana. Gambe forti, base solida.",
+      "exercises": [
+        {
+          "name": "Squat bilanciere",
+          "sets": 5,
+          "reps": "5-8",
+          "rest": 120,
+          "muscle": "Quadricipiti",
+          "icon": "ti-barbell"
+        },
+        {
+          "name": "Pressa 45°",
+          "sets": 4,
+          "reps": "10-12",
+          "rest": 90,
+          "muscle": "Quadricipiti",
+          "icon": "ti-stairs"
+        },
+        {
+          "name": "Stacco rumeno",
+          "sets": 4,
+          "reps": "8-10",
+          "rest": 90,
+          "muscle": "Femorali",
+          "icon": "ti-barbell"
+        },
+        {
+          "name": "Affondi camminata",
+          "sets": 3,
+          "reps": "12/gamba",
+          "rest": 75,
+          "muscle": "Glutei",
+          "icon": "ti-walk"
+        },
+        {
+          "name": "Calf raise",
+          "sets": 4,
+          "reps": "15-20",
+          "rest": 45,
+          "muscle": "Polpacci",
+          "icon": "ti-arrow-up"
+        }
+      ]
+    },
+    {
+      "id": "full",
+      "name": "Full Body Express",
+      "focus": "Total Body",
+      "duration": 35,
+      "level": 1,
+      "accent": "green",
+      "icon": "ti-bolt",
+      "tag": "Veloce",
+      "desc": "Allenamento completo ad alta densità quando hai poco tempo.",
+      "exercises": [
+        {
+          "name": "Goblet squat",
+          "sets": 3,
+          "reps": "12",
+          "rest": 60,
+          "muscle": "Gambe",
+          "icon": "ti-stretching"
+        },
+        {
+          "name": "Push-up",
+          "sets": 3,
+          "reps": "15",
+          "rest": 45,
+          "muscle": "Petto",
+          "icon": "ti-stretching"
+        },
+        {
+          "name": "Rematore manubrio",
+          "sets": 3,
+          "reps": "12",
+          "rest": 60,
+          "muscle": "Dorso",
+          "icon": "ti-barbell"
+        },
+        {
+          "name": "Plank",
+          "sets": 3,
+          "reps": "45s",
+          "rest": 30,
+          "muscle": "Core",
+          "icon": "ti-timeline"
+        }
+      ]
+    },
+    {
+      "id": "core",
+      "name": "Core & Mobility",
+      "focus": "Addome · Mobilità",
+      "duration": 28,
+      "level": 1,
+      "accent": "rose",
+      "icon": "ti-yoga",
+      "tag": "Recupero",
+      "desc": "Sessione di rinforzo del core e mobilità per i giorni di scarico.",
+      "exercises": [
+        {
+          "name": "Hollow hold",
+          "sets": 3,
+          "reps": "30s",
+          "rest": 30,
+          "muscle": "Core",
+          "icon": "ti-timeline"
+        },
+        {
+          "name": "Russian twist",
+          "sets": 3,
+          "reps": "20",
+          "rest": 30,
+          "muscle": "Obliqui",
+          "icon": "ti-rotate"
+        },
+        {
+          "name": "Bird dog",
+          "sets": 3,
+          "reps": "12",
+          "rest": 30,
+          "muscle": "Core",
+          "icon": "ti-stretching"
+        },
+        {
+          "name": "Mobilità anche",
+          "sets": 2,
+          "reps": "8/lato",
+          "rest": 20,
+          "muscle": "Mobilità",
+          "icon": "ti-yoga"
+        }
+      ]
+    }
+  ],
+  "week": [
+    {
+      "d": "L",
+      "state": "done"
+    },
+    {
+      "d": "M",
+      "state": "done"
+    },
+    {
+      "d": "M",
+      "state": "rest"
+    },
+    {
+      "d": "G",
+      "state": "done"
+    },
+    {
+      "d": "V",
+      "state": "done"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    },
+    {
+      "d": "D",
+      "state": "today"
+    }
+  ],
+  "weekGoal": 5,
+  "weekDone": 4,
+  "stats": [
+    {
+      "icon": "ti-clock-hour-4",
+      "tile": "cyan",
+      "val": "4h 12m",
+      "label": "Tempo settimana",
+      "trend": "+18%",
+      "up": true
+    },
+    {
+      "icon": "ti-flame",
+      "tile": "amber",
+      "val": "14",
+      "label": "Allenamenti / mese",
+      "trend": "+2",
+      "up": true
+    },
+    {
+      "icon": "ti-scale",
+      "tile": "violet",
+      "val": "74.2",
+      "unit": "kg",
+      "label": "Peso corporeo",
+      "trend": "-0.8kg",
+      "up": false
+    },
+    {
+      "icon": "ti-stretching",
+      "tile": "green",
+      "val": "168",
+      "label": "Serie completate",
+      "trend": "record",
+      "up": true
+    }
+  ],
+  "volumeWeeks": [
+    {
+      "l": "Lun",
+      "v": 62
+    },
+    {
+      "l": "Mar",
+      "v": 78
+    },
+    {
+      "l": "Mer",
+      "v": 0
+    },
+    {
+      "l": "Gio",
+      "v": 88
+    },
+    {
+      "l": "Ven",
+      "v": 71
+    },
+    {
+      "l": "Sab",
+      "v": 0
+    },
+    {
+      "l": "Dom",
+      "v": 42
+    }
+  ],
+  "weightTrend": [
+    75.6,
+    75.2,
+    75.4,
+    74.9,
+    74.6,
+    74.8,
+    74.4,
+    74.2
+  ],
+  "perfMonths": [
+    {
+      "m": "Gen",
+      "v": 8
+    },
+    {
+      "m": "Feb",
+      "v": 11
+    },
+    {
+      "m": "Mar",
+      "v": 9
+    },
+    {
+      "m": "Apr",
+      "v": 13
+    },
+    {
+      "m": "Mag",
+      "v": 12
+    },
+    {
+      "m": "Giu",
+      "v": 14
+    }
+  ],
+  "badges": [
+    {
+      "icon": "ti-flame",
+      "tile": "amber",
+      "name": "Streak 7",
+      "got": true
+    },
+    {
+      "icon": "ti-bolt",
+      "tile": "cyan",
+      "name": "Early Bird",
+      "got": true
+    },
+    {
+      "icon": "ti-trophy",
+      "tile": "violet",
+      "name": "100 Serie",
+      "got": true
+    },
+    {
+      "icon": "ti-mountain",
+      "tile": "green",
+      "name": "PR Squat",
+      "got": true
+    },
+    {
+      "icon": "ti-calendar-stats",
+      "tile": "rose",
+      "name": "Mese pieno",
+      "got": false
+    },
+    {
+      "icon": "ti-diamond",
+      "tile": "slate",
+      "name": "Livello 10",
+      "got": false
+    }
+  ],
+  "history": [
+    {
+      "name": "Push Power",
+      "date": "Oggi · 07:40",
+      "dur": "52 min",
+      "vol": "4 280 kg",
+      "ex": 6,
+      "accent": "amber",
+      "icon": "ti-barbell"
+    },
+    {
+      "name": "Leg Builder",
+      "date": "Ieri · 18:20",
+      "dur": "61 min",
+      "vol": "6 150 kg",
+      "ex": 5,
+      "accent": "violet",
+      "icon": "ti-run"
+    },
+    {
+      "name": "Pull Day",
+      "date": "2 giorni fa · 07:55",
+      "dur": "47 min",
+      "vol": "3 920 kg",
+      "ex": 5,
+      "accent": "cyan",
+      "icon": "ti-stretching-2"
+    },
+    {
+      "name": "Full Body Express",
+      "date": "4 giorni fa · 12:10",
+      "dur": "34 min",
+      "vol": "2 110 kg",
+      "ex": 4,
+      "accent": "green",
+      "icon": "ti-bolt"
+    },
+    {
+      "name": "Push Power",
+      "date": "5 giorni fa · 07:35",
+      "dur": "54 min",
+      "vol": "4 180 kg",
+      "ex": 6,
+      "accent": "amber",
+      "icon": "ti-barbell"
+    }
+  ],
+  "faq": [
+    {
+      "q": "Come creo una nuova scheda di allenamento?",
+      "a": "Vai su Schede e tocca il pulsante Nuova Scheda, oppure usa l'azione rapida in Home. La creazione guidata ti accompagna passo dopo passo: nome, gruppi muscolari ed esercizi."
+    },
+    {
+      "q": "Posso modificare una scheda mentre mi alleno?",
+      "a": "Sì. Durante l'allenamento attivo puoi saltare un esercizio, aggiungere serie o terminare in anticipo. Le modifiche non alterano la scheda salvata."
+    },
+    {
+      "q": "Come funziona il timer di recupero?",
+      "a": "Il timer parte automaticamente quando completi una serie. Resta discreto in basso e puoi metterlo in pausa o saltarlo con un tap."
+    },
+    {
+      "q": "I miei progressi vengono salvati automaticamente?",
+      "a": "Ogni sessione completata viene registrata nello Storico e aggiorna grafici e statistiche in tempo reale."
+    },
+    {
+      "q": "Come sblocco nuovi badge?",
+      "a": "I badge premiano costanza e record personali: mantieni lo streak, completa serie e supera i tuoi massimali per sbloccarli."
+    }
+  ],
+  "guides": [
+    {
+      "icon": "ti-rocket",
+      "tile": "amber",
+      "t": "Primi passi",
+      "s": "Configura il profilo"
+    },
+    {
+      "icon": "ti-barbell",
+      "tile": "cyan",
+      "t": "Crea una scheda",
+      "s": "Guida in 4 step"
+    },
+    {
+      "icon": "ti-chart-line",
+      "tile": "violet",
+      "t": "Leggi i progressi",
+      "s": "Grafici e metriche"
+    },
+    {
+      "icon": "ti-device-watch",
+      "tile": "green",
+      "t": "Collega wearable",
+      "s": "Sincronizza dati"
+    }
+  ],
+  "muscleGroups": [
+    "Petto",
+    "Dorso",
+    "Spalle",
+    "Gambe",
+    "Bicipiti",
+    "Tricipiti",
+    "Core",
+    "Glutei"
+  ],
+  "exerciseLib": [
+    "Panca piana",
+    "Spinte manubri",
+    "Push-up",
+    "Dip alle parallele",
+    "Panca inclinata",
+    "Cavi incrociati",
+    "Pec deck",
+    "Trazioni",
+    "Rematore bilanciere",
+    "Lat machine",
+    "Pulley basso",
+    "Stacco da terra",
+    "Hyperextension",
+    "Lento avanti",
+    "Alzate laterali",
+    "Alzate frontali",
+    "Arnold press",
+    "Facepull",
+    "Military press",
+    "Curl bilanciere",
+    "Curl manubri",
+    "Curl concentrato",
+    "Curl a martello",
+    "Curl su panca inclinata",
+    "Tricipiti ai cavi",
+    "French press",
+    "Skull crusher",
+    "Tricipiti overhead",
+    "Close grip bench",
+    "Plank",
+    "Crunch",
+    "Russian twist",
+    "Leg raise",
+    "Plank laterale",
+    "Bicycle crunch",
+    "Ab wheel",
+    "Squat",
+    "Pressa 45°",
+    "Leg extension",
+    "Affondi",
+    "Affondi bulgari",
+    "Hack squat",
+    "Stacco rumeno",
+    "Leg curl",
+    "Good morning",
+    "Nordic curl",
+    "Hip thrust",
+    "Sumo squat",
+    "Kickback glutei",
+    "Glutei al cavo",
+    "Calf raise",
+    "Calf raise seduto",
+    "Leg press calf"
+  ],
+  "exercisesByMuscle": {
+    "petto": [
+      "Panca piana",
+      "Spinte manubri",
+      "Push-up",
+      "Dip alle parallele",
+      "Panca inclinata",
+      "Cavi incrociati",
+      "Pec deck"
+    ],
+    "dorsali": [
+      "Trazioni",
+      "Rematore bilanciere",
+      "Lat machine",
+      "Pulley basso",
+      "Stacco da terra",
+      "Hyperextension"
+    ],
+    "spalle": [
+      "Lento avanti",
+      "Alzate laterali",
+      "Alzate frontali",
+      "Arnold press",
+      "Facepull",
+      "Military press"
+    ],
+    "bicipiti": [
+      "Curl bilanciere",
+      "Curl manubri",
+      "Curl concentrato",
+      "Curl a martello",
+      "Curl su panca inclinata"
+    ],
+    "tricipiti": [
+      "Tricipiti ai cavi",
+      "French press",
+      "Skull crusher",
+      "Tricipiti overhead",
+      "Close grip bench"
+    ],
+    "core": [
+      "Plank",
+      "Crunch",
+      "Russian twist",
+      "Leg raise",
+      "Plank laterale",
+      "Bicycle crunch",
+      "Ab wheel"
+    ],
+    "quadricipiti": [
+      "Squat",
+      "Pressa 45°",
+      "Leg extension",
+      "Affondi",
+      "Affondi bulgari",
+      "Hack squat"
+    ],
+    "femorali": [
+      "Stacco rumeno",
+      "Leg curl",
+      "Good morning",
+      "Nordic curl"
+    ],
+    "glutei": [
+      "Hip thrust",
+      "Sumo squat",
+      "Kickback glutei",
+      "Glutei al cavo"
+    ],
+    "polpacci": [
+      "Calf raise",
+      "Calf raise seduto",
+      "Leg press calf"
+    ]
+  }
+}

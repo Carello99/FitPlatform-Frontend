@@ -1,0 +1,99 @@
+<!-- Mostrato solo se il riepilogo esiste (r non è null) -->
+@if (r) {
+  <div class="screen-pad screen-anim" style="text-align:center">
+
+    <!-- ===== ICONA TROFEO + XP ===== -->
+    <div style="padding:30px 0 6px">
+      <div style="position:relative;width:120px;height:120px;margin:0 auto 8px">
+        <!-- Alone verde sfocato dietro il trofeo (effetto glow) -->
+        <div style="position:absolute;inset:0;border-radius:50%;background:var(--green);opacity:0.16;filter:blur(14px)"></div>
+        <!-- "pop": classe CSS per animazione di entrata con effetto bounce -->
+        <div class="pop itile t-green" style="width:120px;height:120px;border-radius:50%;position:relative">
+          <i class="ti ti-trophy-filled" style="font-size:56px" aria-hidden="true"></i>
+        </div>
+      </div>
+      <!-- r.xp: accede direttamente al campo del riepilogo (non è un signal, è un valore semplice) -->
+      <span class="badge badge-green" style="margin:8px auto 0"><i class="ti ti-sparkles" style="font-size:12px" aria-hidden="true"></i>+{{ r.xp }} XP</span>
+      <h1 style="font-size:28px;font-weight:800;letter-spacing:-0.8px;margin-top:14px">Allenamento completato!</h1>
+      <p style="font-size:14.5px;color:var(--ink-3);font-weight:600;margin-top:6px">{{ r.schedaName }} · ottimo lavoro 💪</p>
+
+      <!-- Composizione XP: base + sovraccarico + bonus costanza (mostrati se presenti) -->
+      <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <span class="chip" style="padding:6px 11px;font-size:12px"><i class="ti ti-flame" style="font-size:13px;color:var(--cyan)" aria-hidden="true"></i> {{ r.xpBase }} base</span>
+        @if (r.xpOverload) {
+          <span class="chip" style="padding:6px 11px;font-size:12px"><i class="ti ti-trending-up" style="font-size:13px;color:var(--violet)" aria-hidden="true"></i> +{{ r.xpOverload }} record</span>
+        }
+        @if (r.xpWeeklyBonus) {
+          <span class="chip" style="padding:6px 11px;font-size:12px"><i class="ti ti-calendar-check" style="font-size:13px;color:var(--green)" aria-hidden="true"></i> +{{ r.xpWeeklyBonus }} costanza</span>
+        }
+      </div>
+    </div>
+
+    <!-- ===== LEVEL UP ===== -->
+    @if (r.leveledUp) {
+      <div class="card card-pad pop" style="margin-top:6px;display:flex;align-items:center;gap:12px;text-align:left;border:1px solid var(--amber)">
+        <div class="itile sm t-amber"><i class="ti ti-arrow-big-up-lines" style="font-size:20px" aria-hidden="true"></i></div>
+        <div class="grow">
+          <div style="font-size:14.5px;font-weight:800">Livello {{ r.levelAfter }} raggiunto!</div>
+          <div style="font-size:12px;color:var(--ink-3);font-weight:600">{{ r.tierEmoji }} {{ r.levelTitle }} · sei più forte del te di prima</div>
+        </div>
+      </div>
+    }
+
+    <!-- ===== SETTIMANA COMPLETATA ===== -->
+    @if (r.weekCompleted) {
+      <div class="card card-pad pop" style="margin-top:10px;display:flex;align-items:center;gap:12px;text-align:left;border:1px solid var(--green)">
+        <div class="itile sm t-green"><i class="ti ti-calendar-check" style="font-size:20px" aria-hidden="true"></i></div>
+        <div class="grow">
+          <div style="font-size:14.5px;font-weight:800">Settimana completata 🔥</div>
+          <div style="font-size:12px;color:var(--ink-3);font-weight:600">{{ r.weeksStreak }} settimane di costanza · la costanza batte l'intensità</div>
+        </div>
+      </div>
+    }
+
+    <!-- ===== GRIGLIA STATISTICHE 2x2 ===== -->
+    <!-- @for con animazione sfasata: ogni card appare con un ritardo crescente -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px">
+      @for (x of items; track x.l; let i = $index) {
+        <!-- [style.animation]: animazione "rise" con delay calcolato dall'indice -->
+        <!-- i * 0.07 + 0.2: il delay aumenta di 70ms per ogni card -->
+        <div class="card" style="padding:18px;text-align:left" [style.animation]="'rise 0.5s cubic-bezier(.16,1,.3,1) ' + (i * 0.07 + 0.2) + 's backwards'">
+          <!-- x.tile: l'accento del riquadro icona (stringa come 'amber', 'cyan'...) -->
+          <div class="itile sm" [class]="TILE_CLASS[x.tile]" style="margin-bottom:11px"><i class="ti" [class]="x.ic" style="font-size:19px" aria-hidden="true"></i></div>
+          <div style="font-size:24px;font-weight:800;letter-spacing:-0.6px">{{ x.v }}</div>
+          <div style="font-size:12px;color:var(--ink-3);font-weight:600;margin-top:2px">{{ x.l }}</div>
+        </div>
+      }
+    </div>
+
+    <!-- ===== ACHIEVEMENT SBLOCCATI ===== -->
+    @if (r.unlocked && r.unlocked.length) {
+      <div class="section-hdr" style="margin-top:18px"><h2>Traguardi sbloccati</h2></div>
+      @for (a of r.unlocked; track a.name) {
+        <div class="card card-pad pop" style="margin-top:8px;display:flex;align-items:center;gap:12px;text-align:left">
+          <div class="itile sm t-violet"><i class="ti" [class]="a.icon" style="font-size:20px" aria-hidden="true"></i></div>
+          <div class="grow">
+            <div style="font-size:14.5px;font-weight:800">{{ a.name }}</div>
+            <div style="font-size:12px;color:var(--ink-3);font-weight:600">Nuovo traguardo aggiunto alla collezione</div>
+          </div>
+          <i class="ti ti-circle-check-filled" style="font-size:22px;color:var(--green)" aria-hidden="true"></i>
+        </div>
+      }
+    }
+
+    <!-- ===== RITMO (settimane di costanza) ===== -->
+    <div class="card card-pad" style="margin-top:14px;display:flex;align-items:center;gap:12px;text-align:left">
+      <div class="itile sm t-amber"><i class="ti ti-flame-filled" style="font-size:20px" aria-hidden="true"></i></div>
+      <div class="grow">
+        <div style="font-size:14.5px;font-weight:800">Ritmo: {{ r.weeksStreak ?? w.user.streak }} settimane di costanza</div>
+        <div style="font-size:12px;color:var(--ink-3);font-weight:600">Completa la tua frequenza ogni settimana per farlo crescere.</div>
+      </div>
+    </div>
+
+    <!-- ===== PULSANTI DI NAVIGAZIONE ===== -->
+    <button class="btn btn-primary btn-block btn-lg" style="margin-top:24px" (click)="toHome()">
+      <i class="ti ti-home-2" style="font-size:18px" aria-hidden="true"></i> Torna alla Home
+    </button>
+    <button class="btn btn-ghost btn-block" style="margin-top:10px" (click)="toProgress()">Vedi i progressi</button>
+  </div>
+}

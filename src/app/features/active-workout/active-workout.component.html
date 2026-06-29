@@ -1,0 +1,229 @@
+<!-- Allenamento attivo — logging per serie -->
+@if (scheda) {
+<div class="screen-anim" style="display:flex;flex-direction:column;height:100%">
+
+  <!-- ===== HEADER: nome scheda + cronometro + progress ===== -->
+  <div style="padding:4px 20px 14px;flex-shrink:0">
+    <div class="appbar">
+      <button class="iconbtn" (click)="confirmExit.set(true)" aria-label="Chiudi"><i class="ti ti-x" style="font-size:20px" aria-hidden="true"></i></button>
+      <div class="grow" style="text-align:center">
+        <div style="font-size:11.5px;color:var(--ink-3);font-weight:800;letter-spacing:0.4px">{{ scheda.name.toUpperCase() }}</div>
+        <div class="row center" style="gap:6px;margin-top:2px">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite"></span>
+          <span class="num" style="font-size:15px;font-weight:800">{{ fmt(elapsed()) }}</span>
+        </div>
+      </div>
+      <button class="iconbtn" (click)="confirmExit.set(true)" aria-label="Termina" style="color:var(--green)"><i class="ti ti-flag-filled" style="font-size:18px" aria-hidden="true"></i></button>
+    </div>
+    <div class="row gap12" style="margin-top:12px;align-items:center">
+      <div class="track grow"><div class="fill" [class.green]="pct() >= 1" [style.width.%]="pct() * 100"></div></div>
+      <span class="num" style="font-size:13px;font-weight:800;min-width:46px;text-align:right" [style.color]="pct() >= 1 ? 'var(--green)' : 'var(--amber)'">{{ doneSets() }}/{{ totalSets() }}</span>
+    </div>
+  </div>
+
+  <!-- ===== LISTA ESERCIZI ===== -->
+  <div class="screen" style="padding:4px 20px 150px">
+    <div class="col gap12">
+      @for (e of scheda.exercises; track $index; let ei = $index) {
+        <div class="card ex-card"
+          [class.is-complete]="exDone(ei) && !skipped()[ei]"
+          [class.is-current]="isCurrent(ei)"
+          [style.opacity]="skipped()[ei] ? 0.5 : 1">
+
+          <!-- Testata esercizio -->
+          <div class="row gap12" style="align-items:flex-start">
+            @if (showGif(e.name)) {
+              <img [src]="gifUrl(e.name)!" (error)="markImgFailed(e.name)" [alt]="e.name"
+                style="width:80px;height:80px;object-fit:contain;border-radius:14px;flex-shrink:0;background:var(--surface-3)">
+            } @else {
+              <div class="itile sm" [class]="exDone(ei) && !skipped()[ei] ? 't-green' : TILE_CLASS[scheda.accent]" style="transition:all 0.3s">
+                <i class="ti" [class]="exDone(ei) && !skipped()[ei] ? 'ti-check' : e.icon" style="font-size:20px" aria-hidden="true"></i>
+              </div>
+            }
+            <div class="grow" style="min-width:0">
+              <div class="row between" style="gap:8px">
+                <span style="font-size:15px;font-weight:800;letter-spacing:-0.2px" [style.text-decoration]="skipped()[ei] ? 'line-through' : 'none'">{{ e.name }}</span>
+                <span class="num" style="font-size:12px;font-weight:800;color:var(--ink-3);flex-shrink:0">{{ setsDoneHere(ei) }}/{{ e.sets }}</span>
+              </div>
+              <div class="row gap10" style="margin-top:4px;flex-wrap:wrap">
+                <span style="font-size:12px;color:var(--ink-3);font-weight:700">{{ e.muscle }}</span>
+                <span style="font-size:12px;color:var(--ink-4)">·</span>
+                <span style="font-size:12px;color:var(--ink-3);font-weight:700">obiettivo {{ e.reps }} reps</span>
+                @if (!skipped()[ei]) {
+                  <button class="rest-chip" (click)="openRest(ei)" aria-label="Modifica recupero">
+                    <i class="ti ti-clock" style="font-size:14px" aria-hidden="true"></i> {{ restDef()[ei] }}s rec <i class="ti ti-pencil" style="font-size:12px;color:var(--ink-4)" aria-hidden="true"></i>
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Serie -->
+          @if (!skipped()[ei]) {
+            <div style="margin-top:12px">
+              @for (set of log()[ei]; track $index; let si = $index) {
+                <div class="set-row" [class.done]="set.done" [class.active]="isActiveSet(ei, si)">
+                  <span class="set-num num">{{ si + 1 }}</span>
+                  <div class="stepper">
+                    <button class="step" (click)="stepKg(ei, si, -1)" aria-label="Meno peso"><i class="ti ti-minus" aria-hidden="true"></i></button>
+                    <button class="stepval" (click)="openNum('kg', ei, si)" aria-label="Modifica peso">
+                      <b class="num">{{ set.kg === 0 ? 'corpo' : fmtKg(set.kg) }}</b>
+                      <span>{{ set.kg === 0 ? 'libero' : 'KG' }}</span>
+                    </button>
+                    <button class="step" (click)="stepKg(ei, si, 1)" aria-label="Più peso"><i class="ti ti-plus" aria-hidden="true"></i></button>
+                  </div>
+                  <button class="repcell" (click)="openNum('reps', ei, si)" aria-label="Modifica ripetizioni">
+                    <b class="num">{{ set.reps }}</b>
+                    <span>REPS</span>
+                  </button>
+                  <button class="set-check" [class.on]="set.done" (click)="toggleSet(ei, si)" [attr.aria-label]="set.done ? 'Annulla serie' : 'Completa serie'">
+                    <i class="ti ti-check" style="font-size:21px" aria-hidden="true"></i>
+                  </button>
+                </div>
+              }
+              @if (!exDone(ei)) {
+                <button (click)="skipExercise(ei)" style="margin-top:10px;font-size:12.5px;font-weight:700;color:var(--ink-3);display:flex;align-items:center;gap:5px">
+                  <i class="ti ti-player-skip-forward" style="font-size:15px" aria-hidden="true"></i> Salta esercizio
+                </button>
+              }
+            </div>
+          } @else {
+            <button (click)="resume(ei)" style="margin-top:12px;font-size:12.5px;font-weight:700;color:var(--amber);display:flex;align-items:center;gap:5px">
+              <i class="ti ti-rotate" style="font-size:15px" aria-hidden="true"></i> Riprendi esercizio
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ===== BARRA TIMER DI RECUPERO ===== -->
+  @if (rest(); as r) {
+    <div class="rest-bar">
+      <div class="row gap12" style="align-items:center">
+        <ff-ring [value]="r.total ? r.left / r.total : 0" [size]="56" [stroke]="5" color="var(--cyan)">
+          <span class="num" style="font-size:17px;font-weight:800">{{ r.left }}</span>
+        </ff-ring>
+        <div class="grow" style="min-width:0">
+          <div style="font-size:11.5px;color:var(--ink-3);font-weight:800;letter-spacing:0.3px">RECUPERO@if (r.paused) { · IN PAUSA }</div>
+          <div style="font-size:15px;font-weight:800;letter-spacing:-0.2px;margin-top:1px">Prossima serie tra {{ r.left }}s</div>
+        </div>
+        <button class="iconbtn" style="width:38px;height:38px;border-radius:12px" (click)="togglePause()" [attr.aria-label]="r.paused ? 'Riprendi' : 'Pausa'">
+          <i class="ti" [class]="r.paused ? 'ti-player-play-filled' : 'ti-player-pause-filled'" style="font-size:16px" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="row gap8" style="margin-top:12px">
+        <button class="rest-adj" style="flex:1" (click)="adjRest(-1)"><i class="ti ti-minus" aria-hidden="true"></i> 1s</button>
+        <button class="rest-adj" style="flex:1" (click)="adjRest(1)"><i class="ti ti-plus" aria-hidden="true"></i> 1s</button>
+        <button class="rest-skip" (click)="skipRest()"><i class="ti ti-player-track-next-filled" style="font-size:14px" aria-hidden="true"></i> Salta recupero</button>
+      </div>
+    </div>
+  }
+
+  <!-- ===== CTA TERMINA (nascosta durante il recupero) ===== -->
+  <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 20px 30px;background:linear-gradient(to top, var(--bg-app) 62%, transparent);z-index:30;transition:opacity 0.25s"
+    [style.opacity]="rest() ? 0 : 1" [style.pointer-events]="rest() ? 'none' : 'auto'">
+    <button class="btn btn-block btn-lg" [class]="pct() >= 1 ? 'btn-success' : 'btn-primary'" (click)="confirmExit.set(true)">
+      <i class="ti ti-flag-filled" style="font-size:17px" aria-hidden="true"></i> {{ pct() >= 1 ? 'Completa allenamento' : 'Termina allenamento' }}
+    </button>
+  </div>
+
+  <!-- ===== EDITOR NUMERICO (peso / ripetizioni) ===== -->
+  @if (numEditor(); as ne) {
+    <div class="scrim" (click)="numEditor.set(null)">
+      <div class="sheet" (click)="$event.stopPropagation()">
+        <div class="sheet-grip"></div>
+        <div class="row between" style="align-items:center;margin-bottom:4px">
+          <div>
+            <div style="font-size:11.5px;color:var(--ink-3);font-weight:800;letter-spacing:0.3px">{{ ne.kind === 'kg' ? 'PESO' : 'RIPETIZIONI' }} · SERIE {{ ne.si + 1 }}</div>
+            <div style="font-size:16px;font-weight:800;letter-spacing:-0.3px;margin-top:2px">{{ editorExercise()!.name }}</div>
+          </div>
+          <button class="iconbtn" (click)="numEditor.set(null)" aria-label="Chiudi"><i class="ti ti-x" style="font-size:18px" aria-hidden="true"></i></button>
+        </div>
+        <div style="font-size:12.5px;color:var(--ink-3);font-weight:600;margin-bottom:6px">Obiettivo scheda: {{ editorExercise()!.reps }} reps · recupero {{ editorExercise()!.rest }}s</div>
+
+        <div class="big-step">
+          <button class="bs-btn" (click)="bumpEd(ne.kind === 'kg' ? -2.5 : -1)" aria-label="Riduci"><i class="ti ti-minus" style="font-size:26px" aria-hidden="true"></i></button>
+          <div class="bs-val">
+            <b class="num">{{ ne.kind === 'kg' ? fmtKg(edVal()) : edVal() }}</b>
+            <span>{{ ne.kind === 'kg' ? 'kg' : 'reps' }}</span>
+          </div>
+          <button class="bs-btn" (click)="bumpEd(ne.kind === 'kg' ? 2.5 : 1)" aria-label="Aumenta"><i class="ti ti-plus" style="font-size:26px" aria-hidden="true"></i></button>
+        </div>
+
+        <div class="row gap8">
+          @for (dl of (ne.kind === 'kg' ? [1.25, 2.5, 5] : [1, 2, 5]); track dl) {
+            <button class="qchip" (click)="bumpEd(dl)">+{{ dl }}</button>
+          }
+          @if (ne.kind === 'kg') {
+            <button class="qchip" (click)="setEd(0)" style="flex:0 0 64px">corpo</button>
+          }
+        </div>
+
+        <button class="row between" (click)="edAll.set(!edAll())" style="width:100%;margin-top:16px;padding:4px 2px">
+          <span style="font-size:13.5px;font-weight:700;color:var(--ink-2)">Applica a tutte le serie</span>
+          <span class="ff-switch" [class.on]="edAll()"><span class="ff-switch__knob"></span></span>
+        </button>
+
+        <button class="btn btn-primary btn-block btn-lg" style="margin-top:14px" (click)="commitNumEditor()">
+          <i class="ti ti-check" style="font-size:18px" aria-hidden="true"></i> Applica
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ===== EDITOR TEMPO DI RECUPERO ===== -->
+  @if (restEditor() !== null) {
+    <div class="scrim" (click)="restEditor.set(null)">
+      <div class="sheet" (click)="$event.stopPropagation()">
+        <div class="sheet-grip"></div>
+        <div class="row between" style="align-items:center;margin-bottom:4px">
+          <div>
+            <div style="font-size:11.5px;color:var(--ink-3);font-weight:800;letter-spacing:0.3px">TEMPO DI RECUPERO</div>
+            <div style="font-size:16px;font-weight:800;letter-spacing:-0.3px;margin-top:2px">{{ editorExercise()!.name }}</div>
+          </div>
+          <button class="iconbtn" (click)="restEditor.set(null)" aria-label="Chiudi"><i class="ti ti-x" style="font-size:18px" aria-hidden="true"></i></button>
+        </div>
+        <div style="font-size:12.5px;color:var(--ink-3);font-weight:600;margin-bottom:6px">Il timer parte da questo valore al termine di ogni serie.</div>
+
+        <div class="big-step">
+          <button class="bs-btn" (click)="bumpEd(-15)" aria-label="Riduci"><i class="ti ti-minus" style="font-size:26px" aria-hidden="true"></i></button>
+          <div class="bs-val">
+            <b class="num">{{ edVal() }}</b>
+            <span>sec</span>
+          </div>
+          <button class="bs-btn" (click)="bumpEd(15)" aria-label="Aumenta"><i class="ti ti-plus" style="font-size:26px" aria-hidden="true"></i></button>
+        </div>
+
+        <div class="row wrap" style="gap:8px">
+          @for (p of [30, 45, 60, 75, 90, 120, 150, 180]; track p) {
+            <button class="qchip" [class.sel]="edVal() === p" (click)="setEd(p)" style="flex:1 1 20%;min-width:62px">{{ p }}s</button>
+          }
+        </div>
+
+        <button class="btn btn-primary btn-block btn-lg" style="margin-top:16px" (click)="commitRestEditor()">
+          <i class="ti ti-check" style="font-size:18px" aria-hidden="true"></i> Imposta recupero
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ===== DIALOG CONFERMA FINE SESSIONE ===== -->
+  @if (confirmExit()) {
+    <div class="scrim center" (click)="confirmExit.set(false)">
+      <div class="dialog" (click)="$event.stopPropagation()">
+        <div class="itile" [class]="pct() >= 1 ? 't-green' : 't-amber'" style="width:56px;height:56px;border-radius:18px;margin:0 auto 14px"><i class="ti ti-flag-filled" style="font-size:26px" aria-hidden="true"></i></div>
+        <h2 style="font-size:20px;font-weight:800;letter-spacing:-0.3px">Terminare l'allenamento?</h2>
+        <p style="font-size:14px;color:var(--ink-3);font-weight:500;margin:8px 0 4px;line-height:1.5">
+          Hai completato <b style="color:var(--green)">{{ doneSets() }} di {{ totalSets() }}</b> serie · <b class="num" style="color:var(--ink)">{{ fmtVol(volume()) }} kg</b> di volume.<br/>Il riepilogo verrà salvato nello storico.
+        </p>
+        <button class="btn btn-success btn-block btn-lg" style="margin-top:18px" (click)="finish()">
+          <i class="ti ti-circle-check-filled" style="font-size:18px" aria-hidden="true"></i> Termina e salva
+        </button>
+        <button class="btn btn-ghost btn-block" style="margin-top:10px" (click)="confirmExit.set(false)">Continua ad allenarti</button>
+        <button class="btn btn-block" style="margin-top:4px;color:var(--rose);font-size:13.5px" (click)="exit()">Esci senza salvare</button>
+      </div>
+    </div>
+  }
+</div>
+}

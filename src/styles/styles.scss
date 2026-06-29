@@ -1,0 +1,12 @@
+/* =====================================================
+   FitFlow — global stylesheet entry
+   Modular SCSS: tokens -> base -> layout -> components -> animations -> utilities
+   Fonts (Plus Jakarta Sans) and Tabler Icons webfont are loaded in index.html.
+   ===================================================== */
+@use 'tokens';
+@use 'base';
+@use 'layout';
+@use 'components';
+@use 'animations';
+@use 'utilities';
+@use 'active-workout';

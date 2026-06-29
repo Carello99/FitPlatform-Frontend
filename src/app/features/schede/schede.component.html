@@ -1,0 +1,72 @@
+<!-- Template schermata lista schede con ricerca e filtri -->
+<div class="screen-pad screen-anim">
+
+  <!-- ===== HEADER ===== -->
+  <div class="appbar">
+    <div class="grow">
+      <h1>Schede</h1>
+      <!-- w.schede.length: accede alla proprietà della classe nel template tramite il nome del campo iniettato -->
+      <div class="sub">{{ w.schede.length }} disponibili</div>
+    </div>
+    <!-- Pulsante "+" per creare una nuova scheda -->
+    <button class="iconbtn" (click)="go('new-scheda')" style="background:var(--amber);color:var(--amber-ink)">
+      <i class="ti ti-plus" style="font-size:22px" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <!-- ===== INPUT DI RICERCA ===== -->
+  <!-- [value]="q()": property binding — sincronizza il valore dell'input con il signal q -->
+  <!-- (input)="onSearch($event)": event binding — chiama onSearch() ad ogni modifica del testo -->
+  <!-- Nota: in Angular si usa [value]+(input) invece di [(ngModel)] quando si vogliono signal -->
+  <div class="input-icon" style="margin-top:16px">
+    <i class="ti ti-search" aria-hidden="true"></i>
+    <input class="input" placeholder="Cerca scheda o gruppo muscolare" [value]="q()" (input)="onSearch($event)" />
+  </div>
+
+  <!-- ===== CHIP DI FILTRO ===== -->
+  <!-- scroll-x: classe CSS per scroll orizzontale -->
+  <div class="scroll-x" style="margin-top:14px">
+    @for (f of filters; track f) {
+      <!-- filter.set(f): chiama direttamente il metodo .set() del signal nel template -->
+      <!-- [class.active]="filter() === f": aggiunge la classe "active" al chip selezionato -->
+      <button class="chip" [class.active]="filter() === f" (click)="filter.set(f)">{{ f }}</button>
+    }
+  </div>
+
+  <!-- ===== LISTA SCHEDE FILTRATA ===== -->
+  <!-- list() chiama il computed signal — restituisce l'array filtrato corrente -->
+  <div class="col gap12" style="margin-top:18px">
+    @for (s of list(); track s.id; let i = $index) {
+      <!-- state.openScheda(s.id): chiama direttamente un metodo del servizio iniettato -->
+      <!-- [style.animation]="...": animazione sfasata in base all'indice i -->
+      <button class="card" (click)="state.openScheda(s.id)"
+        style="padding:16px;text-align:left;display:flex;gap:14px;align-items:center"
+        [style.animation]="'rise 0.45s cubic-bezier(.16,1,.3,1) ' + (i * 0.05) + 's backwards'">
+        <!-- Icona colorata con la classe dell'accento -->
+        <div class="itile" [class]="TILE_CLASS[s.accent]" style="width:56px;height:56px;border-radius:18px"><i class="ti" [class]="s.icon" style="font-size:27px" aria-hidden="true"></i></div>
+        <div class="grow" style="min-width:0">
+          <div class="row between">
+            <span style="font-size:16px;font-weight:800;letter-spacing:-0.3px">{{ s.name }}</span>
+            <!-- Mostra il badge solo se s.tag non è una stringa vuota -->
+            @if (s.tag) { <span class="badge" [class]="badgeClass(s.tag)">{{ s.tag }}</span> }
+          </div>
+          <div style="font-size:12px;color:var(--ink-3);font-weight:600;margin:3px 0 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.focus }}</div>
+          <div class="row gap12" style="font-size:12px;font-weight:700;color:var(--ink-2)">
+            <span class="row" style="gap:4px"><i class="ti ti-clock" style="font-size:14px;color:var(--ink-3)" aria-hidden="true"></i>{{ s.duration }}m</span>
+            <span class="row" style="gap:4px"><i class="ti ti-list-numbers" style="font-size:14px;color:var(--ink-3)" aria-hidden="true"></i>{{ s.exercises.length }}</span>
+            <!-- DiffComponent: componente figlio per i pallini di difficoltà -->
+            <span class="row" style="gap:5px"><ff-diff [level]="s.level"></ff-diff></span>
+          </div>
+        </div>
+      </button>
+    }
+
+    <!-- Stato vuoto: mostrato quando la ricerca non trova risultati -->
+    @if (list().length === 0) {
+      <div class="col center" style="padding:50px 0;gap:12px;opacity:0.6">
+        <i class="ti ti-search-off" style="font-size:40px;color:var(--ink-3)" aria-hidden="true"></i>
+        <span style="font-size:14px;font-weight:600;color:var(--ink-3)">Nessuna scheda trovata</span>
+      </div>
+    }
+  </div>
+</div>

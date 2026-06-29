@@ -1,0 +1,92 @@
+<!-- Template schermata Progressi -->
+<div class="screen-pad screen-anim">
+
+  <!-- ===== HEADER ===== -->
+  <div class="appbar">
+    <div class="grow">
+      <h1>Progressi</h1>
+      <div class="sub">La tua evoluzione</div>
+    </div>
+    <button class="iconbtn" (click)="go('history')"><i class="ti ti-history" style="font-size:20px" aria-hidden="true"></i></button>
+  </div>
+
+  <!-- ===== SELEZIONE PERIODO ===== -->
+  <!-- period.set(p): aggiorna il signal direttamente dal template — tutti i computed reagiranno -->
+  <div class="scroll-x" style="margin-top:16px">
+    @for (p of periods; track p) {
+      <button class="chip" [class.active]="period() === p" (click)="period.set(p)">{{ p }}</button>
+    }
+  </div>
+
+  <!-- ===== CARD STATISTICHE PRINCIPALI ===== -->
+  <!-- headStats() è un computed: si aggiorna automaticamente al cambio di period() -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px">
+    @for (x of headStats(); track x.l) {
+      <div class="card" style="padding:16px">
+        <div class="itile sm" [class]="TILE_CLASS[x.tile]" style="margin-bottom:11px"><i class="ti" [class]="x.ic" style="font-size:19px" aria-hidden="true"></i></div>
+        <div style="font-size:23px;font-weight:800;letter-spacing:-0.6px">{{ x.v }}</div>
+        <div style="font-size:11.5px;color:var(--ink-3);font-weight:600;margin-top:2px">{{ x.l }}</div>
+      </div>
+    }
+  </div>
+
+  <!-- ===== GRAFICO A BARRE: VOLUME SETTIMANALE ===== -->
+  <div class="card card-pad" style="margin-top:18px">
+    <div class="row between">
+      <div>
+        <div style="font-size:15px;font-weight:800">Volume settimanale</div>
+        <div style="font-size:12px;color:var(--ink-3);font-weight:600;margin-top:2px">Carico per giorno (×100 kg)</div>
+      </div>
+      <span class="badge badge-green"><i class="ti ti-trending-up" style="font-size:12px" aria-hidden="true"></i>+18%</span>
+    </div>
+    <!-- BarChartComponent: componente condiviso per grafici a barre -->
+    <!-- [data]="w.volumeWeeks": passa l'array di dati -->
+    <!-- accent="var(--amber)": stringa statica (senza binding) per il colore delle barre -->
+    <ff-bar-chart [data]="w.volumeWeeks" accent="var(--amber)"></ff-bar-chart>
+  </div>
+
+  <!-- ===== GRAFICO LINEARE: PESO CORPOREO ===== -->
+  <div class="card card-pad" style="margin-top:14px">
+    <div class="row between">
+      <div>
+        <div style="font-size:15px;font-weight:800">Peso corporeo</div>
+        <div style="font-size:12px;color:var(--ink-3);font-weight:600;margin-top:2px">Ultime 8 settimane</div>
+      </div>
+      <div style="text-align:right">
+        <!-- lastWeight è un getter — si accede senza parentesi -->
+        <div style="font-size:20px;font-weight:800;letter-spacing:-0.5px">{{ lastWeight }}<span style="font-size:13px;color:var(--ink-3)"> kg</span></div>
+        <div style="font-size:11.5px;font-weight:700;color:var(--green)">↓ 1.4 kg</div>
+      </div>
+    </div>
+    <!-- LineChartComponent: componente condiviso per grafici a linea (SVG) -->
+    <ff-line-chart [data]="w.weightTrend" color="var(--cyan)"></ff-line-chart>
+  </div>
+
+  <!-- ===== GRAFICO A BARRE: PERFORMANCE MENSILE ===== -->
+  <div class="card card-pad" style="margin-top:14px">
+    <div class="row between">
+      <div>
+        <div style="font-size:15px;font-weight:800">Evoluzione performance</div>
+        <div style="font-size:12px;color:var(--ink-3);font-weight:600;margin-top:2px">Allenamenti / mese</div>
+      </div>
+      <span class="badge badge-violet"><i class="ti ti-flame" style="font-size:12px" aria-hidden="true"></i>Trend +</span>
+    </div>
+    <ff-bar-chart [data]="w.perfMonths" accent="var(--violet)"></ff-bar-chart>
+  </div>
+
+  <!-- ===== RECORD PERSONALI ===== -->
+  <div class="section-hdr"><h2>Record personali</h2></div>
+  <div class="col gap10">
+    @for (p of prs; track p.ex) {
+      <div class="card" style="padding:14px;display:flex;align-items:center;gap:13px">
+        <div class="itile sm" [class]="TILE_CLASS[p.tile]"><i class="ti" [class]="p.ic" style="font-size:19px" aria-hidden="true"></i></div>
+        <div class="grow">
+          <div style="font-size:14.5px;font-weight:800">{{ p.ex }}</div>
+          <!-- p.d: delta positivo in verde -->
+          <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:1px">{{ p.d }}</div>
+        </div>
+        <div style="font-size:18px;font-weight:800;letter-spacing:-0.5px">{{ p.v }}</div>
+      </div>
+    }
+  </div>
+</div>

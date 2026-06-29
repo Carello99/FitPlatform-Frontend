@@ -1,0 +1,77 @@
+<div>
+  <div
+    (pointerdown)="onDown($event)" (pointermove)="onMove($event)" (pointerup)="onUp()" (pointercancel)="onUp()" (pointerleave)="onUp()"
+    style="position:relative;height:180px;perspective:1000px;perspective-origin:50% 42%;touch-action:pan-y;user-select:none;-webkit-user-select:none;margin:4px -20px 0">
+
+    @for (s of schede; track s.id; let i = $index) {
+      <div (click)="focus(i)"
+        [style.transform]="cardTransform(i)"
+        [style.zIndex]="cardZ(i)"
+        [style.opacity]="cardVisible(i) ? 1 : 0"
+        [style.pointerEvents]="cardVisible(i) ? 'auto' : 'none'"
+        [style.transition]="cardTransition(i)"
+        style="position:absolute;left:50%;top:6px;width:164px;margin-left:-82px;transform-style:preserve-3d;cursor:pointer">
+
+        <!-- cover face -->
+        <div [style.background]="coverBg(s)" [style.boxShadow]="coverShadow(s, isFront(i))"
+          style="width:164px;height:164px;border-radius:20px;position:relative;overflow:hidden">
+          <div style="position:absolute;right:-18px;bottom:-18px;opacity:0.18;color:#000">
+            <i class="ti" [class]="s.icon" style="font-size:120px" aria-hidden="true"></i>
+          </div>
+          <div style="position:absolute;top:12px;left:12px">
+            <div style="width:40px;height:40px;border-radius:12px;background:rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center">
+              <i class="ti" [class]="s.icon" style="font-size:22px;color:#fff" aria-hidden="true"></i>
+            </div>
+          </div>
+          @if (s.id === activeId) {
+            <div style="position:absolute;top:14px;right:14px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.32);display:flex;align-items:center;justify-content:center">
+              <i class="ti ti-bolt-filled" style="font-size:13px;color:#fff" aria-hidden="true"></i>
+            </div>
+          }
+
+          @if (!isFront(i)) {
+            <div style="position:absolute;inset:0;background:rgba(8,8,14,0.42)"></div>
+          }
+        </div>
+
+        <!-- reflection -->
+        <div [style.opacity]="isFront(i) ? 0.55 : 0.32"
+          style="height:62px;margin-top:2px;overflow:hidden;transform:scaleY(-1);-webkit-mask-image:linear-gradient(to top, rgba(0,0,0,0.45), transparent 78%);mask-image:linear-gradient(to top, rgba(0,0,0,0.45), transparent 78%)">
+          <div [style.background]="coverBg(s)"
+            style="width:164px;height:164px;border-radius:20px;position:relative;overflow:hidden">
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- edge chevrons -->
+    <button (click)="$event.stopPropagation(); step(-1)" aria-label="Precedente"
+      style="position:absolute;left:8px;top:40%;z-index:120;width:34px;height:34px;border-radius:50%;background:rgba(20,20,28,0.6);backdrop-filter:blur(4px);border:1px solid var(--hairline);display:flex;align-items:center;justify-content:center">
+      <i class="ti ti-chevron-left" style="font-size:20px;color:var(--ink-2)" aria-hidden="true"></i>
+    </button>
+    <button (click)="$event.stopPropagation(); step(1)" aria-label="Successiva"
+      style="position:absolute;right:8px;top:40%;z-index:120;width:34px;height:34px;border-radius:50%;background:rgba(20,20,28,0.6);backdrop-filter:blur(4px);border:1px solid var(--hairline);display:flex;align-items:center;justify-content:center">
+      <i class="ti ti-chevron-right" style="font-size:20px;color:var(--ink-2)" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <!-- selected plan info + hint -->
+  <div style="text-align:center;margin-top:6px">
+    <div class="row center gap8" style="margin-bottom:4px">
+<!--      @if (center.id === activeId) {
+        <span class="badge badge-amber"><i class="ti ti-bolt-filled" style="font-size:11px" aria-hidden="true"></i>ATTIVA</span>
+      } -->
+      <h3 style="font-size:21px;font-weight:800;letter-spacing:-0.5px">{{ center.name }}</h3>
+    </div>
+    <div style="font-size:13px;color:var(--ink-3);font-weight:600">{{ center.focus }}</div>
+    <div class="row center gap14" style="margin:12px 0 14px;font-size:12.5px;font-weight:700;color:var(--ink-2)">
+      <span class="row" style="gap:5px"><i class="ti ti-clock" style="font-size:15px;color:var(--ink-3)" aria-hidden="true"></i>{{ center.duration }} min</span>
+      <span class="row" style="gap:5px"><i class="ti ti-list-numbers" style="font-size:15px;color:var(--ink-3)" aria-hidden="true"></i>{{ center.exercises.length }} eserc.</span>
+      <span class="row" style="gap:5px"><i class="ti ti-stretching" style="font-size:15px;color:var(--ink-3)" aria-hidden="true"></i>{{ totalSets(center) }} serie</span>
+    </div>
+<!--     <button (click)="start.emit(center)"
+      style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--ink-3);padding:8px 16px;border-radius:var(--r-pill);background:var(--surface-2);border:1px solid var(--hairline)">
+      <i class="ti ti-hand-finger" style="font-size:15px;color:var(--ink-3)" aria-hidden="true"></i> Tocca la scheda per aprirla
+    </button>-->
+  </div>
+</div>

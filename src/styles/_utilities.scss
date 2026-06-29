@@ -1,0 +1,20 @@
+/* =====================================================
+   FitFlow Design System — Utilities — flex, spacing, helpers
+   ===================================================== */
+/* utility */
+.muted{color:var(--ink-3)}
+.row{display:flex;align-items:center}
+.col{display:flex;flex-direction:column}
+.gap6{gap:6px}.gap8{gap:8px}.gap10{gap:10px}.gap12{gap:12px}.gap14{gap:14px}
+.between{justify-content:space-between}
+.center{align-items:center;justify-content:center}
+.grow{flex:1}
+.wrap{flex-wrap:wrap}
+.scroll-x{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:0 -20px;padding:2px 20px 4px}
+.scroll-x::-webkit-scrollbar{display:none}
+.hide-scroll{scrollbar-width:none}
+.hide-scroll::-webkit-scrollbar{display:none}
+
+.num{font-variant-numeric:tabular-nums}
+.hero-num{font-size:44px;font-weight:800;letter-spacing:-1.5px;line-height:1}
+

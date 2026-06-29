@@ -1,0 +1,106 @@
+<!-- Template schermata Profilo -->
+<div class="screen-pad screen-anim">
+
+  <!-- ===== HEADER ===== -->
+  <div class="appbar">
+    <div class="grow"><h1>Profilo</h1></div>
+    <!-- toast.show(...): chiama direttamente un metodo del servizio iniettato -->
+    <button class="iconbtn" (click)="toast.show('Impostazioni', 'ti-settings')"><i class="ti ti-settings" style="font-size:20px" aria-hidden="true"></i></button>
+  </div>
+
+  <!-- ===== CARD IDENTITÀ UTENTE ===== -->
+  <div class="card card-pad" style="margin-top:14px;text-align:center">
+    <!-- Avatar: iniziale del nome con gradiente giallo -->
+    <!-- w.user.name[0]: accede al primo carattere della stringa -->
+    <div style="width:84px;height:84px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(135deg,var(--amber),#d98a0c);display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800;color:var(--amber-ink);box-shadow:var(--shadow-amber)">{{ w.user.name[0] }}</div>
+    <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px">{{ w.user.name }} Rossi</div>
+    <span class="badge badge-amber" style="margin:8px auto 0"><i class="ti ti-bolt-filled" style="font-size:12px" aria-hidden="true"></i>Livello {{ w.user.level }} · {{ w.user.levelTitle }}</span>
+    <!-- Progress bar XP: [style.width.%]="xpPct * 100" → es. 0.62 * 100 = 62% -->
+    <div class="track" style="margin-top:16px"><div class="fill" [style.width.%]="xpPct * 100"></div></div>
+    <div class="row between" style="margin-top:8px;font-size:12px;font-weight:700;color:var(--ink-3)">
+      <span><span class="num">{{ w.user.xp }}</span> XP</span>
+      <span>{{ w.user.xpNext }} XP · Liv. {{ w.user.level + 1 }}</span>
+    </div>
+  </div>
+
+  <!-- ===== MINI STATISTICHE ===== -->
+  <!-- Griglia 3 colonne con valori fissi (mock) -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px">
+    @for (m of mini; track m[1]) {
+      <div class="card" style="padding:16px 8px;text-align:center">
+        <div style="font-size:21px;font-weight:800;letter-spacing:-0.5px">{{ m[0] }}</div>
+        <div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-top:3px">{{ m[1] }}</div>
+      </div>
+    }
+  </div>
+
+  <!-- ===== BADGE ===== -->
+  <div class="section-hdr">
+    <h2>I tuoi badge</h2>
+    <button class="section-link" (click)="toast.show('Collezione badge', 'ti-trophy')">Tutti<i class="ti ti-chevron-right" style="font-size:15px" aria-hidden="true"></i></button>
+  </div>
+  <div class="scroll-x">
+    @for (b of w.badges; track b.name) {
+      <!-- b.got: opacity piena per badge ottenuti, 0.4 per quelli bloccati -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:7px;width:72px;flex-shrink:0" [style.opacity]="b.got ? 1 : 0.4">
+        <div class="itile" [class]="TILE_CLASS[b.tile]" style="width:58px;height:58px;border-radius:18px;position:relative">
+          <i class="ti" [class]="b.icon" style="font-size:26px" aria-hidden="true"></i>
+          <!-- Icona lucchetto per badge non sbloccati -->
+          @if (!b.got) {
+            <div style="position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;border-radius:50%;background:var(--surface-3);border:2px solid var(--surface-2);display:flex;align-items:center;justify-content:center"><i class="ti ti-lock" style="font-size:11px;color:var(--ink-3)" aria-hidden="true"></i></div>
+          }
+        </div>
+        <span style="font-size:10.5px;font-weight:700;color:var(--ink-3);text-align:center;line-height:1.15">{{ b.name }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- ===== SEZIONE ASPETTO (TOGGLE TEMA) ===== -->
+  <div class="section-hdr"><h2>Aspetto</h2></div>
+  <div class="card" style="padding:6px">
+    <!-- theme.toggle(): chiama il metodo del ThemeService al click -->
+    <button class="row between" style="width:100%;padding:13px 12px;border-radius:13px;gap:12px" (click)="theme.toggle()">
+      <div class="row gap12">
+        <!-- theme.isDark: getter booleano del ThemeService (si accede senza parentesi) -->
+        <!-- Icona e colore cambiano in base al tema attuale -->
+        <div class="itile sm" [class]="theme.isDark ? 't-violet' : 't-amber'" style="width:38px;height:38px;border-radius:11px">
+          <i class="ti" [class]="theme.isDark ? 'ti-moon-stars' : 'ti-sun'" style="font-size:18px" aria-hidden="true"></i>
+        </div>
+        <div style="text-align:left">
+          <div style="font-size:14.5px;font-weight:700">Tema scuro</div>
+          <div style="font-size:11.5px;color:var(--ink-3);font-weight:600;margin-top:1px">{{ theme.isDark ? 'Dark mode attiva' : 'Light mode attiva' }}</div>
+        </div>
+      </div>
+      <!-- Toggle switch visuale: [class.on]="theme.isDark" aggiunge la classe "on" se dark -->
+      <!-- role="switch" e aria-checked: accessibilità per screen reader -->
+      <span class="ff-switch" [class.on]="theme.isDark" role="switch" [attr.aria-checked]="theme.isDark" aria-label="Attiva tema scuro">
+        <span class="ff-switch__knob"></span>
+      </span>
+    </button>
+  </div>
+
+  <!-- ===== LISTA IMPOSTAZIONI ===== -->
+  <div class="section-hdr"><h2>Impostazioni</h2></div>
+  <div class="card" style="padding:6px">
+    @for (s of settings; track s.t) {
+      <!-- onSetting(s): gestisce la navigazione o il toast in base alla voce -->
+      <button class="row between" style="width:100%;padding:13px 12px;border-radius:13px;gap:12px" (click)="onSetting(s)">
+        <div class="row gap12">
+          <div class="itile sm" [class]="TILE_CLASS[s.tile]" style="width:38px;height:38px;border-radius:11px"><i class="ti" [class]="s.ic" style="font-size:18px" aria-hidden="true"></i></div>
+          <span style="font-size:14.5px;font-weight:700">{{ s.t }}</span>
+        </div>
+        <div class="row gap8">
+          <!-- @if (s.r): mostra il valore secondario solo se presente (campo opzionale) -->
+          @if (s.r) { <span style="font-size:12.5px;font-weight:700;color:var(--ink-3)">{{ s.r }}</span> }
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--ink-4)" aria-hidden="true"></i>
+        </div>
+      </button>
+    }
+  </div>
+
+  <!-- ===== PULSANTE LOGOUT ===== -->
+  <button class="btn btn-outline btn-block" style="margin-top:18px;color:var(--rose);border-color:rgba(255,107,138,0.3)" (click)="toast.show('A presto! 👋', 'ti-logout')">
+    <i class="ti ti-logout" style="font-size:18px" aria-hidden="true"></i> Esci
+  </button>
+  <div style="text-align:center;font-size:11.5px;color:var(--ink-4);font-weight:600;margin-top:18px">FitFlow v2.4.0 · Train smarter, live better</div>
+</div>

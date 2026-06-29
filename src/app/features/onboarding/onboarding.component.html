@@ -1,0 +1,238 @@
+<div class="screen-anim" style="display:flex;flex-direction:column;height:100%">
+
+  <!-- ===== HEADER + PROGRESS BAR ===== -->
+  <div style="padding:4px 20px 0;flex-shrink:0">
+    <div class="appbar">
+      <button class="iconbtn" (click)="back()" aria-label="Indietro">
+        <i class="ti ti-chevron-left" style="font-size:22px" aria-hidden="true"></i>
+      </button>
+      <div class="grow">
+        <h1>Benvenuto</h1>
+        <div class="sub">Step {{ step() + 1 }} di {{ steps.length }} · {{ steps[step()] }}</div>
+      </div>
+      <!-- Skip: l'onboarding è rinviabile (si parte da livello 1) -->
+      @if (step() < steps.length - 1) {
+        <button class="section-link" style="font-weight:700" (click)="skip()">Salta</button>
+      }
+    </div>
+    <div class="row gap6" style="margin-top:14px">
+      @for (s of steps; track $index; let i = $index) {
+        <div class="grow" style="height:5px;border-radius:99px;transition:background 0.3s"
+          [style.background]="i <= step() ? 'var(--amber)' : 'var(--surface-3)'"></div>
+      }
+    </div>
+  </div>
+
+  <!-- ===== CONTENUTO SCROLLABILE ===== -->
+  <div class="screen" style="padding:22px 20px 130px">
+
+    <!-- ═══════════ STEP 0 — BENVENUTO ═══════════ -->
+    @if (step() === 0) {
+      <div class="stagger" style="text-align:center">
+        <div style="position:relative;width:128px;height:128px;margin:18px auto 10px">
+          <div style="position:absolute;inset:0;border-radius:50%;background:var(--amber);opacity:0.16;filter:blur(16px)"></div>
+          <div class="pop itile t-amber" style="width:128px;height:128px;border-radius:50%;position:relative">
+            <i class="ti ti-flame-filled" style="font-size:60px" aria-hidden="true"></i>
+          </div>
+        </div>
+        <h1 style="font-size:27px;font-weight:800;letter-spacing:-0.7px;margin-top:12px">Ciao {{ w.user.name }} 👋</h1>
+        <p style="font-size:15px;color:var(--ink-2);font-weight:600;margin-top:10px;line-height:1.5">
+          Da oggi gareggi con una sola persona: <b>il te di ieri</b>.
+          Rispondi a poche domande e ti mettiamo subito al punto giusto del percorso.
+        </p>
+
+        <!-- Tre punti chiave del sistema -->
+        <div class="col gap8" style="margin-top:22px;text-align:left">
+          <div class="card card-pad row gap12" style="align-items:center">
+            <div class="itile sm t-green"><i class="ti ti-bolt" style="font-size:19px" aria-hidden="true"></i></div>
+            <div><div style="font-size:14px;font-weight:800">Punti automatici</div><div style="font-size:12px;color:var(--ink-3);font-weight:600">Guadagni allenandoti, non usando l'app</div></div>
+          </div>
+          <div class="card card-pad row gap12" style="align-items:center">
+            <div class="itile sm t-cyan"><i class="ti ti-calendar-heart" style="font-size:19px" aria-hidden="true"></i></div>
+            <div><div style="font-size:14px;font-weight:800">Vince la costanza</div><div style="font-size:12px;color:var(--ink-3);font-weight:600">Settimane regolari battono giornate estreme</div></div>
+          </div>
+          <div class="card card-pad row gap12" style="align-items:center">
+            <div class="itile sm t-violet"><i class="ti ti-mood-smile" style="font-size:19px" aria-hidden="true"></i></div>
+            <div><div style="font-size:14px;font-weight:800">Non si scende mai</div><div style="font-size:12px;color:var(--ink-3);font-weight:600">Si può solo rallentare o rientrare</div></div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ═══════════ STEP 1 — ESPERIENZA ═══════════ -->
+    @if (step() === 1) {
+      <div class="stagger">
+        <h2 style="font-size:20px;font-weight:800;letter-spacing:-0.4px;margin-bottom:4px">Da quanto ti alleni?</h2>
+        <p style="font-size:13.5px;color:var(--ink-3);font-weight:600;margin-bottom:18px">Serve solo a calibrare il punto di partenza.</p>
+        <div class="col gap10">
+          @for (o of experiences; track o.v) {
+            <button class="card card-pad row gap12" style="align-items:center;width:100%;text-align:left;transition:all 0.18s"
+              [style.borderColor]="experience() === o.v ? ACCENT_VAR[o.tile] : 'var(--hairline)'"
+              [style.boxShadow]="experience() === o.v ? '0 8px 22px -10px ' + ACCENT_VAR[o.tile] : 'none'"
+              (click)="experience.set(o.v)">
+              <div class="itile sm" [class]="TILE_CLASS[o.tile]"><i class="ti" [class]="o.ic" style="font-size:20px" aria-hidden="true"></i></div>
+              <div class="grow">
+                <div style="font-size:15px;font-weight:800">{{ o.t }}</div>
+                <div style="font-size:12px;color:var(--ink-3);font-weight:600">{{ o.s }}</div>
+              </div>
+              @if (experience() === o.v) { <i class="ti ti-circle-check-filled" style="font-size:22px" [style.color]="ACCENT_VAR[o.tile]" aria-hidden="true"></i> }
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ═══════════ STEP 2 — FREQUENZA ═══════════ -->
+    @if (step() === 2) {
+      <div class="stagger">
+        <h2 style="font-size:20px;font-weight:800;letter-spacing:-0.4px;margin-bottom:4px">Quanto ti alleni a settimana?</h2>
+        <p style="font-size:13.5px;color:var(--ink-3);font-weight:600;margin-bottom:18px">Fissiamo insieme un obiettivo realistico.</p>
+        <div class="col gap10">
+          @for (o of frequencies; track o.v) {
+            <button class="card card-pad row gap12" style="align-items:center;width:100%;text-align:left;transition:all 0.18s"
+              [style.borderColor]="frequency() === o.v ? ACCENT_VAR[o.tile] : 'var(--hairline)'"
+              [style.boxShadow]="frequency() === o.v ? '0 8px 22px -10px ' + ACCENT_VAR[o.tile] : 'none'"
+              (click)="frequency.set(o.v)">
+              <div class="itile sm" [class]="TILE_CLASS[o.tile]"><i class="ti" [class]="o.ic" style="font-size:20px" aria-hidden="true"></i></div>
+              <div class="grow">
+                <div style="font-size:15px;font-weight:800">{{ o.t }}</div>
+                <div style="font-size:12px;color:var(--ink-3);font-weight:600">{{ o.s }}</div>
+              </div>
+              @if (frequency() === o.v) { <i class="ti ti-circle-check-filled" style="font-size:22px" [style.color]="ACCENT_VAR[o.tile]" aria-hidden="true"></i> }
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ═══════════ STEP 3 — OBIETTIVO ═══════════ -->
+    @if (step() === 3) {
+      <div class="stagger">
+        <h2 style="font-size:20px;font-weight:800;letter-spacing:-0.4px;margin-bottom:4px">Qual è il tuo obiettivo?</h2>
+        <p style="font-size:13.5px;color:var(--ink-3);font-weight:600;margin-bottom:18px">Personalizza missioni e tono dei messaggi.</p>
+        <div class="col gap10">
+          @for (o of goals; track o.v) {
+            <button class="card card-pad row gap12" style="align-items:center;width:100%;text-align:left;transition:all 0.18s"
+              [style.borderColor]="goal() === o.v ? ACCENT_VAR[o.tile] : 'var(--hairline)'"
+              [style.boxShadow]="goal() === o.v ? '0 8px 22px -10px ' + ACCENT_VAR[o.tile] : 'none'"
+              (click)="goal.set(o.v)">
+              <div class="itile sm" [class]="TILE_CLASS[o.tile]"><i class="ti" [class]="o.ic" style="font-size:20px" aria-hidden="true"></i></div>
+              <div class="grow">
+                <div style="font-size:15px;font-weight:800">{{ o.t }}</div>
+                <div style="font-size:12px;color:var(--ink-3);font-weight:600">{{ o.s }}</div>
+              </div>
+              @if (goal() === o.v) { <i class="ti ti-circle-check-filled" style="font-size:22px" [style.color]="ACCENT_VAR[o.tile]" aria-hidden="true"></i> }
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ═══════════ STEP 4 — DATI ═══════════ -->
+    @if (step() === 4) {
+      <div class="stagger">
+        <h2 style="font-size:20px;font-weight:800;letter-spacing:-0.4px;margin-bottom:4px">Qualche dato su di te</h2>
+        <p style="font-size:13.5px;color:var(--ink-3);font-weight:600;margin-bottom:18px">Serve a <b>mostrare i progressi</b>, mai a dare o togliere punti.</p>
+
+        <!-- Sesso: selettore segmentato -->
+        <div class="field">
+          <label>Sesso</label>
+          <div class="row gap8" style="margin-top:8px">
+            @for (o of sexes; track o.v) {
+              <button class="grow" style="padding:11px 0;border-radius:13px;font-size:13.5px;font-weight:700;border:2px solid transparent;transition:all 0.16s"
+                [style.background]="sex() === o.v ? 'var(--amber-soft)' : 'var(--surface-2)'"
+                [style.borderColor]="sex() === o.v ? 'var(--amber)' : 'var(--hairline)'"
+                [style.color]="sex() === o.v ? 'var(--amber)' : 'var(--ink-2)'"
+                (click)="sex.set(o.v)">{{ o.t }}</button>
+            }
+          </div>
+        </div>
+
+        <!-- Età / Peso / Altezza -->
+        <div class="row gap10" style="margin-top:6px">
+          <div class="field grow" style="margin:0">
+            <label>Età</label>
+            <input class="input" type="number" inputmode="numeric" [value]="age()" (input)="onNum('age', $event)" />
+          </div>
+          <div class="field grow" style="margin:0">
+            <label>Peso (kg)</label>
+            <input class="input" type="number" inputmode="decimal" [value]="weight()" (input)="onNum('weight', $event)" />
+          </div>
+          <div class="field grow" style="margin:0">
+            <label>Altezza (cm)</label>
+            <input class="input" type="number" inputmode="numeric" [value]="height()" (input)="onNum('height', $event)" />
+          </div>
+        </div>
+
+        <!-- Personal trainer -->
+        <div class="card" style="padding:6px;margin-top:14px">
+          <button class="row between" style="width:100%;padding:13px 12px;border-radius:13px;gap:12px" (click)="hasPT.set(!hasPT())">
+            <div class="row gap12">
+              <div class="itile sm t-green" style="width:38px;height:38px;border-radius:11px"><i class="ti ti-user-heart" style="font-size:18px" aria-hidden="true"></i></div>
+              <div style="text-align:left">
+                <div style="font-size:14px;font-weight:700">Hai un personal trainer?</div>
+                <div style="font-size:11.5px;color:var(--ink-3);font-weight:600">Potrà loggare i tuoi allenamenti</div>
+              </div>
+            </div>
+            <span class="ff-switch" [class.on]="hasPT()" role="switch" [attr.aria-checked]="hasPT()" aria-label="Hai un personal trainer">
+              <span class="ff-switch__knob"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ═══════════ STEP 5 — POSIZIONAMENTO ═══════════ -->
+    @if (step() === 5) {
+      <div class="stagger" style="text-align:center">
+        <p style="font-size:13.5px;color:var(--ink-3);font-weight:700;letter-spacing:0.3px;text-transform:uppercase;margin-top:6px">Il tuo punto di partenza</p>
+
+        <!-- Emblema del tier assegnato -->
+        <div style="position:relative;width:128px;height:128px;margin:14px auto 8px">
+          <div style="position:absolute;inset:0;border-radius:50%;opacity:0.16;filter:blur(16px)" [style.background]="ACCENT_VAR[tierAccent()]"></div>
+          <div class="pop itile" [class]="TILE_CLASS[tierAccent()]" style="width:128px;height:128px;border-radius:50%;position:relative;font-size:58px">
+            {{ preview().tier.emoji }}
+          </div>
+        </div>
+
+        <h1 style="font-size:28px;font-weight:800;letter-spacing:-0.7px;margin-top:10px">Livello {{ preview().level }}</h1>
+        <span class="badge" [class]="'badge-' + tierAccent()" style="margin:10px auto 0"><i class="ti ti-bolt-filled" style="font-size:12px" aria-hidden="true"></i>{{ preview().tier.emoji }} {{ preview().tier.name }}</span>
+
+        <!-- Barra del livello -->
+        <div class="card card-pad" style="margin-top:20px;text-align:left">
+          <div class="row between" style="font-size:12px;font-weight:700;color:var(--ink-3);margin-bottom:8px">
+            <span>{{ preview().xp.toLocaleString('it-IT') }} XP di partenza</span>
+            <span>Liv. {{ preview().level + 1 }}</span>
+          </div>
+          <div class="track"><div class="fill" [style.width.%]="levelInfo().pct * 100"></div></div>
+          <div class="row gap8" style="margin-top:14px;align-items:flex-start">
+            <i class="ti ti-target-arrow" style="font-size:18px;color:var(--green);margin-top:1px" aria-hidden="true"></i>
+            <div style="font-size:12.5px;color:var(--ink-2);font-weight:600">Obiettivo settimanale: <b>{{ preview().weekGoal }} allenamenti</b>. La prima "settimana completata" è già a portata di mano.</div>
+          </div>
+        </div>
+
+        <!-- Nota anti-gonfiaggio -->
+        <div class="row gap8" style="margin-top:14px;text-align:left;align-items:flex-start;padding:0 4px">
+          <i class="ti ti-info-circle" style="font-size:16px;color:var(--ink-4);margin-top:1px" aria-hidden="true"></i>
+          <div style="font-size:11.5px;color:var(--ink-4);font-weight:600;line-height:1.45">
+            È <b>calibrazione</b>, non punti regalati: parti dal gradino giusto. I tier più alti (Versione 2.0, Leggenda) si conquistano solo allenandosi.
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+
+  <!-- ===== CTA STICKY ===== -->
+  <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 20px 30px;background:linear-gradient(to top, var(--bg-app) 70%, transparent);z-index:30;pointer-events:none">
+    <button class="btn btn-primary btn-block btn-lg" style="pointer-events:all"
+      [disabled]="!canNext()" (click)="next()">
+      @if (step() === steps.length - 1) {
+        <i class="ti ti-rocket" style="font-size:19px" aria-hidden="true"></i> Inizia ad allenarti
+      } @else {
+        Continua <i class="ti ti-arrow-right" style="font-size:18px" aria-hidden="true"></i>
+      }
+    </button>
+  </div>
+
+</div>

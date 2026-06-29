@@ -1,0 +1,278 @@
+<!-- ═══════════════════════════════════════
+     VISTA: BLOCCHI GRUPPI MUSCOLARI
+     ═══════════════════════════════════════ -->
+@if (view() === 'map') {
+  <div style="padding:4px 0 24px">
+
+    <!-- ===== BARRA DI RICERCA ===== -->
+    <div style="display:flex;align-items:center;gap:8px;padding:0 12px;height:44px;background:var(--surface-2);border:1px solid var(--hairline);border-radius:12px;margin-bottom:16px">
+      <i class="ti ti-search" style="font-size:18px;color:var(--ink-3)" aria-hidden="true"></i>
+      <input type="text" placeholder="Cerca esercizio…" [value]="search()" (input)="onSearch($event)"
+        style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--ink);font-size:14px;font-weight:600;font-family:inherit">
+      @if (search()) {
+        <button (click)="clearSearch()" aria-label="Pulisci ricerca"
+          style="border:none;background:transparent;color:var(--ink-3);display:flex;align-items:center;padding:4px">
+          <i class="ti ti-x" style="font-size:16px" aria-hidden="true"></i>
+        </button>
+      }
+    </div>
+
+    @if (search().trim()) {
+      <!-- ===== RISULTATI RICERCA (ExerciseCard standard + GIF 60×60) ===== -->
+      @if (searchResults().length) {
+        @for (g of searchGroups(); track g.id) {
+          <div class="ex-section-head">
+            <i class="ti" [class]="g.icon" aria-hidden="true"></i>
+            <span class="lbl">{{ g.label }}</span>
+            <span class="cnt">· {{ g.items.length }}</span>
+          </div>
+          <div class="col gap8">
+            @for (r of g.items; track r.name) {
+              <div (click)="selectFromSearch(r.name)" style="cursor:pointer">
+                <ff-exercise-card [name]="r.name" [muscleId]="r.muscleId" [showGif]="true" [gifSize]="60"></ff-exercise-card>
+              </div>
+            }
+          </div>
+          @if (!$last) { <div class="ex-section-div"></div> }
+        }
+      } @else {
+        <div style="text-align:center;margin-top:28px;color:var(--ink-4)">
+          <i class="ti ti-search-off" style="font-size:28px" aria-hidden="true"></i>
+          <div style="font-size:13px;font-weight:600;margin-top:8px">Nessun esercizio trovato per «{{ search() }}»</div>
+        </div>
+      }
+    } @else {
+
+    @for (cat of MUSCLE_GROUPS; track cat.label) {
+
+      <!-- Category header -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px" [style.marginTop]="$index > 0 ? '24px' : '0'">
+        <i class="ti" [class]="cat.icon" style="font-size:18px;color:var(--ink-2)" aria-hidden="true"></i>
+        <span style="font-size:12px;font-weight:800;color:var(--ink-2);text-transform:uppercase;letter-spacing:0.6px">{{ cat.label }}</span>
+      </div>
+
+      <!-- Muscle blocks grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        @for (m of cat.muscles; track m.id) {
+          <button (click)="selectMuscle(m.id)"
+            style="padding:16px 14px;border-radius:16px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;border:2px solid;transition:all 0.15s;position:relative"
+            [style.borderColor]="hasExercisesForMuscle(m.id) ? m.color : 'var(--hairline)'"
+            [style.background]="hasExercisesForMuscle(m.id) ? 'var(--surface-2)' : 'var(--surface-2)'">
+
+            <!-- Color dot -->
+            <span style="width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block;margin-bottom:4px"
+              [style.background]="m.color"></span>
+
+            <span style="font-size:14px;font-weight:800"
+              [style.color]="hasExercisesForMuscle(m.id) ? m.color : 'var(--ink)'">{{ m.label }}</span>
+            <span style="font-size:11px;font-weight:600;color:var(--ink-4)">{{ m.desc }}</span>
+
+            <!-- Badge count -->
+            @if (exerciseCountForMuscle(m.id) > 0) {
+              <span style="position:absolute;top:10px;right:10px;font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;color:#fff"
+                [style.background]="m.color">{{ exerciseCountForMuscle(m.id) }}</span>
+            }
+          </button>
+        }
+      </div>
+
+    }
+
+    <!-- Esercizi già aggiunti -->
+    @if (added.length > 0) {
+      <div style="margin-top:24px;padding:0 2px">
+        <div style="font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">
+          {{ added.length }} {{ added.length === 1 ? 'esercizio aggiunto' : 'esercizi aggiunti' }}
+        </div>
+        <div class="col gap8">
+          @for (ex of added; track ex.name) {
+            <ff-exercise-card [name]="ex.name" [sets]="ex.sets" [reps]="ex.reps" [kg]="ex.kg">
+              <button (click)="removeExercise(ex.name)" aria-label="Rimuovi esercizio"
+                style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none"
+                [style.background]="metaForExercise(ex.name)?.color ?? 'var(--ink-3)'">
+                <i class="ti ti-x" style="font-size:12px;color:#fff" aria-hidden="true"></i>
+              </button>
+            </ff-exercise-card>
+          }
+        </div>
+      </div>
+    } @else {
+      <div style="text-align:center;margin-top:28px;color:var(--ink-4)">
+        <div style="font-size:13px;font-weight:600">Seleziona un gruppo muscolare per aggiungere esercizi</div>
+      </div>
+    }
+
+    }
+
+  </div>
+}
+
+<!-- ═══════════════════════════════════════
+     VISTA: LISTA ESERCIZI DEL GRUPPO
+     ═══════════════════════════════════════ -->
+@if (view() === 'exercises' && selectedMuscle(); as m) {
+  <div style="padding:0 0 16px">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0 16px">
+      <button class="iconbtn" (click)="goBack()" aria-label="Indietro">
+        <i class="ti ti-arrow-left" style="font-size:20px" aria-hidden="true"></i>
+      </button>
+      <div>
+        <div style="font-size:18px;font-weight:800;letter-spacing:-0.3px" [style.color]="m.color">{{ m.label }}</div>
+        <div style="font-size:12px;font-weight:600;color:var(--ink-3);margin-top:1px">{{ m.desc }}</div>
+      </div>
+    </div>
+
+    <!-- Griglia esercizi 2 colonne -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      @for (ex of exercisesForMuscle(m.id); track ex) {
+        <button (click)="selectExercise(ex)"
+          style="position:relative;border-radius:18px;overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:2.5px solid;transition:all 0.18s"
+          [style.borderColor]="isExerciseAdded(ex) ? 'var(--amber)' : 'var(--hairline)'"
+          [style.background]="'linear-gradient(150deg, ' + m.soft + ' 0%, var(--surface-3) 100%)'">
+
+          <!-- Badge aggiunto (top-right) -->
+          @if (isExerciseAdded(ex)) {
+            <div style="position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;z-index:2">
+              <i class="ti ti-check" style="font-size:11px;color:#fff" aria-hidden="true"></i>
+            </div>
+          }
+
+          <!-- GIF thumbnail if available, else icon -->
+          @if (!showIcon(ex)) {
+            <img [src]="getGifUrl(ex)!"
+              (error)="markImgFailed(ex)"
+              [alt]="ex"
+              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:15px">
+          }
+          @if (showIcon(ex)) {
+            <i class="ti" [class]="getExerciseIcon(ex)"
+              style="font-size:46px;margin-bottom:26px"
+              [style.color]="isExerciseAdded(ex) ? 'var(--amber)' : m.color"
+              aria-hidden="true"></i>
+          }
+
+          <!-- Nome + config in overlay sfumato in fondo -->
+          <div style="position:absolute;bottom:0;left:0;right:0;padding:22px 10px 10px;background:linear-gradient(to top,rgba(0,0,0,0.72) 0%,transparent 100%)">
+            <div style="font-size:11.5px;font-weight:800;color:#fff;line-height:1.25;text-shadow:0 1px 4px rgba(0,0,0,0.5)">{{ ex }}</div>
+            @if (isExerciseAdded(ex)) {
+              <div style="font-size:10px;font-weight:700;color:var(--amber);margin-top:2px">
+                {{ getAddedConfig(ex)!.sets }}×{{ getAddedConfig(ex)!.reps }}@if (getAddedConfig(ex)!.kg > 0) { · {{ getAddedConfig(ex)!.kg }}kg }
+              </div>
+            }
+          </div>
+
+        </button>
+      }
+    </div>
+
+  </div>
+}
+
+<!-- ═══════════════════════════════════════
+     VISTA: CONFIGURAZIONE ESERCIZIO
+     ═══════════════════════════════════════ -->
+@if (view() === 'config' && selectedExercise(); as exName) {
+  <div style="padding:0 0 16px">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0 20px">
+      <button class="iconbtn" (click)="goBack()" aria-label="Indietro">
+        <i class="ti ti-arrow-left" style="font-size:20px" aria-hidden="true"></i>
+      </button>
+      <div class="grow">
+        <div style="font-size:18px;font-weight:800;letter-spacing:-0.3px">{{ exName }}</div>
+        <div style="font-size:12px;font-weight:600;color:var(--ink-3);margin-top:1px">Scegli la configurazione</div>
+      </div>
+    </div>
+
+    <!-- Valori attuali: 2×2 grid — pulsanti +/- + input manuale (validazione immediata) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px">
+
+      <!-- Serie -->
+      <div class="cfg-cell">
+        <div class="cfg-row">
+          <button class="cfg-step" (click)="adjustSets(-1)" aria-label="Meno serie"><i class="ti ti-minus" aria-hidden="true"></i></button>
+          <input class="cfg-input" type="number" inputmode="numeric" min="1" max="20"
+            [value]="configSets()" (input)="onSetsInput($event)" aria-label="Serie" />
+          <button class="cfg-step" (click)="adjustSets(1)" aria-label="Più serie"><i class="ti ti-plus" aria-hidden="true"></i></button>
+        </div>
+        <div class="cfg-label">Serie</div>
+      </div>
+
+      <!-- Ripetizioni -->
+      <div class="cfg-cell">
+        <div class="cfg-row">
+          <button class="cfg-step" (click)="adjustReps(-1)" aria-label="Meno ripetizioni"><i class="ti ti-minus" aria-hidden="true"></i></button>
+          <input class="cfg-input" type="text" inputmode="numeric"
+            [value]="configReps()" (input)="onRepsInput($event)" aria-label="Ripetizioni" />
+          <button class="cfg-step" (click)="adjustReps(1)" aria-label="Più ripetizioni"><i class="ti ti-plus" aria-hidden="true"></i></button>
+        </div>
+        <div class="cfg-label">Ripetizioni</div>
+      </div>
+
+      <!-- Recupero -->
+      <div class="cfg-cell">
+        <div class="cfg-row">
+          <button class="cfg-step" (click)="adjustRest(-5)" aria-label="Meno recupero"><i class="ti ti-minus" aria-hidden="true"></i></button>
+          <input class="cfg-input" type="number" inputmode="numeric" min="0" max="600" step="5"
+            [value]="configRest()" (input)="onRestInput($event)" aria-label="Recupero in secondi" />
+          <button class="cfg-step" (click)="adjustRest(5)" aria-label="Più recupero"><i class="ti ti-plus" aria-hidden="true"></i></button>
+        </div>
+        <div class="cfg-label">Recupero (s)</div>
+      </div>
+
+      <!-- Carico -->
+      <div class="cfg-cell">
+        <div class="cfg-row">
+          <button class="cfg-step" (click)="adjustKg(-2)" aria-label="Meno carico"><i class="ti ti-minus" aria-hidden="true"></i></button>
+          <input class="cfg-input" type="number" inputmode="numeric" min="0" max="500"
+            [value]="configKg()" (input)="onKgInput($event)" aria-label="Carico in kg" />
+          <button class="cfg-step" (click)="adjustKg(2)" aria-label="Più carico"><i class="ti ti-plus" aria-hidden="true"></i></button>
+        </div>
+        <div class="cfg-label">Carico (kg · 0 = BW)</div>
+      </div>
+    </div>
+
+    <!-- Quick kg chips -->
+    <div style="font-size:11px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px">
+      Carico rapido
+    </div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:22px">
+      @for (k of KG_QUICK; track k) {
+        <button (click)="configKg.set(k)"
+          style="padding:7px 13px;border-radius:10px;font-size:12.5px;font-weight:800;border:2px solid;transition:all 0.12s"
+          [style.borderColor]="configKg() === k ? 'var(--amber)' : 'var(--hairline)'"
+          [style.background]="configKg() === k ? 'var(--amber-soft)' : 'var(--surface-2)'"
+          [style.color]="configKg() === k ? 'var(--amber)' : 'var(--ink-3)'">
+          {{ k === 0 ? 'BW' : k + 'kg' }}
+        </button>
+      }
+    </div>
+
+    <!-- Griglia preset serie×reps -->
+    <div style="font-size:11.5px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px">
+      Preset serie × rip.
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:28px">
+      @for (p of PRESETS; track p.label) {
+        <button (click)="selectPreset(p)"
+          style="padding:13px 6px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:3px;border:2.5px solid transparent;transition:all 0.15s"
+          [class]="p.tile"
+          [style.borderColor]="configSets() === p.sets && configReps() === p.reps ? 'rgba(255,255,255,0.6)' : 'transparent'"
+          [style.transform]="configSets() === p.sets && configReps() === p.reps ? 'scale(1.06)' : 'scale(1)'">
+          <span style="font-size:17px;font-weight:900;letter-spacing:-0.5px">{{ p.label }}</span>
+          <span style="font-size:9px;font-weight:700;opacity:0.75;text-align:center">{{ p.desc }}</span>
+        </button>
+      }
+    </div>
+
+    <!-- CTA conferma -->
+    <button class="btn btn-primary btn-block btn-lg" (click)="confirmExercise()">
+      <i class="ti ti-circle-check" style="font-size:18px" aria-hidden="true"></i>
+      {{ isExerciseAdded(exName) ? 'Aggiorna esercizio' : 'Aggiungi alla scheda' }}
+    </button>
+
+  </div>
+}

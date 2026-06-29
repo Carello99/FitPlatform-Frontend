@@ -1,0 +1,115 @@
+/* =====================================================
+   FitFlow Design System — Design tokens (CSS custom properties)
+   ===================================================== */
+:root{
+  /* Surfaces */
+  --bg:#08080E;
+  --bg-app:#0A0A12;
+  --bg-radial:#14141f;
+  --surface-0:#0E0E16;
+  --surface-1:#16161F;
+  --surface-2:#1A1A26;
+  --surface-3:#222232;
+  --surface-4:#2A2A3A;
+  --hairline:rgba(255,255,255,0.07);
+  --hairline-strong:rgba(255,255,255,0.12);
+
+  /* Text */
+  --ink:#F2F1EA;
+  --ink-2:#9B9AA4;
+  --ink-3:#6B6A75;
+  --ink-4:#4A4A5A;
+
+  /* Brand */
+  --amber:#F5A623;
+  --amber-soft:#2A2010;
+  --amber-ink:#1A0E00;
+  --green:#39C56E;
+  --green-soft:#13301F;
+  --cyan:#22BFEF;
+  --cyan-soft:#0F2734;
+  --violet:#9B7BF0;
+  --violet-soft:#1E1830;
+  --rose:#FF6B8A;
+  --rose-soft:#2E1620;
+  /* Estensione palette — colori extra per identità gruppi muscolari (compatibili) */
+  --blue:#4E8FF5;
+  --blue-soft:#0F2138;
+  --teal:#1FD0C3;
+  --teal-soft:#0A2C2A;
+  --magenta:#E667C9;
+  --magenta-soft:#2B1227;
+  --orange:#FF8A3D;
+  --orange-soft:#2E1A0C;
+
+  /* Radii */
+  --r-sm:12px;
+  --r-md:18px;
+  --r-lg:24px;
+  --r-xl:30px;
+  --r-pill:999px;
+
+  /* Type */
+  --font:'Plus Jakarta Sans',-apple-system,system-ui,sans-serif;
+
+  /* Shadow */
+  --shadow-card:0 1px 0 rgba(255,255,255,0.03) inset;
+  --shadow-pop:0 24px 60px -20px rgba(0,0,0,0.7);
+  --shadow-amber:0 12px 30px -8px rgba(245,166,35,0.45);
+  --shadow-green:0 12px 30px -8px rgba(57,197,110,0.4);
+}
+
+/* =====================================================
+   Light theme — applied when <html data-theme="light">.
+   The default (no attribute, or data-theme="dark") is the dark design.
+   Only palette tokens are overridden; radii, type and brand hues are shared.
+   ===================================================== */
+:root[data-theme='light']{
+  /* Surfaces */
+  --bg:#E9E8E2;
+  --bg-app:#F5F4EF;
+  --bg-radial:#ffffff;
+  --surface-0:#FFFFFF;
+  --surface-1:#FFFFFF;
+  --surface-2:#FFFFFF;
+  --surface-3:#ECEBE4;
+  --surface-4:#DEDDD4;
+  --hairline:rgba(20,20,30,0.09);
+  --hairline-strong:rgba(20,20,30,0.16);
+
+  /* Text */
+  --ink:#1A1A22;
+  --ink-2:#54545E;
+  --ink-3:#86868F;
+  --ink-4:#B0B0B8;
+
+  /* Brand — hues unchanged; soft tints become light washes */
+  --amber-soft:#FBEFD6;
+  --green-soft:#DDF3E6;
+  --cyan-soft:#DAEEF8;
+  --violet-soft:#ECE5FB;
+  --rose-soft:#FCE1E8;
+  --blue-soft:#DEE9FD;
+  --teal-soft:#D2F4F1;
+  --magenta-soft:#FBE1F4;
+  --orange-soft:#FCE7D7;
+
+  /* Shadow — softer on light */
+  --shadow-card:0 1px 2px rgba(20,20,30,0.05);
+  --shadow-pop:0 24px 60px -20px rgba(20,20,30,0.22);
+  --shadow-amber:0 12px 30px -8px rgba(245,166,35,0.38);
+  --shadow-green:0 12px 30px -8px rgba(57,197,110,0.32);
+}
+
+/* Smooth cross-fade when toggling theme */
+body,
+.phone-inner,
+.card,
+.chip,
+.input,
+.bottomnav,
+.itile,
+.appbar .iconbtn{
+  transition:background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+}
+

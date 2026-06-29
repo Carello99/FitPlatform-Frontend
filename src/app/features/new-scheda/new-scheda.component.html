@@ -1,0 +1,213 @@
+<div class="screen-anim" style="display:flex;flex-direction:column;height:100%">
+
+  <!-- ===== HEADER + PROGRESS BAR ===== -->
+  <div style="padding:4px 20px 0;flex-shrink:0">
+    <div class="appbar">
+      <button class="iconbtn" (click)="back()" aria-label="Indietro">
+        <i class="ti ti-chevron-left" style="font-size:22px" aria-hidden="true"></i>
+      </button>
+      <div class="grow">
+        <h1>Nuova Scheda</h1>
+        <!-- step() + 1: converte da 0-based a 1-based per la visualizzazione -->
+        <div class="sub">Step {{ step() + 1 }} di 3 · {{ steps[step()] }}</div>
+      </div>
+    </div>
+    <!-- Barretta per ogni step: colorata (amber) se raggiunta, grigia altrimenti -->
+    <div class="row gap6" style="margin-top:14px">
+      @for (s of steps; track $index; let i = $index) {
+        <div class="grow" style="height:5px;border-radius:99px;transition:background 0.3s"
+          [style.background]="i <= step() ? 'var(--amber)' : 'var(--surface-3)'"></div>
+      }
+    </div>
+  </div>
+
+  <!-- ===== CONTENUTO SCROLLABILE ===== -->
+  <div class="screen" style="padding:20px 20px 130px">
+
+    <!-- ═══════════════════════════════════════════
+         STEP 0 — SETUP: nome + icona + colore
+         ═══════════════════════════════════════════ -->
+    @if (step() === 0) {
+      <div class="stagger">
+
+        <!-- Preview live della card (si aggiorna in tempo reale) -->
+        <div style="display:flex;justify-content:center;margin-bottom:26px">
+          <div style="width:130px;height:130px;border-radius:24px;position:relative;overflow:hidden;transition:background 0.3s,box-shadow 0.3s"
+            [style.background]="cardBg()"
+            [style.boxShadow]="'0 22px 52px -16px ' + ACCENT_VAR[accent()] + '88'">
+            <!-- Icona decorativa sfondo -->
+            <i class="ti" [class]="icon()"
+              style="font-size:92px;position:absolute;right:-14px;bottom:-14px;color:rgba(0,0,0,0.14);transition:all 0.2s"
+              aria-hidden="true"></i>
+            <!-- Tile icona in alto a sinistra -->
+            <div style="position:absolute;top:12px;left:12px;width:38px;height:38px;border-radius:12px;background:rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center">
+              <i class="ti" [class]="icon()" style="font-size:20px;color:#fff" aria-hidden="true"></i>
+            </div>
+            <!-- Nome in basso -->
+            <div style="position:absolute;bottom:10px;left:12px;right:8px">
+              <div style="font-size:11.5px;font-weight:800;color:rgba(255,255,255,0.92);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                {{ name() || 'Nuova scheda' }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campo nome scheda -->
+        <div class="field">
+          <label>Nome della scheda</label>
+          <!-- [value]+"(input)": pattern per "two-way binding" manuale senza FormsModule -->
+          <input class="input" placeholder="es. Push Power, Gambe killer…"
+            [value]="name()" (input)="onName($event)" maxlength="30" />
+        </div>
+
+        <!-- Selezione icona: scroll orizzontale di tile colored -->
+        <div class="field">
+          <label>Icona</label>
+          <div style="display:flex;overflow-x:auto;gap:8px;padding:4px 0 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch">
+            @for (ic of ICONS; track ic) {
+              <!-- icon.set(ic): aggiorna il signal dell'icona selezionata -->
+              <!-- [class]="TILE_CLASS[accent()]": usa il colore dell'accento corrente -->
+              <button (click)="icon.set(ic)"
+                style="flex-shrink:0;width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;border:2.5px solid transparent;transition:all 0.18s"
+                [class]="TILE_CLASS[accent()]"
+                [style.borderColor]="icon() === ic ? ACCENT_VAR[accent()] : 'transparent'"
+                [style.transform]="icon() === ic ? 'scale(1.12)' : 'scale(1)'"
+                [style.boxShadow]="icon() === ic ? '0 6px 18px -4px ' + ACCENT_VAR[accent()] + '77' : 'none'">
+                <i class="ti" [class]="ic" aria-hidden="true"></i>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Selezione colore: 6 cerchi colorati -->
+        <div class="field">
+          <label>Colore della card</label>
+          <div class="row gap12" style="margin-top:10px">
+            @for (a of ACCENTS; track a) {
+              <!-- accent.set(a): aggiorna il signal dell'accento selezionato -->
+              <button (click)="accent.set(a)"
+                style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;transition:all 0.2s"
+                [style.background]="ACCENT_VAR[a]"
+                [style.transform]="accent() === a ? 'scale(1.22)' : 'scale(1)'"
+                [style.boxShadow]="accent() === a ? '0 0 0 3px var(--surface-1), 0 0 0 6px ' + ACCENT_VAR[a] : 'none'">
+                <!-- Spunta solo sul colore selezionato -->
+                @if (accent() === a) {
+                  <i class="ti ti-check" style="font-size:17px;color:#fff;font-weight:900" aria-hidden="true"></i>
+                }
+              </button>
+            }
+          </div>
+        </div>
+
+      </div>
+    }
+
+    <!-- ═══════════════════════════════════════════
+         STEP 1 — ESERCIZI: selezione visuale per gruppo muscolare
+         ═══════════════════════════════════════════ -->
+    @if (step() === 1) {
+      <ff-muscle-picker
+        [added]="picked()"
+        (exercisePicked)="onMusclePicked($event)"
+        (exerciseRemoved)="removeEx($event)">
+      </ff-muscle-picker>
+    }
+
+    <!-- ═══════════════════════════════════════════
+         STEP 2 — RIEPILOGO: anteprima + salvataggio
+         ═══════════════════════════════════════════ -->
+    @if (step() === 2) {
+      <div class="stagger">
+
+        <!-- Anteprima card (formato coverflow 164×164) -->
+        <div style="display:flex;justify-content:center;margin-bottom:22px">
+          <div style="width:164px;height:164px;border-radius:22px;position:relative;overflow:hidden"
+            [style.background]="cardBg()"
+            [style.boxShadow]="'0 24px 56px -16px ' + ACCENT_VAR[accent()] + '77'">
+            <!-- Icona sfondo decorativa -->
+            <i class="ti" [class]="icon()"
+              style="font-size:120px;position:absolute;right:-18px;bottom:-18px;color:rgba(0,0,0,0.15)"
+              aria-hidden="true"></i>
+            <!-- Tile icona -->
+            <div style="position:absolute;top:12px;left:12px;width:40px;height:40px;border-radius:12px;background:rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center">
+              <i class="ti" [class]="icon()" style="font-size:22px;color:#fff" aria-hidden="true"></i>
+            </div>
+            <!-- Badge "Nuova" -->
+            <div style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.15);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.2);border-radius:99px;padding:3px 8px">
+              <span style="font-size:9.5px;font-weight:800;color:#fff;letter-spacing:0.4px">NUOVA</span>
+            </div>
+            <!-- Nome + conteggio in basso -->
+            <div style="position:absolute;bottom:14px;left:14px;right:14px">
+              <div style="font-size:14px;font-weight:800;color:rgba(255,255,255,0.95);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                {{ name() }}
+              </div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px">{{ picked().length }} esercizi</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistiche rapide -->
+        <div class="row center gap0" style="margin-bottom:24px;background:var(--surface-2);border:1px solid var(--hairline);border-radius:16px;overflow:hidden">
+          <div style="flex:1;padding:14px 12px;text-align:center">
+            <div style="font-size:22px;font-weight:900" [style.color]="ACCENT_VAR[accent()]">{{ picked().length }}</div>
+            <div style="font-size:11px;font-weight:700;color:var(--ink-3);margin-top:2px">Esercizi</div>
+          </div>
+          <div style="width:1px;background:var(--hairline);align-self:stretch"></div>
+          <div style="flex:1;padding:14px 12px;text-align:center">
+            <div style="font-size:22px;font-weight:900" [style.color]="ACCENT_VAR[accent()]">{{ totalSeries() }}</div>
+            <div style="font-size:11px;font-weight:700;color:var(--ink-3);margin-top:2px">Serie tot.</div>
+          </div>
+          <div style="width:1px;background:var(--hairline);align-self:stretch"></div>
+          <div style="flex:1;padding:14px 12px;text-align:center">
+            <div style="font-size:22px;font-weight:900" [style.color]="ACCENT_VAR[accent()]">~{{ estDuration() }}</div>
+            <div style="font-size:11px;font-weight:700;color:var(--ink-3);margin-top:2px">Min est.</div>
+          </div>
+        </div>
+
+        <!-- Lista esercizi raggruppata in macro-sezioni Upper / Lower Body -->
+        <div style="font-size:12.5px;font-weight:800;color:var(--ink-2);letter-spacing:0.3px;text-transform:uppercase;margin-bottom:10px">
+          Esercizi
+        </div>
+
+        @for (g of recapGroups(); track g.id) {
+          <!-- Intestazione sezione -->
+          <div class="ex-section-head">
+            <i class="ti" [class]="g.icon" aria-hidden="true"></i>
+            <span class="lbl">{{ g.label }}</span>
+            <span class="cnt">· {{ g.items.length }}</span>
+          </div>
+
+          <div class="col gap8">
+            @for (ex of g.items; track ex.name) {
+              <ff-exercise-card
+                [name]="ex.name" [index]="$index"
+                [sets]="ex.sets" [reps]="ex.reps" [kg]="ex.kg" [rest]="ex.rest">
+              </ff-exercise-card>
+            }
+          </div>
+
+          <!-- Divisore tra sezioni (non dopo l'ultima) -->
+          @if (!$last) { <div class="ex-section-div"></div> }
+        }
+
+      </div>
+    }
+
+  </div>
+
+  <!-- ===== PULSANTE CTA STICKY ===== -->
+  <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 20px 30px;background:linear-gradient(to top, var(--bg-app) 70%, transparent);z-index:30;pointer-events:none">
+    <!-- [disabled]="!canNext()": disabilita il pulsante se lo step non è valido -->
+    <button class="btn btn-primary btn-block btn-lg" style="pointer-events:all"
+      [disabled]="!canNext()" (click)="next()">
+      @if (step() === 2) {
+        <i class="ti ti-circle-check-filled" style="font-size:20px" aria-hidden="true"></i> Crea scheda
+      } @else if (step() === 1) {
+        Riepilogo <i class="ti ti-arrow-right" style="font-size:18px" aria-hidden="true"></i>
+      } @else {
+        Scegli esercizi <i class="ti ti-arrow-right" style="font-size:18px" aria-hidden="true"></i>
+      }
+    </button>
+  </div>
+
+</div>

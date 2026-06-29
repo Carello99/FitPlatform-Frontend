@@ -1,0 +1,29 @@
+<div class="exercise-card" [class.subtle]="variant === 'subtle'" [class.active]="active"
+  [style.--mcol]="color" [style.--msoft]="soft">
+
+  <div class="ex-left">
+    <!-- GIF o numero progressivo (opzionali) -->
+    @if (showGif && gifUrl) {
+      <img class="ex-gif" [src]="gifUrl" (error)="onImgError()" [alt]="name"
+        [style.width.px]="gifSize" [style.height.px]="gifSize" />
+    } @else if (index !== null) {
+      <span class="ex-num">{{ index + 1 }}</span>
+    }
+
+    <!-- Badge gruppo muscolare: pieno nel colore del gruppo -->
+    <span class="ex-group">{{ groupLabel ?? '—' }}</span>
+
+    <!-- Nome (colorato come il gruppo) + statistiche -->
+    <div class="ex-main">
+      <div class="ex-name">{{ name }}</div>
+      @if (statsLine) {
+        <div class="ex-stats">{{ statsLine }}</div>
+      }
+    </div>
+  </div>
+
+  <!-- Slot in coda: badge recupero, pulsante rimuovi, ecc. -->
+  <div class="ex-trailing">
+    <ng-content></ng-content>
+  </div>
+</div>

@@ -1,0 +1,103 @@
+:host { display: block; }
+
+/* --mcol = colore gruppo muscolare, --msoft = sfondo soft.
+   Sono variabili CSS del design system (token) → si adattano a dark/light. */
+.exercise-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 13px;
+  background: var(--msoft);
+  border: 1px solid var(--hairline);
+  border-left: 4px solid var(--mcol);
+}
+
+/* Fusa col pannello sotto: il contenitore esterno disegna bordo + rail.
+   La card cede il proprio bordo/raggio per non duplicarli. */
+.exercise-card.active {
+  border-color: transparent;
+  border-radius: 0;
+}
+
+/* Variante allenamento attivo: nessuno sfondo invasivo, solo accento sottile */
+.exercise-card.subtle {
+  background: transparent;
+  border-color: var(--hairline);
+  border-left-width: 3px;
+}
+
+.ex-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ex-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: var(--surface-3);
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.ex-gif {
+  border-radius: 11px;
+  flex-shrink: 0;
+  object-fit: contain;
+  background: var(--surface-3);
+}
+
+.ex-group {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--mcol);
+  padding: 3px 9px;
+  border-radius: 99px;
+}
+
+/* Subtle: badge gruppo solo contornato */
+.exercise-card.subtle .ex-group {
+  color: var(--mcol);
+  background: transparent;
+  border: 1.5px solid var(--mcol);
+  padding: 1.5px 8px;
+}
+
+.ex-main { min-width: 0; }
+
+.ex-name {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  color: var(--mcol);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.exercise-card.subtle .ex-name { color: var(--ink); }
+
+.ex-stats {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-3);
+  margin-top: 1px;
+}
+
+.ex-trailing {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}

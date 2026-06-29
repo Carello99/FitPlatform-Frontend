@@ -1,0 +1,427 @@
+@if (scheda(); as s) {
+  <div class="screen-anim" style="display:flex;flex-direction:column;height:100%">
+
+    <!-- Area scrollabile principale -->
+    <div class="screen" style="flex:1;min-height:0;overflow-y:auto">
+
+      <!-- ===== HERO HEADER ===== -->
+      <div style="position:relative;overflow:hidden;padding:6px 20px 26px" [style.background]="heroBg(s.accent)">
+        <div style="position:absolute;top:-50px;right:-40px;width:170px;height:170px;border-radius:50%;filter:blur(10px);opacity:0.14" [style.background]="ACCENT_VAR[s.accent]"></div>
+
+        <div class="appbar" style="position:relative;z-index:2">
+          <button class="iconbtn" (click)="back()" aria-label="Indietro"><i class="ti ti-chevron-left" style="font-size:22px" aria-hidden="true"></i></button>
+          <div class="grow"></div>
+          <button class="iconbtn" (click)="toggleFav()">
+            <i class="ti" [class]="state.fav() ? 'ti-heart-filled' : 'ti-heart'" style="font-size:20px" [style.color]="state.fav() ? 'var(--rose)' : 'var(--ink)'" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div style="position:relative;z-index:2;margin-top:10px">
+          <div class="itile" [class]="TILE_CLASS[s.accent]" style="width:64px;height:64px;border-radius:20px;margin-bottom:16px"><i class="ti" [class]="s.icon" style="font-size:32px" aria-hidden="true"></i></div>
+          @if (s.tag) { <span class="badge" [class]="badgeClass(s.tag)" style="margin-bottom:10px">{{ s.tag }}</span> }
+          <h1 style="font-size:28px;font-weight:800;letter-spacing:-0.8px;margin-top:8px">{{ s.name }}</h1>
+          <div style="font-size:13.5px;color:var(--ink-2);font-weight:600;margin-top:4px">{{ s.focus }}</div>
+          <p style="font-size:14px;color:var(--ink-3);font-weight:500;margin-top:12px;line-height:1.55;text-wrap:pretty">{{ s.desc }}</p>
+        </div>
+      </div>
+
+      <div style="padding:0 20px 260px">
+        <!-- ===== STRIP STATISTICHE ===== -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px">
+          <div class="card" style="padding:14px 10px;text-align:center">
+            <i class="ti ti-clock" style="font-size:19px;color:var(--ink-3)" aria-hidden="true"></i>
+            <div style="font-size:20px;font-weight:800;margin-top:6px;letter-spacing:-0.5px">{{ s.duration }}</div>
+            <div style="font-size:11px;color:var(--ink-3);font-weight:600">min</div>
+          </div>
+          <div class="card" style="padding:14px 10px;text-align:center">
+            <i class="ti ti-list-numbers" style="font-size:19px;color:var(--ink-3)" aria-hidden="true"></i>
+            <div style="font-size:20px;font-weight:800;margin-top:6px;letter-spacing:-0.5px">{{ s.exercises.length }}</div>
+            <div style="font-size:11px;color:var(--ink-3);font-weight:600">esercizi</div>
+          </div>
+          <div class="card" style="padding:14px 10px;text-align:center">
+            <i class="ti ti-stretching" style="font-size:19px;color:var(--ink-3)" aria-hidden="true"></i>
+            <div style="font-size:20px;font-weight:800;margin-top:6px;letter-spacing:-0.5px">{{ totalSets }}</div>
+            <div style="font-size:11px;color:var(--ink-3);font-weight:600">serie</div>
+          </div>
+        </div>
+
+        <div class="row between" style="margin:22px 0 4px;align-items:center">
+          <h2 style="font-size:17px;font-weight:800">Esercizi</h2>
+          <span class="badge badge-violet"><i class="ti ti-bolt" style="font-size:11px" aria-hidden="true"></i>{{ LEVEL_LABEL[s.level] }}</span>
+        </div>
+
+        <!-- ===== LISTA ESERCIZI (Upper / Lower Body) — accordion read-only ===== -->
+        <div style="margin-top:14px">
+          @for (g of groupEx(s.exercises); track g.id) {
+            <div class="ex-section-head">
+              <i class="ti" [class]="g.icon" aria-hidden="true"></i>
+              <span class="lbl">{{ g.label }}</span>
+              <span class="cnt">· {{ g.items.length }}</span>
+            </div>
+            <div class="col gap10">
+              @for (e of g.items; track e.name) {
+                <!-- Card + pannello = un blocco unico. Da aperto, il contenitore
+                     prende l'identità del gruppo: rail colorato continuo + glow. -->
+                <div class="ex-acc"
+                  [style.borderColor]="openEx() === e.name ? (metaFor(e.name)?.color ?? 'var(--hairline)') : 'var(--hairline)'"
+                  [style.borderLeftWidth.px]="openEx() === e.name ? 5 : 1.5"
+                  [style.boxShadow]="openEx() === e.name ? '0 12px 30px -14px color-mix(in srgb, ' + (metaFor(e.name)?.color ?? 'var(--ink-3)') + ' 55%, transparent)' : 'none'">
+
+                  <!-- Riga esercizio cliccabile: apre/chiude il pannello -->
+                  <div (click)="toggleEx(e.name)" style="cursor:pointer">
+                    <ff-exercise-card [name]="e.name" [index]="$index" [active]="openEx() === e.name"
+                      [sets]="e.sets" [reps]="e.reps" [kg]="e.kg">
+                      <span class="badge badge-amber"><i class="ti ti-clock" style="font-size:11px" aria-hidden="true"></i>{{ e.rest }}s</span>
+                      <i class="ti ti-chevron-down ex-acc-chev" [class.open]="openEx() === e.name"
+                        style="font-size:18px;color:var(--ink-3);margin-left:2px" aria-hidden="true"></i>
+                    </ff-exercise-card>
+                  </div>
+
+                  <!-- Pannello espanso: GIF + serie/reps/kg + note future -->
+                  @if (openEx() === e.name) {
+                    <div class="ex-acc-panel"
+                      [style.background]="metaFor(e.name)?.soft ?? 'var(--surface-1)'"
+                      [style.borderTopColor]="'color-mix(in srgb, ' + (metaFor(e.name)?.color ?? 'var(--hairline)') + ' 28%, transparent)'">
+
+                      <div class="ex-acc-row">
+                        @if (gifUrl(e.name); as gif) {
+                          <div class="ex-acc-gif">
+                            <img [src]="gif" [alt]="e.name" loading="lazy" (error)="onGifError(e.name)" />
+                          </div>
+                        }
+                        <div class="ex-acc-stats">
+                          <div class="ex-stat"><span class="v">{{ e.sets }}</span><span class="k">serie</span></div>
+                          <div class="ex-stat"><span class="v">{{ e.reps }}</span><span class="k">reps</span></div>
+                          <div class="ex-stat">
+                            <span class="v">{{ e.kg && e.kg > 0 ? e.kg : 'BW' }}</span>
+                            <span class="k">{{ e.kg && e.kg > 0 ? 'kg' : 'corpo' }}</span>
+                          </div>
+                          <div class="ex-stat"><span class="v">{{ e.rest }}s</span><span class="k">recupero</span></div>
+                        </div>
+                      </div>
+
+                      <!-- Note (placeholder per funzionalità futura) -->
+                      <div class="ex-acc-note">
+                        <i class="ti ti-note" style="font-size:14px" aria-hidden="true"></i>
+                        <span>Nessuna nota</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+            @if (!$last) { <div class="ex-section-div"></div> }
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CTA STICKY IN BASSO (sopra la bottom nav della shell) ===== -->
+    <div style="position:absolute;left:0;right:0;bottom:calc(95px + env(safe-area-inset-bottom));padding:16px 20px 12px;background:linear-gradient(to top, var(--bg-app) 70%, transparent);z-index:30">
+      <button class="btn btn-ghost btn-block" style="margin-bottom:10px" (click)="enterEditMode()">
+        <i class="ti ti-edit" style="font-size:17px" aria-hidden="true"></i> Modifica scheda
+      </button>
+      <button class="btn btn-primary btn-block btn-lg" (click)="showDialog.set(true)">
+        <i class="ti ti-player-play-filled" style="font-size:18px" aria-hidden="true"></i> Inizia Allenamento
+      </button>
+    </div>
+
+    <!-- ===== DIALOG CONFERMA AVVIO ===== -->
+    @if (showDialog()) {
+      <div class="scrim center" (click)="showDialog.set(false)">
+        <div class="dialog" (click)="$event.stopPropagation()">
+          <div class="itile" [class]="TILE_CLASS[s.accent]" style="width:60px;height:60px;border-radius:18px;margin:0 auto 16px"><i class="ti" [class]="s.icon" style="font-size:30px" aria-hidden="true"></i></div>
+          <h2 style="font-size:21px;font-weight:800;letter-spacing:-0.4px">Vuoi iniziare l'allenamento?</h2>
+          <p style="font-size:14px;color:var(--ink-3);font-weight:500;margin:8px 0 6px;line-height:1.5">
+            <b style="color:var(--ink-2)">{{ s.name }}</b> · {{ s.exercises.length }} esercizi · circa {{ s.duration }} min
+          </p>
+          <div class="row center gap14" style="margin:14px 0 20px;font-size:12.5px;font-weight:700;color:var(--ink-2)">
+            <span class="row" style="gap:5px"><i class="ti ti-stretching" style="font-size:15px;color:var(--ink-3)" aria-hidden="true"></i>{{ totalSets }} serie</span>
+            <span class="row" style="gap:5px"><ff-diff [level]="s.level"></ff-diff> {{ LEVEL_LABEL[s.level] }}</span>
+          </div>
+          <button class="btn btn-primary btn-block btn-lg" (click)="state.beginSession(s.id)">
+            <i class="ti ti-player-play-filled" style="font-size:18px" aria-hidden="true"></i> Sì, inizia ora
+          </button>
+          <button class="btn btn-ghost btn-block" style="margin-top:10px" (click)="showDialog.set(false)">Più tardi</button>
+        </div>
+      </div>
+    }
+
+    <!-- ===== MODAL MODIFICA SCHEDA ===== -->
+    @if (editMode()) {
+      <div style="position:fixed;inset:0;z-index:200;background:var(--bg-app);display:flex;flex-direction:column;overflow:hidden">
+
+        <!-- Header modal -->
+        <div style="display:flex;align-items:center;padding:14px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--hairline)">
+          <button class="iconbtn" (click)="cancelEdit()" aria-label="Annulla"><i class="ti ti-x" style="font-size:20px" aria-hidden="true"></i></button>
+          <span style="flex:1;text-align:center;font-size:17px;font-weight:800;letter-spacing:-0.3px">Modifica scheda</span>
+          <button class="btn btn-primary" style="padding:8px 18px;font-size:13px;font-weight:700" (click)="saveEdit()" [disabled]="!editName().trim()">Salva</button>
+        </div>
+
+        <!-- Contenuto scrollabile -->
+        <div class="screen" style="flex:1;min-height:0;overflow-y:auto;padding:20px 20px 120px">
+
+          <!-- Preview card live -->
+          <div style="display:flex;justify-content:center;margin-bottom:24px">
+            <div style="width:130px;height:130px;border-radius:24px;position:relative;overflow:hidden;transition:background 0.3s,box-shadow 0.3s"
+              [style.background]="editCardBg()"
+              [style.boxShadow]="'0 22px 52px -16px ' + ACCENT_VAR[editAccent()] + '88'">
+              <i class="ti" [class]="editIcon()" style="font-size:92px;position:absolute;right:-14px;bottom:-14px;color:rgba(0,0,0,0.14);transition:all 0.2s" aria-hidden="true"></i>
+              <div style="position:absolute;top:12px;left:12px;width:38px;height:38px;border-radius:12px;background:rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center">
+                <i class="ti" [class]="editIcon()" style="font-size:20px;color:#fff" aria-hidden="true"></i>
+              </div>
+              <div style="position:absolute;bottom:10px;left:12px;right:8px">
+                <div style="font-size:11.5px;font-weight:800;color:rgba(255,255,255,0.92);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ editName() || 'Nome scheda' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nome scheda -->
+          <div class="field" style="margin-bottom:20px">
+            <label>Nome della scheda</label>
+            <input class="input" [value]="editName()" (input)="onEditName($event)" placeholder="Es. Push Day" maxlength="30" />
+          </div>
+
+          <!-- Selezione colore -->
+          <div class="field" style="margin-bottom:20px">
+            <label>Colore della card</label>
+            <div class="row gap12" style="margin-top:10px">
+              @for (a of ACCENTS; track a) {
+                <button (click)="editAccent.set(a)"
+                  style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;transition:all 0.2s"
+                  [style.background]="ACCENT_VAR[a]"
+                  [style.transform]="editAccent() === a ? 'scale(1.22)' : 'scale(1)'"
+                  [style.boxShadow]="editAccent() === a ? '0 0 0 3px var(--surface-1), 0 0 0 6px ' + ACCENT_VAR[a] : 'none'">
+                  @if (editAccent() === a) {
+                    <i class="ti ti-check" style="font-size:17px;color:#fff;font-weight:900" aria-hidden="true"></i>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Selezione icona -->
+          <div class="field" style="margin-bottom:28px">
+            <label>Icona</label>
+            <div style="display:flex;overflow-x:auto;gap:8px;padding:4px 0 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch">
+              @for (ic of ICONS; track ic) {
+                <button (click)="editIcon.set(ic)"
+                  style="flex-shrink:0;width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;border:2.5px solid transparent;transition:all 0.18s"
+                  [class]="TILE_CLASS[editAccent()]"
+                  [style.borderColor]="editIcon() === ic ? ACCENT_VAR[editAccent()] : 'transparent'"
+                  [style.transform]="editIcon() === ic ? 'scale(1.12)' : 'scale(1)'"
+                  [style.boxShadow]="editIcon() === ic ? '0 6px 18px -4px ' + ACCENT_VAR[editAccent()] + '77' : 'none'">
+                  <i class="ti" [class]="ic" aria-hidden="true"></i>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- ===== ESERCIZI ===== -->
+          <div style="font-size:17px;font-weight:800;margin-bottom:8px">Esercizi</div>
+
+          <!-- Hint interazione -->
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-3);font-weight:600;margin-bottom:14px;padding:10px 12px;background:var(--surface-2);border-radius:10px">
+            <i class="ti ti-hand-click" style="font-size:16px;color:var(--ink-3)" aria-hidden="true"></i>
+            Tocca per modificare le serie · <i class="ti ti-trash" style="font-size:13px" aria-hidden="true"></i> per eliminare
+          </div>
+
+          <div style="margin-bottom:14px">
+            @for (g of groupEx(editExs()); track g.id) {
+            <!-- Sezione Upper / Lower Body -->
+            <div class="ex-section-head">
+              <i class="ti" [class]="g.icon" aria-hidden="true"></i>
+              <span class="lbl">{{ g.label }}</span>
+              <span class="cnt">· {{ g.items.length }}</span>
+            </div>
+            <div class="col gap8">
+            @for (e of g.items; track e.name) {
+              <!-- Card + pannello = un blocco unico. Da aperto, il contenitore
+                   prende l'identità del gruppo: rail colorato continuo + glow. -->
+              <div style="border-radius:14px;overflow:hidden;border:1.5px solid;transition:border-color .2s,box-shadow .2s"
+                [style.borderColor]="openEditEx() === e.name ? (metaFor(e.name)?.color ?? ACCENT_VAR[editAccent()]) : 'var(--hairline)'"
+                [style.borderLeftWidth.px]="openEditEx() === e.name ? 5 : 1.5"
+                [style.boxShadow]="openEditEx() === e.name ? '0 12px 30px -14px color-mix(in srgb, ' + (metaFor(e.name)?.color ?? 'var(--ink-3)') + ' 55%, transparent)' : 'none'">
+
+                <!-- Riga esercizio: ExerciseCard standard cliccabile (apre accordion) -->
+                <div (click)="toggleEditEx(e.name)" style="cursor:pointer">
+                  <ff-exercise-card
+                    [name]="e.name" [index]="$index" [active]="openEditEx() === e.name"
+                    [sets]="e.sets" [reps]="e.reps" [kg]="e.kg" [rest]="e.rest">
+                    <!-- Cestino: stopPropagation per non aprire l'accordion -->
+                    <button (click)="$event.stopPropagation(); requestDeleteEx(e.name)"
+                      style="padding:6px 8px;border:none;background:transparent;color:var(--rose);display:flex;align-items:center"
+                      aria-label="Rimuovi esercizio">
+                      <i class="ti ti-trash" style="font-size:19px" aria-hidden="true"></i>
+                    </button>
+                  </ff-exercise-card>
+                </div>
+
+                <!-- Accordion: preset + kg + recupero. Sfondo soft del gruppo
+                     → continuità visiva con la card sopra. -->
+                @if (openEditEx() === e.name) {
+                  <div style="padding:14px 16px;border-top:1px solid"
+                    [style.background]="metaFor(e.name)?.soft ?? 'var(--surface-1)'"
+                    [style.borderTopColor]="'color-mix(in srgb, ' + (metaFor(e.name)?.color ?? 'var(--hairline)') + ' 28%, transparent)'">
+
+                    <!-- Pill conferma modifica (lampeggia ~1.3s) -->
+                    @if (flashEx() === e.name) {
+                      <div style="display:inline-flex;align-items:center;gap:5px;margin-bottom:12px;padding:5px 11px;border-radius:99px;background:var(--green-soft);color:var(--green);font-size:11.5px;font-weight:800">
+                        <i class="ti ti-circle-check-filled" style="font-size:14px" aria-hidden="true"></i> Aggiornato
+                      </div>
+                    }
+
+                    <!-- Preset serie×reps -->
+                    <div style="font-size:11.5px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px">Cambia preset</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px">
+                      @for (p of PRESETS; track p.label) {
+                        <button (click)="selectEditPreset(e.name, p)"
+                          style="display:flex;flex-direction:column;align-items:center;padding:9px 14px;border-radius:12px;border:none;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s"
+                          [class]="p.tile"
+                          [style.transform]="e.sets === p.sets && e.reps === p.reps ? 'scale(1.08)' : 'scale(1)'"
+                          [style.boxShadow]="e.sets === p.sets && e.reps === p.reps ? '0 4px 14px -4px rgba(0,0,0,0.35)' : 'none'">
+                          <span style="font-size:14px;font-weight:800">{{ p.label }}</span>
+                          <span style="font-size:10px;font-weight:600;opacity:0.75;margin-top:1px">{{ p.desc }}</span>
+                        </button>
+                      }
+                    </div>
+
+                    <!-- Divisore -->
+                    <div style="height:1px;background:var(--hairline);margin:14px 0"></div>
+
+                    <!-- Kg stepper -->
+                    <div style="font-size:11.5px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px">Carico</div>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px">
+                      <button (click)="adjustEditExKg(e.name, -2)"
+                        style="width:36px;height:36px;border-radius:10px;border:none;background:var(--surface-3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <i class="ti ti-minus" style="font-size:16px;color:var(--ink-2)" aria-hidden="true"></i>
+                      </button>
+                      <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px;min-width:56px;text-align:center">
+                        {{ e.kg === 0 ? 'BW' : e.kg + ' kg' }}
+                      </div>
+                      <button (click)="adjustEditExKg(e.name, 2)"
+                        style="width:36px;height:36px;border-radius:10px;border:none;background:var(--surface-3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <i class="ti ti-plus" style="font-size:16px;color:var(--ink-2)" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                    <!-- Quick kg chips -->
+                    <div style="display:flex;gap:6px;flex-wrap:wrap">
+                      @for (k of KG_QUICK; track k) {
+                        <button (click)="setEditExKg(e.name, k)"
+                          style="padding:6px 12px;border-radius:9px;font-size:12px;font-weight:800;border:2px solid;transition:all 0.12s"
+                          [style.borderColor]="e.kg === k ? 'var(--amber)' : 'var(--hairline)'"
+                          [style.background]="e.kg === k ? 'var(--amber-soft)' : 'var(--surface-2)'"
+                          [style.color]="e.kg === k ? 'var(--amber)' : 'var(--ink-3)'">
+                          {{ k === 0 ? 'BW' : k + 'kg' }}
+                        </button>
+                      }
+                    </div>
+
+                    <!-- Divisore -->
+                    <div style="height:1px;background:var(--hairline);margin:14px 0"></div>
+
+                    <!-- Tempo di recupero -->
+                    <div style="font-size:11.5px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px">Recupero</div>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px">
+                      <button (click)="adjustEditExRest(e.name, -15)"
+                        style="width:36px;height:36px;border-radius:10px;border:none;background:var(--surface-3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <i class="ti ti-minus" style="font-size:16px;color:var(--ink-2)" aria-hidden="true"></i>
+                      </button>
+                      <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px;min-width:56px;text-align:center">
+                        {{ e.rest }}<span style="font-size:14px;font-weight:700;color:var(--ink-3)">s</span>
+                      </div>
+                      <button (click)="adjustEditExRest(e.name, 15)"
+                        style="width:36px;height:36px;border-radius:10px;border:none;background:var(--surface-3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <i class="ti ti-plus" style="font-size:16px;color:var(--ink-2)" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                    <!-- Quick rest chips -->
+                    <div style="display:flex;gap:6px;flex-wrap:wrap">
+                      @for (r of REST_QUICK; track r) {
+                        <button (click)="setEditExRest(e.name, r)"
+                          style="padding:6px 12px;border-radius:9px;font-size:12px;font-weight:800;border:2px solid;transition:all 0.12s"
+                          [style.borderColor]="e.rest === r ? 'var(--amber)' : 'var(--hairline)'"
+                          [style.background]="e.rest === r ? 'var(--amber-soft)' : 'var(--surface-2)'"
+                          [style.color]="e.rest === r ? 'var(--amber)' : 'var(--ink-3)'">
+                          {{ r }}s
+                        </button>
+                      }
+                    </div>
+
+                  </div>
+                }
+              </div>
+            }
+            </div>
+            @if (!$last) { <div class="ex-section-div"></div> }
+            }
+          </div>
+
+          <!-- ===== AGGIUNGI ESERCIZIO ===== -->
+          <button class="btn btn-ghost btn-block" (click)="showAddEx.set(true)">
+            <i class="ti ti-plus" style="font-size:17px" aria-hidden="true"></i> Aggiungi esercizio
+          </button>
+        </div>
+
+        <!-- Bottom sticky: salva -->
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 20px 30px;background:linear-gradient(to top, var(--bg-app) 70%, transparent);z-index:10">
+          <button class="btn btn-primary btn-block btn-lg" (click)="saveEdit()" [disabled]="!editName().trim()">
+            <i class="ti ti-device-floppy" style="font-size:18px" aria-hidden="true"></i> Salva modifiche
+          </button>
+        </div>
+
+        <!-- ===== OVERLAY AGGIUNGI ESERCIZIO (muscle picker) ===== -->
+        @if (showAddEx()) {
+          <div style="position:absolute;inset:0;z-index:30;background:var(--bg-app);display:flex;flex-direction:column">
+            <!-- Header -->
+            <div style="display:flex;align-items:center;padding:14px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--hairline)">
+              <button class="iconbtn" (click)="showAddEx.set(false)" aria-label="Chiudi">
+                <i class="ti ti-arrow-left" style="font-size:20px" aria-hidden="true"></i>
+              </button>
+              <span style="flex:1;text-align:center;font-size:17px;font-weight:800;letter-spacing:-0.3px">Aggiungi esercizio</span>
+              <div style="width:40px"></div>
+            </div>
+            <!-- Picker scrollabile -->
+            <div style="flex:1;overflow-y:auto;padding:0 20px 24px">
+              <ff-muscle-picker
+                [added]="editExs()"
+                (exercisePicked)="onMusclePicked($event)"
+                (exerciseRemoved)="removeEditEx($event)">
+              </ff-muscle-picker>
+            </div>
+          </div>
+        }
+
+        <!-- ===== DIALOG CONFERMA ELIMINAZIONE ===== -->
+        @if (pendingDeleteEx()) {
+          <div class="scrim center" style="position:absolute;inset:0;z-index:20" (click)="cancelDeleteEx()">
+            <div class="dialog" (click)="$event.stopPropagation()">
+              <!-- Icona cestino -->
+              <div style="width:60px;height:60px;border-radius:18px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:28px" class="t-rose">
+                <i class="ti ti-trash" aria-hidden="true"></i>
+              </div>
+
+              <h2 style="font-size:20px;font-weight:800;letter-spacing:-0.4px">Rimuovere l'esercizio?</h2>
+              <p style="font-size:14px;color:var(--ink-3);font-weight:500;margin:8px 0 20px;line-height:1.5">
+                <b style="color:var(--ink-2)">{{ pendingDeleteEx() }}</b> verrà rimosso dalla scheda.
+              </p>
+
+              <!-- Checkbox "non mostrare più" -->
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:20px;padding:10px 12px;background:var(--surface-2);border-radius:10px">
+                <input type="checkbox" [checked]="deleteCheckbox()" (change)="onDeleteCheckbox($event)"
+                  style="width:18px;height:18px;accent-color:var(--rose);cursor:pointer;flex-shrink:0" />
+                <span style="font-size:13px;font-weight:600;color:var(--ink-2)">Non mostrare più questa conferma</span>
+              </label>
+
+              <button class="btn btn-block btn-lg" style="background:var(--rose);color:#fff;font-weight:700" (click)="confirmDeleteEx()">
+                <i class="ti ti-trash" style="font-size:17px" aria-hidden="true"></i> Sì, rimuovi
+              </button>
+              <button class="btn btn-ghost btn-block" style="margin-top:10px" (click)="cancelDeleteEx()">Annulla</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+}
