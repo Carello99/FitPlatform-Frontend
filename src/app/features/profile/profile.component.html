@@ -1,6 +1,8 @@
 <!-- Template schermata Profilo -->
 <div class="screen-pad screen-anim">
 
+  <ff-app-header></ff-app-header>
+
   <!-- ===== HEADER ===== -->
   <div class="appbar">
     <div class="grow"><h1>Profilo</h1></div>
@@ -12,7 +14,7 @@
   <div class="card card-pad" style="margin-top:14px;text-align:center">
     <!-- Avatar: iniziale del nome con gradiente giallo -->
     <!-- w.user.name[0]: accede al primo carattere della stringa -->
-    <div style="width:84px;height:84px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(135deg,var(--amber),#d98a0c);display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800;color:var(--amber-ink);box-shadow:var(--shadow-amber)">{{ w.user.name[0] }}</div>
+    <div style="width:84px;height:84px;border-radius:50%;margin:0 auto 14px;background:var(--amber);display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800;color:var(--amber-ink);box-shadow:var(--shadow-amber)">{{ w.user.name[0] }}</div>
     <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px">{{ w.user.name }} Rossi</div>
     <span class="badge badge-amber" style="margin:8px auto 0"><i class="ti ti-bolt-filled" style="font-size:12px" aria-hidden="true"></i>Livello {{ w.user.level }} · {{ w.user.levelTitle }}</span>
     <!-- Progress bar XP: [style.width.%]="xpPct * 100" → es. 0.62 * 100 = 62% -->
@@ -27,7 +29,7 @@
   <!-- Griglia 3 colonne con valori fissi (mock) -->
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px">
     @for (m of mini; track m[1]) {
-      <div class="card" style="padding:16px 8px;text-align:center">
+      <div class="card" style="padding:14px 8px;text-align:center">
         <div style="font-size:21px;font-weight:800;letter-spacing:-0.5px">{{ m[0] }}</div>
         <div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-top:3px">{{ m[1] }}</div>
       </div>
@@ -43,8 +45,8 @@
     @for (b of w.badges; track b.name) {
       <!-- b.got: opacity piena per badge ottenuti, 0.4 per quelli bloccati -->
       <div style="display:flex;flex-direction:column;align-items:center;gap:7px;width:72px;flex-shrink:0" [style.opacity]="b.got ? 1 : 0.4">
-        <div class="itile" [class]="TILE_CLASS[b.tile]" style="width:58px;height:58px;border-radius:18px;position:relative">
-          <i class="ti" [class]="b.icon" style="font-size:26px" aria-hidden="true"></i>
+        <div class="itile" [class]="TILE_CLASS[b.tile]" style="width:52px;height:52px;border-radius:16px;position:relative">
+          <i class="ti" [class]="b.icon" style="font-size:22px" aria-hidden="true"></i>
           <!-- Icona lucchetto per badge non sbloccati -->
           @if (!b.got) {
             <div style="position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;border-radius:50%;background:var(--surface-3);border:2px solid var(--surface-2);display:flex;align-items:center;justify-content:center"><i class="ti ti-lock" style="font-size:11px;color:var(--ink-3)" aria-hidden="true"></i></div>
@@ -96,6 +98,42 @@
         </div>
       </button>
     }
+  </div>
+
+  <!-- ===== SEZIONE DEMO (simulazioni) ===== -->
+  <div class="section-hdr"><h2>Demo</h2></div>
+  <div class="card" style="padding:6px">
+    <!-- Toggle "Ho un coach": se OFF, la sezione Coach reindirizza al marketplace -->
+    <button class="row between" style="width:100%;padding:13px 12px;border-radius:13px;gap:12px" (click)="toggleCoach()">
+      <div class="row gap12">
+        <div class="itile sm" [class]="trainer.hasCoach() ? 't-green' : 't-rose'" style="width:38px;height:38px;border-radius:11px">
+          <i class="ti" [class]="trainer.hasCoach() ? 'ti-user-check' : 'ti-user-off'" style="font-size:18px" aria-hidden="true"></i>
+        </div>
+        <div style="text-align:left">
+          <div style="font-size:14.5px;font-weight:700">Ho un coach</div>
+          <div style="font-size:11.5px;color:var(--ink-3);font-weight:600;margin-top:1px">{{ trainer.hasCoach() ? 'Coach assegnato · hub Coach' : 'Nessun coach · Coach → marketplace' }}</div>
+        </div>
+      </div>
+      <span class="ff-switch" [class.on]="trainer.hasCoach()" role="switch" [attr.aria-checked]="trainer.hasCoach()" aria-label="Simula presenza coach">
+        <span class="ff-switch__knob"></span>
+      </span>
+    </button>
+
+    <!-- Toggle "Ho delle schede": se OFF, la Home mostra l'empty-state di creazione -->
+    <button class="row between" style="width:100%;padding:13px 12px;border-radius:13px;gap:12px" (click)="toggleSchede()">
+      <div class="row gap12">
+        <div class="itile sm" [class]="w.hasSchede() ? 't-green' : 't-rose'" style="width:38px;height:38px;border-radius:11px">
+          <i class="ti" [class]="w.hasSchede() ? 'ti-cards' : 'ti-cards-off'" style="font-size:18px" aria-hidden="true"></i>
+        </div>
+        <div style="text-align:left">
+          <div style="font-size:14.5px;font-weight:700">Ho delle schede</div>
+          <div style="font-size:11.5px;color:var(--ink-3);font-weight:600;margin-top:1px">{{ w.hasSchede() ? 'Carosello schede in Home' : 'Nessuna scheda · Home guida alla creazione' }}</div>
+        </div>
+      </div>
+      <span class="ff-switch" [class.on]="w.hasSchede()" role="switch" [attr.aria-checked]="w.hasSchede()" aria-label="Simula presenza schede">
+        <span class="ff-switch__knob"></span>
+      </span>
+    </button>
   </div>
 
   <!-- ===== PULSANTE LOGOUT ===== -->

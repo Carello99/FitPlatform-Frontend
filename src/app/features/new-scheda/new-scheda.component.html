@@ -1,7 +1,7 @@
 <div class="screen-anim" style="display:flex;flex-direction:column;height:100%">
 
   <!-- ===== HEADER + PROGRESS BAR ===== -->
-  <div style="padding:4px 20px 0;flex-shrink:0">
+  <div style="padding:4px 16px 0;flex-shrink:0">
     <div class="appbar">
       <button class="iconbtn" (click)="back()" aria-label="Indietro">
         <i class="ti ti-chevron-left" style="font-size:22px" aria-hidden="true"></i>
@@ -22,7 +22,7 @@
   </div>
 
   <!-- ===== CONTENUTO SCROLLABILE ===== -->
-  <div class="screen" style="padding:20px 20px 130px">
+  <div class="screen" style="padding:20px 16px 130px">
 
     <!-- ═══════════════════════════════════════════
          STEP 0 — SETUP: nome + icona + colore
@@ -41,11 +41,11 @@
               aria-hidden="true"></i>
             <!-- Tile icona in alto a sinistra -->
             <div style="position:absolute;top:12px;left:12px;width:38px;height:38px;border-radius:12px;background:rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center">
-              <i class="ti" [class]="icon()" style="font-size:20px;color:#fff" aria-hidden="true"></i>
+              <i class="ti" [class]="icon()" style="font-size:20px;color:var(--on-accent)" aria-hidden="true"></i>
             </div>
             <!-- Nome in basso -->
             <div style="position:absolute;bottom:10px;left:12px;right:8px">
-              <div style="font-size:11.5px;font-weight:800;color:rgba(255,255,255,0.92);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+              <div style="font-size:11.5px;font-weight:800;color:color-mix(in srgb, var(--on-accent) 92%, transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
                 {{ name() || 'Nuova scheda' }}
               </div>
             </div>
@@ -92,7 +92,7 @@
                 [style.boxShadow]="accent() === a ? '0 0 0 3px var(--surface-1), 0 0 0 6px ' + ACCENT_VAR[a] : 'none'">
                 <!-- Spunta solo sul colore selezionato -->
                 @if (accent() === a) {
-                  <i class="ti ti-check" style="font-size:17px;color:#fff;font-weight:900" aria-hidden="true"></i>
+                  <i class="ti ti-check" style="font-size:17px;color:var(--on-accent);font-weight:800" aria-hidden="true"></i>
                 }
               </button>
             }
@@ -130,18 +130,18 @@
               aria-hidden="true"></i>
             <!-- Tile icona -->
             <div style="position:absolute;top:12px;left:12px;width:40px;height:40px;border-radius:12px;background:rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center">
-              <i class="ti" [class]="icon()" style="font-size:22px;color:#fff" aria-hidden="true"></i>
+              <i class="ti" [class]="icon()" style="font-size:22px;color:var(--on-accent)" aria-hidden="true"></i>
             </div>
             <!-- Badge "Nuova" -->
-            <div style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.15);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.2);border-radius:99px;padding:3px 8px">
-              <span style="font-size:9.5px;font-weight:800;color:#fff;letter-spacing:0.4px">NUOVA</span>
+            <div style="position:absolute;top:14px;right:14px;background:color-mix(in srgb, var(--on-accent) 15%, transparent);backdrop-filter:blur(6px);border:1px solid color-mix(in srgb, var(--on-accent) 20%, transparent);border-radius:99px;padding:3px 8px">
+              <span style="font-size:9.5px;font-weight:800;color:var(--on-accent);letter-spacing:0.4px">NUOVA</span>
             </div>
             <!-- Nome + conteggio in basso -->
             <div style="position:absolute;bottom:14px;left:14px;right:14px">
-              <div style="font-size:14px;font-weight:800;color:rgba(255,255,255,0.95);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+              <div style="font-size:14px;font-weight:800;color:color-mix(in srgb, var(--on-accent) 95%, transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
                 {{ name() }}
               </div>
-              <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px">{{ picked().length }} esercizi</div>
+              <div style="font-size:11px;color:color-mix(in srgb, var(--on-accent) 50%, transparent);margin-top:2px">{{ picked().length }} esercizi</div>
             </div>
           </div>
         </div>
@@ -149,17 +149,17 @@
         <!-- Statistiche rapide -->
         <div class="row center gap0" style="margin-bottom:24px;background:var(--surface-2);border:1px solid var(--hairline);border-radius:16px;overflow:hidden">
           <div style="flex:1;padding:14px 12px;text-align:center">
-            <div style="font-size:22px;font-weight:900" [style.color]="ACCENT_VAR[accent()]">{{ picked().length }}</div>
+            <div style="font-size:22px;font-weight:800" [style.color]="ACCENT_VAR[accent()]">{{ picked().length }}</div>
             <div style="font-size:11px;font-weight:700;color:var(--ink-3);margin-top:2px">Esercizi</div>
           </div>
           <div style="width:1px;background:var(--hairline);align-self:stretch"></div>
           <div style="flex:1;padding:14px 12px;text-align:center">
-            <div style="font-size:22px;font-weight:900" [style.color]="ACCENT_VAR[accent()]">{{ totalSeries() }}</div>
+            <div style="font-size:22px;font-weight:800" [style.color]="ACCENT_VAR[accent()]">{{ totalSeries() }}</div>
             <div style="font-size:11px;font-weight:700;color:var(--ink-3);margin-top:2px">Serie tot.</div>
           </div>
           <div style="width:1px;background:var(--hairline);align-self:stretch"></div>
           <div style="flex:1;padding:14px 12px;text-align:center">
-            <div style="font-size:22px;font-weight:900" [style.color]="ACCENT_VAR[accent()]">~{{ estDuration() }}</div>
+            <div style="font-size:22px;font-weight:800" [style.color]="ACCENT_VAR[accent()]">~{{ estDuration() }}</div>
             <div style="font-size:11px;font-weight:700;color:var(--ink-3);margin-top:2px">Min est.</div>
           </div>
         </div>
@@ -196,7 +196,7 @@
   </div>
 
   <!-- ===== PULSANTE CTA STICKY ===== -->
-  <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 20px 30px;background:linear-gradient(to top, var(--bg-app) 70%, transparent);z-index:30;pointer-events:none">
+  <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 16px 30px;background:linear-gradient(to top, var(--bg-app) 70%, transparent);z-index:30;pointer-events:none">
     <!-- [disabled]="!canNext()": disabilita il pulsante se lo step non è valido -->
     <button class="btn btn-primary btn-block btn-lg" style="pointer-events:all"
       [disabled]="!canNext()" (click)="next()">

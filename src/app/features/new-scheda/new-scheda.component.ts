@@ -42,7 +42,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { Router } from '@angular/router';
 import { Accent, Scheda } from '../../core/models/workout.models';
 import {
-  ACCENT_VAR, MUSCLE_META, MuscleInfo, TILE_CLASS,
+  ACCENT_VAR, MUSCLE_META, MuscleInfo, SET_PRESETS, SetPreset, TILE_CLASS,
 } from '../../core/constants/ui.constants';
 import { ToastService } from '../../core/services/toast.service';
 import { WorkoutStore } from '../../core/services/workout-store.service';
@@ -59,14 +59,6 @@ interface PickedEx {
 }
 
 // Configurazione predefinita di serie×reps mostrata nel selettore accordeon
-interface Preset {
-  label: string; // testo principale, es. "3×12"
-  sets: number;
-  reps: string;
-  rest: number;  // secondi di recupero
-  desc: string;  // etichetta breve, es. "Ipertrofia"
-  tile: string;  // classe CSS del colore del pulsante, es. "t-cyan"
-}
 
 /**
  * Wizard guidato per la creazione di una nuova scheda di allenamento.
@@ -138,14 +130,7 @@ export class NewSchedaComponent {
   ];
 
   // Preset serie×reps: ogni pulsante ha un colore tile diverso per la categoria
-  readonly PRESETS: Preset[] = [
-    { label: '3×12', sets: 3, reps: '12', rest: 60,  desc: 'Ipertrofia',    tile: 't-cyan'   },
-    { label: '3×10', sets: 3, reps: '10', rest: 75,  desc: 'Ipertrofia',    tile: 't-violet' },
-    { label: '4×8',  sets: 4, reps: '8',  rest: 90,  desc: 'Forza & Massa', tile: 't-amber'  },
-    { label: '3×6',  sets: 3, reps: '6',  rest: 120, desc: 'Forza',         tile: 't-rose'   },
-    { label: '5×5',  sets: 5, reps: '5',  rest: 180, desc: 'Forza Max',     tile: 't-green'  },
-    { label: '2×15', sets: 2, reps: '15', rest: 45,  desc: 'Tonific.',      tile: 't-slate'  },
-  ];
+  readonly PRESETS = SET_PRESETS;
 
   // Etichette degli step per header e progress bar
   readonly steps = ['Setup', 'Esercizi', 'Riepilogo'];
@@ -228,7 +213,7 @@ export class NewSchedaComponent {
   }
 
   // Aggiunge l'esercizio con il preset scelto (o aggiorna se già presente)
-  selectPreset(exName: string, p: Preset): void {
+  selectPreset(exName: string, p: SetPreset): void {
     const idx = this.picked().findIndex((e) => e.name === exName);
     if (idx >= 0) {
       // Aggiorna la configurazione di un esercizio già aggiunto

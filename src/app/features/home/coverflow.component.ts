@@ -243,7 +243,7 @@ export class CoverflowComponent {
   cardTransition(i: number): string {
     return this.teleporting().has(i)
       ? 'none'
-      : 'transform 0.5s cubic-bezier(.22,1,.36,1), opacity 0.45s';
+      : 'transform 0.5s cubic-bezier(.16,1,.3,1), opacity 0.45s';
   }
 
   // ---- Funzioni di trasformazione 3D CSS ----

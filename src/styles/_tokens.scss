@@ -26,6 +26,7 @@
   --amber-ink:#1A0E00;
   --green:#39C56E;
   --green-soft:#13301F;
+  --green-ink:#06180E;
   --cyan:#22BFEF;
   --cyan-soft:#0F2734;
   --violet:#9B7BF0;
@@ -39,6 +40,11 @@
   --teal-soft:#0A2C2A;
   --magenta:#E667C9;
   --magenta-soft:#2B1227;
+  /* Testo/icone SOPRA una superficie brand satura (accento pieno, colore muscolare,
+     copertina scheda). Identico nei due temi di proposito: la superficie sotto è
+     colorata, non tematizzata. NON usarlo su una superficie --surface-*: lì il
+     colore giusto è --ink, che si inverte col tema. */
+  --on-accent:#FFFFFF;
   --orange:#FF8A3D;
   --orange-soft:#2E1A0C;
 

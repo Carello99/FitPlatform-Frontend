@@ -1,7 +1,7 @@
 <div class="screen-anim" style="display:flex;flex-direction:column;height:100%">
 
   <!-- ===== HEADER + PROGRESS BAR ===== -->
-  <div style="padding:4px 20px 0;flex-shrink:0">
+  <div style="padding:4px 16px 0;flex-shrink:0">
     <div class="appbar">
       <button class="iconbtn" (click)="back()" aria-label="Indietro">
         <i class="ti ti-chevron-left" style="font-size:22px" aria-hidden="true"></i>
@@ -24,7 +24,7 @@
   </div>
 
   <!-- ===== CONTENUTO SCROLLABILE ===== -->
-  <div class="screen" style="padding:22px 20px 130px">
+  <div class="screen" style="padding:22px 16px 130px">
 
     <!-- ═══════════ STEP 0 — BENVENUTO ═══════════ -->
     @if (step() === 0) {
@@ -224,7 +224,7 @@
   </div>
 
   <!-- ===== CTA STICKY ===== -->
-  <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 20px 30px;background:linear-gradient(to top, var(--bg-app) 70%, transparent);z-index:30;pointer-events:none">
+  <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 16px 30px;background:linear-gradient(to top, var(--bg-app) 70%, transparent);z-index:30;pointer-events:none">
     <button class="btn btn-primary btn-block btn-lg" style="pointer-events:all"
       [disabled]="!canNext()" (click)="next()">
       @if (step() === steps.length - 1) {

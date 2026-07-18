@@ -1,72 +1,182 @@
-<!-- Template schermata lista schede con ricerca e filtri -->
+<!--
+  Sezione "Schede", due tab:
+   • Schede      → i piani: cosa PUOI fare
+   • Allenamenti → lo storico: cosa HAI fatto
+  Nessun contatore nei tab: quanti sono non aiuta a decidere niente.
+-->
 <div class="screen-pad screen-anim">
+
+  <ff-app-header></ff-app-header>
 
   <!-- ===== HEADER ===== -->
   <div class="appbar">
     <div class="grow">
       <h1>Schede</h1>
-      <!-- w.schede.length: accede alla proprietà della classe nel template tramite il nome del campo iniettato -->
-      <div class="sub">{{ w.schede.length }} disponibili</div>
     </div>
-    <!-- Pulsante "+" per creare una nuova scheda -->
-    <button class="iconbtn" (click)="go('new-scheda')" style="background:var(--amber);color:var(--amber-ink)">
+    <button class="iconbtn" (click)="go('new-scheda')" style="background:var(--amber);color:var(--amber-ink)" aria-label="Crea una nuova scheda">
       <i class="ti ti-plus" style="font-size:22px" aria-hidden="true"></i>
     </button>
   </div>
 
-  <!-- ===== INPUT DI RICERCA ===== -->
-  <!-- [value]="q()": property binding — sincronizza il valore dell'input con il signal q -->
-  <!-- (input)="onSearch($event)": event binding — chiama onSearch() ad ogni modifica del testo -->
-  <!-- Nota: in Angular si usa [value]+(input) invece di [(ngModel)] quando si vogliono signal -->
-  <div class="input-icon" style="margin-top:16px">
-    <i class="ti ti-search" aria-hidden="true"></i>
-    <input class="input" placeholder="Cerca scheda o gruppo muscolare" [value]="q()" (input)="onSearch($event)" />
-  </div>
+  <!-- ===== SEGMENTED: Schede · Allenamenti ===== -->
+  <nav class="segment" role="tablist" aria-label="Schede o allenamenti">
+    <button class="seg" [class.on]="tab() === 'schede'" role="tab" [attr.aria-selected]="tab() === 'schede'" (click)="setTab('schede')">Schede</button>
+    <button class="seg" [class.on]="tab() === 'allenamenti'" role="tab" [attr.aria-selected]="tab() === 'allenamenti'" (click)="setTab('allenamenti')">Allenamenti</button>
+  </nav>
 
-  <!-- ===== CHIP DI FILTRO ===== -->
-  <!-- scroll-x: classe CSS per scroll orizzontale -->
-  <div class="scroll-x" style="margin-top:14px">
-    @for (f of filters; track f) {
-      <!-- filter.set(f): chiama direttamente il metodo .set() del signal nel template -->
-      <!-- [class.active]="filter() === f": aggiunge la classe "active" al chip selezionato -->
-      <button class="chip" [class.active]="filter() === f" (click)="filter.set(f)">{{ f }}</button>
-    }
-  </div>
+  @switch (tab()) {
 
-  <!-- ===== LISTA SCHEDE FILTRATA ===== -->
-  <!-- list() chiama il computed signal — restituisce l'array filtrato corrente -->
-  <div class="col gap12" style="margin-top:18px">
-    @for (s of list(); track s.id; let i = $index) {
-      <!-- state.openScheda(s.id): chiama direttamente un metodo del servizio iniettato -->
-      <!-- [style.animation]="...": animazione sfasata in base all'indice i -->
-      <button class="card" (click)="state.openScheda(s.id)"
-        style="padding:16px;text-align:left;display:flex;gap:14px;align-items:center"
-        [style.animation]="'rise 0.45s cubic-bezier(.16,1,.3,1) ' + (i * 0.05) + 's backwards'">
-        <!-- Icona colorata con la classe dell'accento -->
-        <div class="itile" [class]="TILE_CLASS[s.accent]" style="width:56px;height:56px;border-radius:18px"><i class="ti" [class]="s.icon" style="font-size:27px" aria-hidden="true"></i></div>
-        <div class="grow" style="min-width:0">
-          <div class="row between">
-            <span style="font-size:16px;font-weight:800;letter-spacing:-0.3px">{{ s.name }}</span>
-            <!-- Mostra il badge solo se s.tag non è una stringa vuota -->
-            @if (s.tag) { <span class="badge" [class]="badgeClass(s.tag)">{{ s.tag }}</span> }
-          </div>
-          <div style="font-size:12px;color:var(--ink-3);font-weight:600;margin:3px 0 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.focus }}</div>
-          <div class="row gap12" style="font-size:12px;font-weight:700;color:var(--ink-2)">
-            <span class="row" style="gap:4px"><i class="ti ti-clock" style="font-size:14px;color:var(--ink-3)" aria-hidden="true"></i>{{ s.duration }}m</span>
-            <span class="row" style="gap:4px"><i class="ti ti-list-numbers" style="font-size:14px;color:var(--ink-3)" aria-hidden="true"></i>{{ s.exercises.length }}</span>
-            <!-- DiffComponent: componente figlio per i pallini di difficoltà -->
-            <span class="row" style="gap:5px"><ff-diff [level]="s.level"></ff-diff></span>
-          </div>
-        </div>
-      </button>
-    }
-
-    <!-- Stato vuoto: mostrato quando la ricerca non trova risultati -->
-    @if (list().length === 0) {
-      <div class="col center" style="padding:50px 0;gap:12px;opacity:0.6">
-        <i class="ti ti-search-off" style="font-size:40px;color:var(--ink-3)" aria-hidden="true"></i>
-        <span style="font-size:14px;font-weight:600;color:var(--ink-3)">Nessuna scheda trovata</span>
+    <!-- ==================================================================== -->
+    <!--  TAB 1 — SCHEDE (i piani)                                            -->
+    <!-- ==================================================================== -->
+    @case ('schede') {
+      <div class="input-icon" style="margin-top:14px">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <input class="input" placeholder="Cerca scheda o gruppo muscolare" [value]="q()" (input)="onSearch($event)" />
       </div>
+
+      <div class="scroll-x" style="margin-top:14px">
+        @for (f of filters; track f) {
+          <button class="chip" [class.active]="filter() === f" (click)="filter.set(f)">{{ f }}</button>
+        }
+      </div>
+
+      <div class="col gap12" style="margin-top:18px">
+        @for (s of list(); track s.id; let i = $index) {
+          <button class="card press" (click)="state.openScheda(s.id)"
+            style="border-radius:var(--r-md);padding:13px;text-align:left;display:flex;gap:12px;align-items:center"
+            [style.animation]="'rise 0.45s cubic-bezier(.16,1,.3,1) ' + (i * 0.05) + 's backwards'">
+            <div class="itile" [class]="TILE_CLASS[s.accent]" [style.borderColor]="ACCENT_VAR[s.accent]" style="border:1.5px solid"><i class="ti" [class]="s.icon" style="font-size:22px" aria-hidden="true"></i></div>
+            <div class="grow" style="min-width:0">
+              <div class="row between">
+                <span style="font-size:15px;font-weight:800;letter-spacing:-0.3px">{{ s.name }}</span>
+                @if (s.tag) { <span class="badge" [class]="badgeClass(s.tag)">{{ s.tag }}</span> }
+              </div>
+              <div style="font-size:12px;color:var(--ink-3);font-weight:600;margin:3px 0 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.focus }}</div>
+              <div class="row gap12" style="font-size:12px;font-weight:700;color:var(--ink-2)">
+                <span class="row" style="gap:4px"><i class="ti ti-clock" style="font-size:14px;color:var(--ink-3)" aria-hidden="true"></i>{{ s.duration }}m</span>
+                <span class="row" style="gap:4px"><i class="ti ti-list-numbers" style="font-size:14px;color:var(--ink-3)" aria-hidden="true"></i>{{ s.exercises.length }}</span>
+                <span class="row" style="gap:5px"><ff-diff [level]="s.level"></ff-diff></span>
+              </div>
+            </div>
+          </button>
+        }
+
+        @if (list().length === 0 && archived().length === 0) {
+          <div class="ff-empty">
+            <div class="itile t-slate" style="width:60px;height:60px;border-radius:18px">
+              <i class="ti ti-search-off" style="font-size:28px" aria-hidden="true"></i>
+            </div>
+            <div class="ff-empty__t">Nessuna scheda trovata</div>
+            <p class="ff-empty__s">Prova con un altro filtro, oppure creane una nuova.</p>
+            <button class="btn btn-primary" (click)="go('new-scheda')">
+              <i class="ti ti-plus" aria-hidden="true"></i> Crea scheda
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- archiviate/scadute (in fondo, de-enfatizzate) -->
+      @if (archived().length) {
+        <div class="arch-hd"><i class="ti ti-archive" aria-hidden="true"></i>Archiviate</div>
+        <div class="col gap12" style="margin-top:10px">
+          @for (s of archived(); track s.id) {
+            <button class="card arch press" (click)="state.openScheda(s.id)"
+              style="border-radius:var(--r-md);padding:13px;text-align:left;display:flex;gap:12px;align-items:center">
+              <div class="itile" [class]="TILE_CLASS[s.accent]"><i class="ti" [class]="s.icon" style="font-size:22px" aria-hidden="true"></i></div>
+              <div class="grow" style="min-width:0">
+                <div class="row between">
+                  <span style="font-size:15px;font-weight:800;letter-spacing:-0.3px">{{ s.name }}</span>
+                  <span class="badge">Scaduta</span>
+                </div>
+                <div style="font-size:12px;color:var(--ink-3);font-weight:600;margin:3px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.focus }}</div>
+              </div>
+            </button>
+          }
+        </div>
+      }
     }
-  </div>
+
+    <!-- ==================================================================== -->
+    <!--  TAB 2 — ALLENAMENTI (lo storico)                                    -->
+    <!-- ==================================================================== -->
+    @case ('allenamenti') {
+
+      @if (historyEmpty()) {
+        <!-- Vuoto assoluto: non si è mai allenato -->
+        <div class="ff-empty">
+          <div class="itile t-amber" style="width:60px;height:60px;border-radius:18px">
+            <i class="ti ti-history" style="font-size:28px" aria-hidden="true"></i>
+          </div>
+          <div class="ff-empty__t">Qui nascerà la tua storia</div>
+          <p class="ff-empty__s">Ogni allenamento che completi resta qui: carichi, tempo, record. Il primo è a due tap da qui.</p>
+          <button class="btn btn-primary" (click)="setTab('schede')">
+            <i class="ti ti-player-play-filled" aria-hidden="true"></i> Scegli una scheda
+          </button>
+        </div>
+      } @else {
+
+        <!-- ===== FILTRI DI PERIODO ===== -->
+        <div class="scroll-x" style="margin-top:14px">
+          @for (r of ranges; track r.v) {
+            <button class="chip" [class.active]="range() === r.v" (click)="range.set(r.v)">{{ r.l }}</button>
+          }
+        </div>
+
+        @if (!hasWorkouts()) {
+          <!-- Vuoto per il filtro scelto: ≠ storico vuoto -->
+          <div class="ff-empty">
+            <div class="itile t-slate" style="width:60px;height:60px;border-radius:18px">
+              <i class="ti ti-calendar-off" style="font-size:28px" aria-hidden="true"></i>
+            </div>
+            <div class="ff-empty__t">Niente in questo periodo</div>
+            <p class="ff-empty__s">Non ci sono allenamenti nell'intervallo che hai scelto.</p>
+            <button class="btn btn-ghost" (click)="range.set('tutti')">Mostra tutti</button>
+          </div>
+        } @else {
+
+          <!-- ===== LISTA RAGGRUPPATA PER SETTIMANA ===== -->
+          @for (g of groups(); track g.key) {
+            <div class="ex-section-head" style="margin-top:22px">
+              <i class="ti ti-calendar-week" aria-hidden="true"></i>
+              <span class="lbl">{{ g.label }}</span>
+            </div>
+
+            <div class="col gap10">
+              @for (h of g.items; track h.id; let i = $index) {
+                <!-- Riga compatta: nome, quando, e solo i due numeri che dicono
+                     qualcosa a colpo d'occhio. Il resto vive nel riepilogo. -->
+                <button class="card wk press" [id]="'wk-' + h.id" [class.hl]="h.id === focusId()"
+                  [style.--acc]="ACCENT_VAR[h.accent]"
+                  [style.animation]="'rise 0.4s cubic-bezier(.16,1,.3,1) ' + (i * 0.04) + 's backwards'"
+                  (click)="openWorkout(h)" [attr.aria-label]="'Riepilogo di ' + h.name">
+
+                  <div class="itile sm" [class]="TILE_CLASS[h.accent]">
+                    <i class="ti" [class]="h.icon" style="font-size:20px" aria-hidden="true"></i>
+                  </div>
+
+                  <div class="grow" style="min-width:0">
+                    <div class="wk-head">
+                      <span class="wk-name">{{ h.name }}</span>
+                      <!-- La coppa = record di carico battuto in questa sessione -->
+                      @if (h.prs) {
+                        <i class="ti ti-trophy wk-pr" [attr.aria-label]="h.prs === 1 ? 'Record battuto' : h.prs + ' record battuti'"></i>
+                      }
+                    </div>
+                    <div class="wk-when">{{ when(h) }}</div>
+                    <div class="wk-meta">
+                      <span><i class="ti ti-clock" aria-hidden="true"></i>{{ h.durMin }} min</span>
+                      <span><i class="ti ti-list-numbers" aria-hidden="true"></i>{{ h.ex }} esercizi</span>
+                    </div>
+                  </div>
+
+                  <i class="ti ti-chevron-right wk-go" aria-hidden="true"></i>
+                </button>
+              }
+            </div>
+          }
+        }
+      }
+    }
+  }
 </div>

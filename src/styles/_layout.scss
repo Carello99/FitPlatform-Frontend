@@ -33,7 +33,7 @@
 .screen-self{flex:1;min-height:0;display:flex;flex-direction:column;overflow-x:hidden;contain:paint}
 /* Bottom padding = altezza bottom nav (~120px) + area gesture, così l'ultimo
    contenuto non resta nascosto sotto la nav su iPhone con home indicator. */
-.screen-pad{padding:6px 20px calc(120px + env(safe-area-inset-bottom))}
+.screen-pad{padding:8px 16px calc(120px + env(safe-area-inset-bottom))}
 
 /* ---------- Bottom nav ---------- */
 .bottomnav{
@@ -51,15 +51,14 @@
   transition:transform 0.18s cubic-bezier(.34,1.56,.64,1);
 }
 .bn-item:active{transform:scale(0.9)}
-.bn-item .ti{font-size:24px;color:var(--ink-4);transition:color 0.18s,transform 0.18s}
-.bn-item .bn-label{font-size:10px;font-weight:700;color:var(--ink-4);letter-spacing:0.3px;transition:color 0.18s}
-.bn-item.active .ti{color:var(--amber);transform:translateY(-1px)}
+/* .ic-mask accanto a .ti: il tab Coach usa un'icona a maschera, e deve
+   ricevere dimensione, colore e stato attivo come tutte le altre. */
+.bn-item .ti,
+.bn-item .ic-mask{font-size:23px;color:var(--ink-4);transition:color 0.18s,transform 0.18s}
+.bn-item .bn-label{font-size:10px;font-weight:700;color:var(--ink-4);transition:color 0.18s}
+.bn-item.active .ti,
+.bn-item.active .ic-mask{color:var(--amber);transform:translateY(-1px)}
 .bn-item.active .bn-label{color:var(--amber)}
-/* Immagini PNG nella bottom nav: grigio quando inattive, ambra quando attive.
-   brightness(0) converte l'immagine in nero, poi il pipeline di filtri la ricolora.
-   Questo replica l'effetto di "color: var(--amber)" che funziona solo sulle icone font. */
-.bn-item img{width:24px;height:24px;object-fit:contain;filter:brightness(0) saturate(100%) invert(31%) sepia(8%) saturate(620%) hue-rotate(202deg) brightness(95%);transition:filter 0.18s,transform 0.18s}
-.bn-item.active img{filter:brightness(0) saturate(100%) invert(78%) sepia(55%) saturate(600%) hue-rotate(357deg);transform:translateY(-1px)}
 .bn-fab{
   width:60px;height:60px;border-radius:50%;
   background:var(--amber);color:var(--amber-ink);
@@ -69,4 +68,20 @@
   transition:transform 0.18s cubic-bezier(.34,1.56,.64,1);
 }
 .bn-fab:active{transform:scale(0.9)}
+
+/* CTA centrale "Allena": FAB rialzato che sporge sopra la barra. */
+.bn-cta{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:6px 10px;border:none;background:none;font-family:inherit;cursor:pointer;
+  transition:transform 0.18s cubic-bezier(.34,1.56,.64,1);
+}
+.bn-cta:active{transform:scale(0.92)}
+.bn-cta-fab{
+  width:52px;height:52px;border-radius:50%;
+  background:var(--amber);color:var(--amber-ink);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;margin-top:-22px;
+  box-shadow:var(--shadow-amber);
+}
+.bn-cta .bn-label{font-size:10px;font-weight:800;color:var(--amber)}
 

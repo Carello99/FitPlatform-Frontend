@@ -52,7 +52,9 @@ import {
 } from '@angular/core';
 import { WorkoutStore } from '../../../core/services/workout-store.service';
 import { ExerciseImageService } from '../../../core/services/exercise-image.service';
-import { MUSCLE_CATEGORIES, MUSCLE_META, MuscleInfo } from '../../../core/constants/ui.constants';
+import {
+  KG_QUICK, MUSCLE_CATEGORIES, MUSCLE_META, MuscleInfo, SET_PRESETS, SetPreset,
+} from '../../../core/constants/ui.constants';
 import { ExerciseCardComponent } from '../exercise-card/exercise-card.component';
 
 export interface PickedExercise {
@@ -69,14 +71,6 @@ interface MuscleCategory {
   muscles: MuscleInfo[];
 }
 
-interface Preset {
-  label: string;
-  sets: number;
-  reps: string;
-  rest: number;
-  desc: string;
-  tile: string;
-}
 
 // Sezioni e colori derivano dalla fonte unica MUSCLE_META → coerenza con il recap.
 const MUSCLE_GROUPS: MuscleCategory[] = MUSCLE_CATEGORIES.map((cat) => ({
@@ -88,16 +82,7 @@ const MUSCLE_GROUPS: MuscleCategory[] = MUSCLE_CATEGORIES.map((cat) => ({
 // Flat list for lookup helpers
 const ALL_MUSCLES: MuscleInfo[] = Object.values(MUSCLE_META);
 
-const PRESETS: Preset[] = [
-  { label: '3×12', sets: 3, reps: '12', rest: 60,  desc: 'Ipertrofia',    tile: 't-cyan'   },
-  { label: '3×10', sets: 3, reps: '10', rest: 75,  desc: 'Ipertrofia',    tile: 't-violet' },
-  { label: '4×8',  sets: 4, reps: '8',  rest: 90,  desc: 'Forza & Massa', tile: 't-amber'  },
-  { label: '3×6',  sets: 3, reps: '6',  rest: 120, desc: 'Forza',         tile: 't-rose'   },
-  { label: '5×5',  sets: 5, reps: '5',  rest: 180, desc: 'Forza Max',     tile: 't-green'  },
-  { label: '2×15', sets: 2, reps: '15', rest: 45,  desc: 'Tonific.',      tile: 't-slate'  },
-];
 
-const KG_QUICK: number[] = [0, 5, 10, 20, 30, 40, 60, 80];
 
 // Default kg by exercise name (common compound/isolation lifts)
 const KG_BY_EXERCISE: Record<string, number> = {
@@ -138,7 +123,7 @@ export class MusclePickerComponent {
   @Output() exerciseRemoved = new EventEmitter<string>();
 
   readonly MUSCLE_GROUPS = MUSCLE_GROUPS;
-  readonly PRESETS        = PRESETS;
+  readonly PRESETS        = SET_PRESETS;
   readonly KG_QUICK       = KG_QUICK;
 
   readonly view             = signal<'map' | 'exercises' | 'config'>('map');
@@ -240,7 +225,7 @@ export class MusclePickerComponent {
     this.selectExercise(name);
   }
 
-  selectPreset(p: Preset): void {
+  selectPreset(p: SetPreset): void {
     this.configSets.set(p.sets);
     this.configReps.set(p.reps);
     this.configRest.set(p.rest);

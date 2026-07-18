@@ -51,6 +51,8 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
+// Le chiavi di persistenza sono dichiarate nel registro centrale, mai inline.
+import { STORAGE_EXERCISE_CATALOG as CACHE_KEY } from '../constants/storage.constants';
 
 /** Forma di un singolo esercizio nel catalogo (vedi schema dell'asset JSON). */
 export interface CatalogExercise {
@@ -78,7 +80,6 @@ interface CatalogFile {
 // Gruppi "upper": tutto il resto è "lower" (coerente con MUSCLE_META/CATEGORY_MACRO).
 const UPPER = new Set(['petto', 'dorsali', 'spalle', 'bicipiti', 'tricipiti']);
 const ASSET_URL = 'assets/data/exercise-catalog.json';
-const CACHE_KEY = 'ff_exercise_catalog';
 const CACHE_VERSION = 1; // ALZARE se cambia lo schema → invalida le cache client
 
 @Injectable({ providedIn: 'root' })

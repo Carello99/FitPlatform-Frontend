@@ -33,7 +33,8 @@
  */
 
 // Routes è il tipo per l'array di route di Angular
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, Routes } from '@angular/router';
 // activeSessionGuard: una "guardia" che blocca l'accesso a /active se non c'è una sessione attiva
 import { activeSessionGuard } from './core/guards/active-session.guard';
 
@@ -66,7 +67,7 @@ export const routes: Routes = [
   {
     path: 'home',
     title: 'FitFlow',       // <title> del browser
-    data: { chrome: true }, // mostra la bottom nav
+    data: { chrome: true }, // mostra la bottom nav; scroll verticale gestito dalla shell
     // loadComponent: lazy loading — importa il componente solo quando necessario
     loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent),
   },
@@ -83,6 +84,15 @@ export const routes: Routes = [
     data: { chrome: true }, // mostra la bottom nav anche nel dettaglio scheda
     loadComponent: () =>
       import('./features/scheda-detail/scheda-detail.component').then((m) => m.SchedaDetailComponent),
+  },
+  {
+    // Riepilogo di un allenamento SVOLTO (gemello "passato" di /scheda/:id).
+    // chrome: true → si resta dentro l'hub Schede, da cui si arriva.
+    path: 'allenamento/:id',
+    title: 'Riepilogo allenamento',
+    data: { chrome: true },
+    loadComponent: () =>
+      import('./features/workout-detail/workout-detail.component').then((m) => m.WorkoutDetailComponent),
   },
   {
     path: 'active',
@@ -122,11 +132,19 @@ export const routes: Routes = [
     loadComponent: () => import('./features/help/help.component').then((m) => m.HelpComponent),
   },
   {
+    // Lo Storico NON è più una schermata a sé: vive nel tab "Allenamenti" della
+    // sezione Schede (DECISIONS D-38). La rotta resta come redirect perché i
+    // vecchi link continuino a valere.
+    //
+    // redirectTo è una FUNZIONE, non una stringa: una stringa non può portare
+    // query param ('schede?tab=allenamenti' verrebbe interpretato come un
+    // segmento di path, non come una query). La funzione costruisce un UrlTree
+    // e può quindi propagare il ?focus=<id> del deep-link dall'Agenda.
     path: 'history',
-    title: 'Storico',
-    data: { chrome: true },
-    loadComponent: () =>
-      import('./features/history/history.component').then((m) => m.HistoryComponent),
+    redirectTo: ({ queryParams }) =>
+      inject(Router).createUrlTree(['/schede'], {
+        queryParams: { tab: 'allenamenti', ...queryParams },
+      }),
   },
   {
     path: 'profile',
@@ -134,6 +152,36 @@ export const routes: Routes = [
     data: { chrome: true },
     loadComponent: () =>
       import('./features/profile/profile.component').then((m) => m.ProfileComponent),
+  },
+  {
+    path: 'personal-trainer',
+    title: 'Personal Trainer',
+    data: { chrome: true },
+    loadComponent: () =>
+      import('./features/personal-trainer/personal-trainer.component').then((m) => m.PersonalTrainerComponent),
+  },
+  {
+    // Chat 1:1 col PT — selfLayout: gestisce header/scroll/composer da sé.
+    path: 'messaggi',
+    title: 'Messaggi',
+    data: { chrome: true, selfLayout: true },
+    loadComponent: () =>
+      import('./features/messaggi/messaggi.component').then((m) => m.MessaggiComponent),
+  },
+  {
+    path: 'agenda',
+    title: 'Agenda',
+    data: { chrome: true },
+    loadComponent: () =>
+      import('./features/agenda/agenda.component').then((m) => m.AgendaComponent),
+  },
+  {
+    // Marketplace coach — sotto-pagina dell'hub Coach (scoperta/scelta coach).
+    path: 'coach-marketplace',
+    title: 'Esplora coach',
+    data: { chrome: true },
+    loadComponent: () =>
+      import('./features/coach-marketplace/coach-marketplace.component').then((m) => m.CoachMarketplaceComponent),
   },
   // Wildcard: qualsiasi URL non riconosciuto → redirect a /home
   { path: '**', redirectTo: 'home' },

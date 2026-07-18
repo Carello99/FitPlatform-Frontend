@@ -1,0 +1,185 @@
+<!--
+  Riepilogo di un allenamento svolto.
+  Stessa impaginazione del dettaglio scheda (/scheda/:id): hero compatto
+  (icona nella barra alta, identità centrata fra le frecce, riga meta) →
+  lista esercizi ad accordion → CTA sticky. Le classi .sd-* sono condivise:
+  stanno in styles/_components.scss, non in un component.scss.
+-->
+@if (workout(); as h) {
+  <div class="screen-anim" style="display:flex;flex-direction:column;height:100%">
+
+    <!-- Area scrollabile principale -->
+    <div class="screen" style="flex:1;min-height:0;overflow-y:auto">
+
+      <!-- ===== HERO COMPATTO ===== -->
+      <div style="position:relative;overflow:hidden;padding:6px 16px 18px" [style.background]="heroBg(h.accent)">
+        <!-- Intestazione dell'app: dentro l'hero, così il gradiente la copre. -->
+        <div style="position:relative;z-index:2">
+          <ff-app-header></ff-app-header>
+        </div>
+
+        <!-- Barra alta: indietro · ICONA DELL'ALLENAMENTO · segnaposto.
+             Il segnaposto ha la larghezza di un iconbtn (38px): senza, lo
+             space-between spingerebbe l'icona a destra invece di centrarla.
+             Qui non c'è cuore — un allenamento svolto non si mette tra i
+             preferiti, si ripete (vedi la CTA in basso). -->
+        <div class="appbar sd-top" style="position:relative;z-index:2">
+          <button class="iconbtn" (click)="back()" aria-label="Indietro">
+            <i class="ti ti-chevron-left" style="font-size:22px" aria-hidden="true"></i>
+          </button>
+
+          <div class="itile" [class]="TILE_CLASS[h.accent]"><i class="ti" [class]="h.icon" aria-hidden="true"></i></div>
+
+          <div style="width:38px" aria-hidden="true"></div>
+        </div>
+
+        <!-- Identità CENTRATA fra le frecce che scorrono lo storico: sfogli gli
+             allenamenti senza tornare alla lista. I pulsanti restano montati
+             anche da disabilitati, così il blocco centrale non si sposta sul
+             primo e sull'ultimo allenamento. -->
+        <div class="sd-bar">
+          <button class="iconbtn sd-nav" [disabled]="!prevWorkout()"
+            (click)="goWorkout(prevWorkout()!.id!)"
+            [attr.aria-label]="prevWorkout() ? 'Allenamento più recente: ' + prevWorkout()!.name : 'Nessun allenamento più recente'">
+            <i class="ti ti-chevron-left" style="font-size:20px" aria-hidden="true"></i>
+          </button>
+
+          <div class="sd-center">
+            <h1>{{ h.name }}</h1>
+            <div class="sd-focus">{{ when() }}</div>
+
+            <div class="sd-badges">
+              <!-- Il record è la notizia: se c'è, si dice subito -->
+              @if (h.prs) {
+                <span class="badge badge-amber">
+                  <i class="ti ti-trophy" style="font-size:11px" aria-hidden="true"></i>
+                  {{ h.prs === 1 ? 'Nuovo record' : h.prs + ' nuovi record' }}
+                </span>
+              }
+              <span class="badge badge-green"><i class="ti ti-circle-check-filled" style="font-size:11px" aria-hidden="true"></i>Completato</span>
+            </div>
+
+            <!-- Statistiche come riga, non come tre card: stesso linguaggio del
+                 dettaglio scheda, un terzo dello spazio. -->
+            <div class="sd-meta">
+              <span><i class="ti ti-clock" aria-hidden="true"></i>{{ h.durMin }} min</span>
+              <span><i class="ti ti-list-numbers" aria-hidden="true"></i>{{ h.ex }} esercizi</span>
+              @if (totalSets()) {
+                <span><i class="ti ti-stretching" aria-hidden="true"></i>{{ totalSets() }} serie</span>
+              }
+              @if (h.volKg) {
+                <span><i class="ti ti-barbell" aria-hidden="true"></i>{{ h.volKg }} kg</span>
+              }
+              @if (h.kcal) {
+                <span><i class="ti ti-flame" aria-hidden="true"></i>{{ h.kcal }} kcal</span>
+              }
+            </div>
+          </div>
+
+          <button class="iconbtn sd-nav" [disabled]="!nextWorkout()"
+            (click)="goWorkout(nextWorkout()!.id!)"
+            [attr.aria-label]="nextWorkout() ? 'Allenamento precedente: ' + nextWorkout()!.name : 'Nessun allenamento precedente'">
+            <i class="ti ti-chevron-right" style="font-size:20px" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- padding-bottom: lascia spazio alla CTA sticky + bottom nav -->
+      <div style="padding:0 16px 210px">
+
+        <!-- ===== LISTA ESERCIZI (Upper / Lower Body) — accordion read-only =====
+             Nessun header "Cosa hai fatto": le intestazioni Upper/Lower dicono
+             già dove sei, come nel dettaglio scheda. -->
+        @if (h.exercises?.length) {
+          <div style="margin-top:18px">
+            @for (g of groupEx(h.exercises!); track g.id) {
+              <div class="ex-section-head">
+                <i class="ti" [class]="g.icon" aria-hidden="true"></i>
+                <span class="lbl">{{ g.label }}</span>
+                <span class="cnt">· {{ g.items.length }}</span>
+              </div>
+              <div class="col gap10">
+                @for (e of g.items; track e.name) {
+                  <!-- Card + pannello = un blocco unico. Da aperto, il contenitore
+                       prende l'identità del gruppo: rail colorato continuo + glow. -->
+                  <div class="ex-acc"
+                    [style.borderColor]="openEx() === e.name ? (metaFor(e.name)?.color ?? 'var(--hairline)') : 'var(--hairline)'"
+                    [style.borderLeftWidth.px]="openEx() === e.name ? 5 : 1.5"
+                    [style.boxShadow]="openEx() === e.name ? '0 12px 30px -14px color-mix(in srgb, ' + (metaFor(e.name)?.color ?? 'var(--ink-3)') + ' 55%, transparent)' : 'none'">
+
+                    <!-- Riga esercizio cliccabile: apre/chiude il pannello -->
+                    <div (click)="toggleEx(e.name)" style="cursor:pointer">
+                      <ff-exercise-card [name]="e.name" [index]="$index" [active]="openEx() === e.name"
+                        [sets]="e.sets" [reps]="e.reps" [kg]="e.topKg">
+                        @if (e.pr) {
+                          <span class="badge badge-amber"><i class="ti ti-trophy" style="font-size:11px" aria-hidden="true"></i>Record</span>
+                        }
+                        <i class="ti ti-chevron-down ex-acc-chev" [class.open]="openEx() === e.name"
+                          style="font-size:18px;color:var(--ink-3);margin-left:2px" aria-hidden="true"></i>
+                      </ff-exercise-card>
+                    </div>
+
+                    <!-- Pannello espanso: GIF + serie/reps/kg/record -->
+                    @if (openEx() === e.name) {
+                      <!-- La linea al 45% come nel dettaglio scheda: per CORE —
+                           neutro di proposito — è l'UNICO separatore fra card e
+                           pannello, quindi è tarata su quel caso peggiore. -->
+                      <div class="ex-acc-panel"
+                        [style.borderTopColor]="'color-mix(in srgb, ' + (metaFor(e.name)?.color ?? 'var(--ink-3)') + ' 45%, transparent)'">
+
+                        <div class="ex-acc-row">
+                          @if (gifUrl(e.name); as gif) {
+                            <div class="ex-acc-gif">
+                              <img [src]="gif" [alt]="e.name" loading="lazy" (error)="onGifError(e.name)" />
+                            </div>
+                          }
+                          <div class="ex-acc-stats">
+                            <div class="ex-stat"><span class="v">{{ e.sets }}</span><span class="k">serie</span></div>
+                            <div class="ex-stat"><span class="v">{{ e.reps }}</span><span class="k">reps</span></div>
+                            <div class="ex-stat">
+                              <span class="v">{{ e.topKg > 0 ? e.topKg : 'BW' }}</span>
+                              <span class="k">{{ e.topKg > 0 ? 'kg' : 'corpo' }}</span>
+                            </div>
+                            <!-- Al posto del "recupero" del dettaglio scheda: lo
+                                 storico non lo registra, il record sì. -->
+                            <div class="ex-stat">
+                              <span class="v" [style.color]="e.pr ? 'var(--amber)' : null">{{ e.pr ? 'Sì' : 'No' }}</span>
+                              <span class="k">record</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Note (placeholder per funzionalità futura) -->
+                        <div class="ex-acc-note">
+                          <i class="ti ti-note" style="font-size:14px" aria-hidden="true"></i>
+                          <span>Nessuna nota</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+              @if (!$last) { <div class="ex-section-div"></div> }
+            }
+          </div>
+        } @else {
+          <!-- Voci di storico più vecchie del dettaglio per esercizio -->
+          <div class="wd-none" style="margin-top:18px">
+            <i class="ti ti-file-unknown" aria-hidden="true"></i>
+            <span>Per questo allenamento non abbiamo il dettaglio degli esercizi.</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ===== CTA STICKY (come "Inizia Allenamento" nel dettaglio scheda) ===== -->
+    @if (scheda()) {
+      <div class="wd-cta">
+        <button class="btn btn-primary btn-block btn-lg" (click)="repeat()">
+          <i class="ti ti-rotate-clockwise" style="font-size:18px" aria-hidden="true"></i>
+          Rifai questo allenamento
+        </button>
+      </div>
+    }
+  </div>
+}

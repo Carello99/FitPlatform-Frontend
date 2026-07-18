@@ -22,6 +22,8 @@ import { ToastService } from '../../core/services/toast.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { WorkoutStore } from '../../core/services/workout-store.service';
 import { GamificationService } from '../../core/gamification/gamification.service';
+import { AppHeaderComponent } from '../../layout/app-header/app-header.component';
+import { TrainerService } from '../../core/services/trainer.service';
 
 // Interfaccia locale per le voci del menu impostazioni
 interface Setting {
@@ -46,7 +48,7 @@ interface Setting {
   selector: 'ff-profile',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [], // Nessun componente figlio personalizzato
+  imports: [AppHeaderComponent],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent {
@@ -54,8 +56,23 @@ export class ProfileComponent {
   readonly gami = inject(GamificationService);  // Progressione reale (livello/XP/badge)
   readonly toast = inject(ToastService);        // "readonly" ma non "private" — usato nel template
   readonly theme = inject(ThemeService);        // "readonly" ma non "private" — usato nel template
+  readonly trainer = inject(TrainerService);    // Per il toggle demo "Ho un coach"
   private readonly router = inject(Router);     // Privato — usato solo nel TS, non nel template
   readonly TILE_CLASS = TILE_CLASS;
+
+  /** Toggle demo: simula presenza/assenza del coach (l'hub Coach reindirizza al marketplace se assente). */
+  toggleCoach(): void {
+    const has = !this.trainer.hasCoach();
+    this.trainer.hasCoach.set(has);
+    this.toast.show(has ? 'Coach assegnato' : 'Nessun coach: apri la sezione Coach', has ? 'ti-user-check' : 'ti-user-off');
+  }
+
+  /** Toggle demo: simula presenza/assenza di schede (home → carosello vs empty-state guida). */
+  toggleSchede(): void {
+    const has = !this.w.hasSchede();
+    this.w.hasSchede.set(has);
+    this.toast.show(has ? 'Schede disponibili · carosello' : 'Nessuna scheda: crea la prima dalla Home', has ? 'ti-cards' : 'ti-cards-off');
+  }
 
   // Percentuale XP (0-1) per la progress bar del livello
   get xpPct(): number {

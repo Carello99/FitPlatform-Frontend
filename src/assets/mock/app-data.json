@@ -68,7 +68,9 @@
           "muscle": "Tricipiti",
           "icon": "ti-cable"
         }
-      ]
+      ],
+      "author": "coach",
+      "archived": false
     },
     {
       "id": "pull",
@@ -121,7 +123,9 @@
           "muscle": "Bicipiti",
           "icon": "ti-barbell"
         }
-      ]
+      ],
+      "author": "coach",
+      "archived": false
     },
     {
       "id": "legs",
@@ -174,7 +178,9 @@
           "muscle": "Polpacci",
           "icon": "ti-arrow-up"
         }
-      ]
+      ],
+      "author": "self",
+      "archived": false
     },
     {
       "id": "full",
@@ -219,7 +225,9 @@
           "muscle": "Core",
           "icon": "ti-timeline"
         }
-      ]
+      ],
+      "author": "coach",
+      "archived": false
     },
     {
       "id": "core",
@@ -264,7 +272,9 @@
           "muscle": "Mobilità",
           "icon": "ti-yoga"
         }
-      ]
+      ],
+      "author": "self",
+      "archived": true
     }
   ],
   "week": [
@@ -440,49 +450,503 @@
   ],
   "history": [
     {
+      "id": "w1",
       "name": "Push Power",
-      "date": "Oggi · 07:40",
-      "dur": "52 min",
-      "vol": "4 280 kg",
+      "dateIso": "2026-07-15",
+      "time": "07:40",
+      "durMin": 52,
+      "volKg": 4280,
       "ex": 6,
+      "kcal": 420,
+      "prs": 1,
       "accent": "amber",
-      "icon": "ti-barbell"
+      "icon": "ti-barbell",
+      "exercises": [
+        {
+          "name": "Panca piana bilanciere",
+          "sets": 4,
+          "reps": 8,
+          "topKg": 60,
+          "pr": true
+        },
+        {
+          "name": "Spinte manubri inclinata",
+          "sets": 3,
+          "reps": 10,
+          "topKg": 24
+        },
+        {
+          "name": "Lento avanti manubri",
+          "sets": 4,
+          "reps": 8,
+          "topKg": 20
+        },
+        {
+          "name": "Alzate laterali",
+          "sets": 3,
+          "reps": 12,
+          "topKg": 8
+        },
+        {
+          "name": "French press",
+          "sets": 3,
+          "reps": 10,
+          "topKg": 23
+        },
+        {
+          "name": "Push-down ai cavi",
+          "sets": 3,
+          "reps": 12,
+          "topKg": 35
+        }
+      ]
     },
     {
-      "name": "Leg Builder",
-      "date": "Ieri · 18:20",
-      "dur": "61 min",
-      "vol": "6 150 kg",
-      "ex": 5,
-      "accent": "violet",
-      "icon": "ti-run"
-    },
-    {
-      "name": "Pull Day",
-      "date": "2 giorni fa · 07:55",
-      "dur": "47 min",
-      "vol": "3 920 kg",
-      "ex": 5,
-      "accent": "cyan",
-      "icon": "ti-stretching-2"
-    },
-    {
-      "name": "Full Body Express",
-      "date": "4 giorni fa · 12:10",
-      "dur": "34 min",
-      "vol": "2 110 kg",
+      "id": "w2",
+      "name": "Core & Abs",
+      "dateIso": "2026-07-14",
+      "time": "08:00",
+      "durMin": 33,
+      "volKg": 1850,
       "ex": 4,
-      "accent": "green",
-      "icon": "ti-bolt"
+      "kcal": 250,
+      "accent": "rose",
+      "icon": "ti-activity",
+      "exercises": [
+        {
+          "name": "Plank",
+          "sets": 3,
+          "reps": 45,
+          "topKg": 0
+        },
+        {
+          "name": "Crunch",
+          "sets": 3,
+          "reps": 20,
+          "topKg": 0
+        },
+        {
+          "name": "Russian twist",
+          "sets": 3,
+          "reps": 20,
+          "topKg": 8
+        },
+        {
+          "name": "Leg raise",
+          "sets": 3,
+          "reps": 12,
+          "topKg": 0
+        }
+      ]
     },
     {
+      "id": "w3",
+      "name": "Leg Builder",
+      "dateIso": "2026-07-13",
+      "time": "18:20",
+      "durMin": 61,
+      "volKg": 6150,
+      "ex": 5,
+      "kcal": 540,
+      "prs": 2,
+      "accent": "violet",
+      "icon": "ti-run",
+      "exercises": [
+        {
+          "name": "Squat bilanciere",
+          "sets": 5,
+          "reps": 5,
+          "topKg": 78
+        },
+        {
+          "name": "Pressa 45°",
+          "sets": 4,
+          "reps": 10,
+          "topKg": 120,
+          "pr": true
+        },
+        {
+          "name": "Stacco rumeno",
+          "sets": 4,
+          "reps": 8,
+          "topKg": 75
+        },
+        {
+          "name": "Affondi camminata",
+          "sets": 3,
+          "reps": 12,
+          "topKg": 14
+        },
+        {
+          "name": "Calf raise",
+          "sets": 4,
+          "reps": 15,
+          "topKg": 95,
+          "pr": true
+        }
+      ]
+    },
+    {
+      "id": "w4",
+      "name": "Pull Day",
+      "dateIso": "2026-07-11",
+      "time": "08:05",
+      "durMin": 47,
+      "volKg": 3920,
+      "ex": 5,
+      "kcal": 380,
+      "accent": "cyan",
+      "icon": "ti-stretching-2",
+      "exercises": [
+        {
+          "name": "Trazioni alla sbarra",
+          "sets": 4,
+          "reps": 6,
+          "topKg": 0
+        },
+        {
+          "name": "Rematore bilanciere",
+          "sets": 4,
+          "reps": 8,
+          "topKg": 50
+        },
+        {
+          "name": "Lat machine presa larga",
+          "sets": 3,
+          "reps": 10,
+          "topKg": 43
+        },
+        {
+          "name": "Curl bilanciere",
+          "sets": 3,
+          "reps": 10,
+          "topKg": 23
+        },
+        {
+          "name": "Curl manubri alternato",
+          "sets": 3,
+          "reps": 12,
+          "topKg": 14
+        }
+      ]
+    },
+    {
+      "id": "w5",
+      "name": "Core & Abs",
+      "dateIso": "2026-07-10",
+      "time": "19:00",
+      "durMin": 32,
+      "volKg": 1800,
+      "ex": 4,
+      "kcal": 240,
+      "accent": "rose",
+      "icon": "ti-activity",
+      "exercises": [
+        {
+          "name": "Plank",
+          "sets": 3,
+          "reps": 45,
+          "topKg": 0
+        },
+        {
+          "name": "Crunch",
+          "sets": 3,
+          "reps": 20,
+          "topKg": 0
+        },
+        {
+          "name": "Russian twist",
+          "sets": 3,
+          "reps": 20,
+          "topKg": 8
+        },
+        {
+          "name": "Leg raise",
+          "sets": 3,
+          "reps": 12,
+          "topKg": 0
+        }
+      ]
+    },
+    {
+      "id": "w6",
       "name": "Push Power",
-      "date": "5 giorni fa · 07:35",
-      "dur": "54 min",
-      "vol": "4 180 kg",
+      "dateIso": "2026-07-09",
+      "time": "07:30",
+      "durMin": 50,
+      "volKg": 4180,
       "ex": 6,
+      "kcal": 410,
       "accent": "amber",
-      "icon": "ti-barbell"
+      "icon": "ti-barbell",
+      "exercises": [
+        {
+          "name": "Panca piana bilanciere",
+          "sets": 4,
+          "reps": 8,
+          "topKg": 62
+        },
+        {
+          "name": "Spinte manubri inclinata",
+          "sets": 3,
+          "reps": 10,
+          "topKg": 22
+        },
+        {
+          "name": "Lento avanti manubri",
+          "sets": 4,
+          "reps": 8,
+          "topKg": 18
+        },
+        {
+          "name": "Alzate laterali",
+          "sets": 3,
+          "reps": 12,
+          "topKg": 8
+        },
+        {
+          "name": "French press",
+          "sets": 3,
+          "reps": 10,
+          "topKg": 30
+        },
+        {
+          "name": "Push-down ai cavi",
+          "sets": 3,
+          "reps": 12,
+          "topKg": 32
+        }
+      ]
+    },
+    {
+      "id": "w7",
+      "name": "Full Body",
+      "dateIso": "2026-07-08",
+      "time": "07:50",
+      "durMin": 58,
+      "volKg": 5100,
+      "ex": 5,
+      "kcal": 500,
+      "prs": 1,
+      "accent": "green",
+      "icon": "ti-bolt",
+      "exercises": [
+        {
+          "name": "Goblet squat",
+          "sets": 4,
+          "reps": 10,
+          "topKg": 20,
+          "pr": true
+        },
+        {
+          "name": "Push-up",
+          "sets": 3,
+          "reps": 12,
+          "topKg": 0
+        },
+        {
+          "name": "Rematore manubrio",
+          "sets": 3,
+          "reps": 10,
+          "topKg": 18
+        },
+        {
+          "name": "Plank",
+          "sets": 2,
+          "reps": 45,
+          "topKg": 0
+        },
+        {
+          "name": "Hollow hold",
+          "sets": 2,
+          "reps": 30,
+          "topKg": 0
+        }
+      ]
+    },
+    {
+      "id": "w8",
+      "name": "Push Power",
+      "dateIso": "2026-07-06",
+      "time": "18:10",
+      "durMin": 50,
+      "volKg": 4180,
+      "ex": 6,
+      "kcal": 410,
+      "accent": "amber",
+      "icon": "ti-barbell",
+      "exercises": [
+        {
+          "name": "Panca piana bilanciere",
+          "sets": 4,
+          "reps": 8,
+          "topKg": 58
+        },
+        {
+          "name": "Spinte manubri inclinata",
+          "sets": 3,
+          "reps": 10,
+          "topKg": 29
+        },
+        {
+          "name": "Lento avanti manubri",
+          "sets": 4,
+          "reps": 8,
+          "topKg": 16
+        },
+        {
+          "name": "Alzate laterali",
+          "sets": 3,
+          "reps": 12,
+          "topKg": 10
+        },
+        {
+          "name": "French press",
+          "sets": 3,
+          "reps": 10,
+          "topKg": 30
+        },
+        {
+          "name": "Push-down ai cavi",
+          "sets": 3,
+          "reps": 12,
+          "topKg": 28
+        }
+      ]
+    },
+    {
+      "id": "w9",
+      "name": "Leg Builder",
+      "dateIso": "2026-07-04",
+      "time": "09:30",
+      "durMin": 63,
+      "volKg": 6320,
+      "ex": 5,
+      "kcal": 560,
+      "prs": 1,
+      "accent": "violet",
+      "icon": "ti-run",
+      "exercises": [
+        {
+          "name": "Squat bilanciere",
+          "sets": 5,
+          "reps": 5,
+          "topKg": 85
+        },
+        {
+          "name": "Pressa 45°",
+          "sets": 4,
+          "reps": 10,
+          "topKg": 125,
+          "pr": true
+        },
+        {
+          "name": "Stacco rumeno",
+          "sets": 4,
+          "reps": 8,
+          "topKg": 72
+        },
+        {
+          "name": "Affondi camminata",
+          "sets": 3,
+          "reps": 12,
+          "topKg": 14
+        },
+        {
+          "name": "Calf raise",
+          "sets": 4,
+          "reps": 15,
+          "topKg": 90
+        }
+      ]
+    },
+    {
+      "id": "w10",
+      "name": "Pull Day",
+      "dateIso": "2026-07-03",
+      "time": "08:00",
+      "durMin": 45,
+      "volKg": 3760,
+      "ex": 5,
+      "kcal": 360,
+      "accent": "cyan",
+      "icon": "ti-stretching-2",
+      "exercises": [
+        {
+          "name": "Trazioni alla sbarra",
+          "sets": 4,
+          "reps": 6,
+          "topKg": 0
+        },
+        {
+          "name": "Rematore bilanciere",
+          "sets": 4,
+          "reps": 8,
+          "topKg": 48
+        },
+        {
+          "name": "Lat machine presa larga",
+          "sets": 3,
+          "reps": 10,
+          "topKg": 50
+        },
+        {
+          "name": "Curl bilanciere",
+          "sets": 3,
+          "reps": 10,
+          "topKg": 25
+        },
+        {
+          "name": "Curl manubri alternato",
+          "sets": 3,
+          "reps": 12,
+          "topKg": 12
+        }
+      ]
+    },
+    {
+      "id": "w11",
+      "name": "Full Body",
+      "dateIso": "2026-07-01",
+      "time": "07:45",
+      "durMin": 55,
+      "volKg": 4980,
+      "ex": 5,
+      "kcal": 480,
+      "accent": "green",
+      "icon": "ti-bolt",
+      "exercises": [
+        {
+          "name": "Goblet squat",
+          "sets": 4,
+          "reps": 10,
+          "topKg": 20
+        },
+        {
+          "name": "Push-up",
+          "sets": 3,
+          "reps": 12,
+          "topKg": 0
+        },
+        {
+          "name": "Rematore manubrio",
+          "sets": 3,
+          "reps": 10,
+          "topKg": 18
+        },
+        {
+          "name": "Plank",
+          "sets": 2,
+          "reps": 45,
+          "topKg": 0
+        },
+        {
+          "name": "Hollow hold",
+          "sets": 2,
+          "reps": 30,
+          "topKg": 0
+        }
+      ]
     }
   ],
   "faq": [

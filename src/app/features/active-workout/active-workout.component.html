@@ -3,7 +3,7 @@
 <div class="screen-anim" style="display:flex;flex-direction:column;height:100%">
 
   <!-- ===== HEADER: nome scheda + cronometro + progress ===== -->
-  <div style="padding:4px 20px 14px;flex-shrink:0">
+  <div style="padding:4px 16px 14px;flex-shrink:0">
     <div class="appbar">
       <button class="iconbtn" (click)="confirmExit.set(true)" aria-label="Chiudi"><i class="ti ti-x" style="font-size:20px" aria-hidden="true"></i></button>
       <div class="grow" style="text-align:center">
@@ -22,7 +22,7 @@
   </div>
 
   <!-- ===== LISTA ESERCIZI ===== -->
-  <div class="screen" style="padding:4px 20px 150px">
+  <div class="screen" style="padding:4px 16px 150px">
     <div class="col gap12">
       @for (e of scheda.exercises; track $index; let ei = $index) {
         <div class="card ex-card"
@@ -121,7 +121,7 @@
   }
 
   <!-- ===== CTA TERMINA (nascosta durante il recupero) ===== -->
-  <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 20px 30px;background:linear-gradient(to top, var(--bg-app) 62%, transparent);z-index:30;transition:opacity 0.25s"
+  <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 16px 30px;background:linear-gradient(to top, var(--bg-app) 62%, transparent);z-index:30;transition:opacity 0.25s"
     [style.opacity]="rest() ? 0 : 1" [style.pointer-events]="rest() ? 'none' : 'auto'">
     <button class="btn btn-block btn-lg" [class]="pct() >= 1 ? 'btn-success' : 'btn-primary'" (click)="confirmExit.set(true)">
       <i class="ti ti-flag-filled" style="font-size:17px" aria-hidden="true"></i> {{ pct() >= 1 ? 'Completa allenamento' : 'Termina allenamento' }}

@@ -12,33 +12,36 @@
         [style.transition]="cardTransition(i)"
         style="position:absolute;left:50%;top:6px;width:164px;margin-left:-82px;transform-style:preserve-3d;cursor:pointer">
 
-        <!-- cover face -->
+        <!-- cover face (originale) + autore in alto a sinistra -->
         <div [style.background]="coverBg(s)" [style.boxShadow]="coverShadow(s, isFront(i))"
           style="width:164px;height:164px;border-radius:20px;position:relative;overflow:hidden">
+          <!-- watermark icona (originale) -->
           <div style="position:absolute;right:-18px;bottom:-18px;opacity:0.18;color:#000">
             <i class="ti" [class]="s.icon" style="font-size:120px" aria-hidden="true"></i>
           </div>
-          <div style="position:absolute;top:12px;left:12px">
+          <!-- alto-sx: chi ha creato la scheda (coach = star, tu = utente) -->
+          <div style="position:absolute;top:12px;left:12px" [title]="s.author === 'coach' ? 'Creata dal coach' : 'Creata da te'">
             <div style="width:40px;height:40px;border-radius:12px;background:rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center">
-              <i class="ti" [class]="s.icon" style="font-size:22px;color:#fff" aria-hidden="true"></i>
+              @if (s.author === 'coach') {
+                <i class="ic-mask ic-gym" style="font-size:22px;color:var(--on-accent)" aria-hidden="true"></i>
+              } @else {
+                <i class="ti ti-user" style="font-size:22px;color:var(--on-accent)" aria-hidden="true"></i>
+              }
             </div>
           </div>
-          @if (s.id === activeId) {
-            <div style="position:absolute;top:14px;right:14px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.32);display:flex;align-items:center;justify-content:center">
-              <i class="ti ti-bolt-filled" style="font-size:13px;color:#fff" aria-hidden="true"></i>
-            </div>
-          }
-
           @if (!isFront(i)) {
             <div style="position:absolute;inset:0;background:rgba(8,8,14,0.42)"></div>
           }
         </div>
 
-        <!-- reflection -->
-        <div [style.opacity]="isFront(i) ? 0.55 : 0.32"
-          style="height:62px;margin-top:2px;overflow:hidden;transform:scaleY(-1);-webkit-mask-image:linear-gradient(to top, rgba(0,0,0,0.45), transparent 78%);mask-image:linear-gradient(to top, rgba(0,0,0,0.45), transparent 78%)">
+        <!-- reflection: la mask sfuma proprio la CUCITURA (lato vicino alla carta)
+             così non si vede più la riga netta; il riflesso resta sotto, tenue. -->
+        <div [style.opacity]="isFront(i) ? 0.5 : 0.3"
+          style="height:58px;margin-top:3px;overflow:hidden;transform:scaleY(-1);-webkit-mask-image:linear-gradient(to top, rgba(0,0,0,0.55), transparent 82%);mask-image:linear-gradient(to top, rgba(0,0,0,0.55), transparent 82%)">
+          <!-- margin-top:-106 = 164-58 → nella finestra si vede il FONDO stondato
+               della carta, così il riflesso ha gli angoli arrotondati come lei -->
           <div [style.background]="coverBg(s)"
-            style="width:164px;height:164px;border-radius:20px;position:relative;overflow:hidden">
+            style="width:164px;height:164px;border-radius:20px;margin-top:-106px;position:relative;overflow:hidden">
           </div>
         </div>
       </div>

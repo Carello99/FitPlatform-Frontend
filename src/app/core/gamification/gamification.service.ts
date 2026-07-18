@@ -35,8 +35,10 @@ import { ACHIEVEMENTS, AchievementContext, satisfiedAchievementIds } from './ach
 import { LevelInfo, levelForXp, levelInfoForXp } from './level-curve';
 import { OnboardingInput, PositioningResult, positioningFor } from './positioning';
 import { weeklyConsistencyBonus, workoutXp } from './xp';
+// Le chiavi di persistenza sono dichiarate nel registro centrale, mai inline.
+import { STORAGE_GAMIFICATION as STORAGE_KEY } from '../constants/storage.constants';
 
-const STORAGE_KEY = 'ff-gamification-v1';
+
 /** Frequenza settimanale di default se lo store non ne fornisce una. */
 const DEFAULT_WEEK_GOAL = 3;
 /** Giorni di inattività oltre i quali un rientro è un "comeback". */
@@ -91,8 +93,12 @@ export interface FinishedWorkout {
   setsDone: number;
   setsTotal: number;
   volume: number;
-  /** Per esercizio: carico massimo sollevato in una serie completata (0 = corpo libero). */
-  exercises: { name: string; topKg: number }[];
+  /**
+   * Cosa è stato fatto, esercizio per esercizio: serie completate, ripetizioni
+   * della serie più pesante e carico massimo (0 = corpo libero / saltato).
+   * `topKg` è il dato su cui si calcolano i record.
+   */
+  exercises: { name: string; sets: number; reps: number; topKg: number }[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -258,12 +264,17 @@ export class GamificationService {
     };
 
     // --- Esercizi migliorati (record battuto) + aggiornamento record ---
+    // `prExercises` tiene traccia di QUALI esercizi hanno segnato il record, non
+    // solo di quanti: è ciò che permette allo Storico di mostrare la coppa sulla
+    // sessione e di indicare l'esercizio esatto nel riepilogo.
     let improved = 0;
+    const prExercises = new Set<string>();
     for (const ex of w.exercises) {
       if (ex.topKg <= 0) continue; // corpo libero: niente record di carico
       const best = next.records[ex.name] ?? 0;
       if (ex.topKg > best) {
         improved++;
+        prExercises.add(ex.name);
         next.records[ex.name] = ex.topKg;
       }
     }
@@ -333,7 +344,7 @@ export class GamificationService {
     // --- Commit stato + allineamento Store ---
     this.state.set(next);
     this.persist();
-    this.pushHistory(w, now);
+    this.pushHistory(w, now, prExercises);
     this.syncStore();
 
     // --- Riepilogo per la schermata Summary ---
@@ -396,18 +407,40 @@ export class GamificationService {
     }));
   }
 
-  /** Inserisce nello storico l'allenamento appena concluso. */
-  private pushHistory(w: FinishedWorkout, now: Date): void {
+  /**
+   * Inserisce nello storico l'allenamento appena concluso.
+   *
+   * `id` e `dateIso` NON sono opzionali nei fatti, anche se un tempo mancavano:
+   * senza dateIso l'allenamento non compare nel calendario dell'Agenda (che
+   * indicizza per quel campo) e senza id non è deep-linkabile dallo Storico.
+   */
+  private pushHistory(w: FinishedWorkout, now: Date, prExercises: Set<string>): void {
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
+
+    // Solo gli esercizi davvero svolti: uno saltato non ha una storia da raccontare.
+    const done = w.exercises.filter((e) => e.sets > 0);
+
     const item: HistoryItem = {
+      id: 'wk-' + now.getTime(),
       name: w.schedaName,
-      date: `Oggi · ${hh}:${mm}`,
-      dur: `${Math.round(w.seconds / 60)} min`,
-      vol: `${w.volume.toLocaleString('it-IT')} kg`,
+      dateIso: this.dayKey(now),
+      time: `${hh}:${mm}`,
+      durMin: Math.round(w.seconds / 60),
+      volKg: w.volume,
       ex: w.exDone,
       accent: w.accent,
       icon: w.icon,
+      // `prs` mancava: la coppa dello Storico si vedeva solo sui dati mock,
+      // mai su un allenamento vero.
+      prs: prExercises.size || undefined,
+      exercises: done.map((e) => ({
+        name: e.name,
+        sets: e.sets,
+        reps: e.reps,
+        topKg: e.topKg,
+        pr: prExercises.has(e.name) || undefined,
+      })),
     };
     this.store.prependHistory(item);
   }
@@ -439,13 +472,23 @@ export class GamificationService {
   // ---------------------------------------------------------------------------
 
   private freshState(): GamificationState {
+    // DEMO: alcuni giorni allenati in questa settimana (lun, gio, ven) così il
+    // recap "La tua settimana" mostra i fuocherelli anche senza tracking reale.
+    const now = new Date();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    const demoWeekDays = [0, 3, 4].map((off) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + off);
+      return this.dayKey(d);
+    });
     return {
       totalXp: 0,
       totalWorkouts: 0,
       weeksStreak: 0,
       weekKey: this.weekKey(new Date()),
-      weekSessions: 0,
-      weekDays: [],
+      weekSessions: demoWeekDays.length,
+      weekDays: demoWeekDays,
       weekXp: 0,
       weekCompleted: false,
       dayKey: this.dayKey(new Date()),
@@ -472,7 +515,9 @@ export class GamificationService {
         ...parsed,
         records: parsed.records ?? {},
         unlocked: parsed.unlocked ?? [],
-        weekDays: parsed.weekDays ?? [],
+        // DEMO: se non ci sono giorni allenati registrati per questa settimana,
+        // usa il seed dimostrativo così il recap mostra comunque i fuocherelli.
+        weekDays: parsed.weekDays && parsed.weekDays.length ? parsed.weekDays : this.freshState().weekDays,
         onboarded: parsed.onboarded ?? true,
       };
     } catch {

@@ -371,11 +371,6 @@ export class ActiveWorkoutComponent implements OnInit, OnDestroy {
   }
 
   // ---- Riepilogo / uscita ----
-  /** Carico massimo sollevato in una serie COMPLETATA dell'esercizio (0 = corpo libero). */
-  private topKg(ei: number): number {
-    return (this.log()[ei] ?? []).filter((x) => x.done).reduce((m, x) => Math.max(m, x.kg), 0);
-  }
-
   /**
    * Costruisce il payload grezzo per il motore di gamification. Gli esercizi
    * saltati sono esclusi dal calcolo dei record (non hanno serie completate utili).
@@ -393,7 +388,23 @@ export class ActiveWorkoutComponent implements OnInit, OnDestroy {
       setsDone: this.doneSets(),
       setsTotal: this.totalSets(),
       volume: this.volume() || Math.round(this.doneSets() * 88),
-      exercises: s.exercises.map((e, i) => ({ name: e.name, topKg: this.skipped()[i] ? 0 : this.topKg(i) })),
+      // Cosa è stato fatto davvero, esercizio per esercizio: alimenta i record
+      // e il riepilogo consultabile dallo Storico. Un esercizio saltato esce con
+      // sets 0 e topKg 0, così non risulta svolto né segna record.
+      exercises: s.exercises.map((e, i) => {
+        const skipped = this.skipped()[i];
+        const done = skipped ? [] : (this.log()[i] ?? []).filter((x) => x.done);
+        const heaviest = done.reduce<{ kg: number; reps: number } | null>(
+          (best, x) => (!best || x.kg > best.kg ? { kg: x.kg, reps: x.reps } : best),
+          null,
+        );
+        return {
+          name: e.name,
+          sets: done.length,
+          reps: heaviest?.reps ?? 0,
+          topKg: heaviest?.kg ?? 0,
+        };
+      }),
     };
   }
 

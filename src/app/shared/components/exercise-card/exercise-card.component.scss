@@ -35,18 +35,23 @@
   min-width: 0;
 }
 
+/* Il quadratino col numero è TINTO col colore del gruppo, non con un neutro
+   fisso. Con --surface-3 si vedeva per differenza di TINTA (grigio su fondo
+   ciano/verde/…), non di luminosità — e spariva del tutto sul gruppo Core, il
+   cui --msoft È --surface-3: stessa tinta, stessa luminanza, contrasto 1.00.
+   Legandolo a --mcol stacca sempre, qualunque sia il gruppo. */
 .ex-num {
   width: 26px;
   height: 26px;
   border-radius: 8px;
   flex-shrink: 0;
-  background: var(--surface-3);
+  background: color-mix(in srgb, var(--mcol) 22%, transparent);
   color: var(--ink-2);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .ex-gif {
@@ -62,7 +67,7 @@
   font-weight: 800;
   letter-spacing: 0.2px;
   text-transform: uppercase;
-  color: #fff;
+  color: var(--on-accent);
   background: var(--mcol);
   padding: 3px 9px;
   border-radius: 99px;

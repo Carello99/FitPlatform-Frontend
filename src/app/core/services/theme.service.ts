@@ -35,12 +35,11 @@
 // effect: esegue una funzione ogni volta che uno dei signal letti al suo interno cambia
 // signal: crea un segnale reattivo
 import { Injectable, effect, signal } from '@angular/core';
+// Le chiavi di persistenza sono dichiarate nel registro centrale, mai inline.
+import { STORAGE_THEME as STORAGE_KEY } from '../constants/storage.constants';
 
 // Tipo TypeScript per i temi disponibili
 export type Theme = 'dark' | 'light';
-
-// Chiave usata per salvare/leggere il tema in localStorage
-const STORAGE_KEY = 'ff-theme';
 
 /**
  * Servizio che gestisce il tema dell'applicazione (dark/light).

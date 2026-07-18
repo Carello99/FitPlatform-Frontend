@@ -3,71 +3,72 @@
 <!-- screen-anim: classe CSS per l'animazione di entrata della schermata -->
 <div class="screen-pad screen-anim">
 
-  <!-- ===== HEADER: logo + streak + notifiche ===== -->
-  <div class="row between" style="padding:10px 0 2px">
-    <div class="row gap10">
-      <!-- Anello XP del livello utente (stesso componente usato in fondo alla pagina) -->
-      <!-- [value]="xpPct": percentuale 0-1 di avanzamento verso il livello successivo -->
-      <ff-ring [value]="xpPct" [size]="44" [stroke]="5" color="var(--amber)">
-        <!-- Contenuto proiettato dentro il ring via <ng-content> -->
-        <span style="font-size:13px;font-weight:900">{{ w.user.level }}</span>
-      </ff-ring>
-      <div>
-        <div style="font-size:15px;font-weight:800;letter-spacing:-0.3px">
-          Lv {{ w.user.level }} · {{ w.user.levelTitle }}
-        </div>
-        <div style="font-size:11px;color:var(--ink-3);font-weight:600">
-          {{ w.user.xp }} / {{ w.user.xpNext }} XP
+  <!-- ===== HEADER DI SEZIONE: brand + streak + avatar (condiviso) ===== -->
+  <ff-app-header></ff-app-header>
+
+  <!-- ===== HERO: info-chiave del giorno col gioco di font (bianco/arancione) ===== -->
+  <!-- Riga bianca (hi-1) + riga arancione (hi-2) = l'informazione più importante
+       all'apertura; riga grigia piccola = contesto secondario. -->
+  <section class="greet" style="margin-top:18px">
+    <h1 class="hi"><span class="hi-1">{{ hero().top }}</span><span class="hi-2">{{ hero().accent }}</span></h1>
+    <p>{{ hero().sub }}</p>
+  </section>
+
+  <!-- ===== AZIONI RAPIDE: navigazione secondaria, quieta (cerchi line-art) ===== -->
+  <!-- width:calc((100vw - 40px)/4.75): il 5° sbuca a ~75% → suggerisce lo scroll. -->
+  <div class="scroll-x qa-row" style="margin-top:22px">
+    <button class="qa-item" (click)="go('new-scheda')">
+      <span class="qa-ic" style="border-color:var(--amber);color:var(--amber)"><i class="ti ti-plus" aria-hidden="true"></i></span>
+      <span class="qa-lb">Nuova</span>
+    </button>
+    <button class="qa-item" (click)="go('progress')">
+      <span class="qa-ic" style="border-color:var(--cyan);color:var(--cyan)"><i class="ti ti-chart-line" aria-hidden="true"></i></span>
+      <span class="qa-lb">Progressi</span>
+    </button>
+    <button class="qa-item" (click)="goStorico()">
+      <span class="qa-ic" style="border-color:var(--violet);color:var(--violet)"><i class="ti ti-history" aria-hidden="true"></i></span>
+      <span class="qa-lb">Storico</span>
+    </button>
+    <button class="qa-item" (click)="go('schede')">
+      <span class="qa-ic" style="border-color:var(--green);color:var(--green)"><i class="ti ti-stack-2" aria-hidden="true"></i></span>
+      <span class="qa-lb">Schede</span>
+    </button>
+    <button class="qa-item" (click)="go('help')">
+      <span class="qa-ic" style="border-color:var(--rose);color:var(--rose)"><i class="ti ti-lifebuoy" aria-hidden="true"></i></span>
+      <span class="qa-lb">Aiuto</span>
+    </button>
+  </div>
+
+  <!-- linea bianca leggera: divide le scelte rapide dal carosello -->
+  <div class="qa-sep"></div>
+
+  <!-- ===== COACHING: invito a collegare un coach (solo senza PT) ===== -->
+  @if (!trainer.hasCoach()) {
+    <div class="coach-eyebrow">Coaching</div>
+    <div class="coach-card">
+      <div class="cc-top">
+        <span class="cc-thumb"><i class="ic-mask ic-gym" aria-hidden="true"></i></span>
+        <div class="cc-head">
+          <div class="cc-title">Allenati con un coach</div>
+          <div class="cc-sub">Ricevi schede su misura, feedback e un programma pensato per te.</div>
         </div>
       </div>
+      <div class="cc-avail">
+        <span class="cc-avatars">
+          @for (c of coachPreview; track c.id) {
+            <span class="cc-av"><img [src]="c.photoUrl" [alt]="c.name" /></span>
+          }
+        </span>
+        <span class="cc-count">128 coach verificati disponibili</span>
+      </div>
+      <button class="cc-cta press" (click)="go('coach-marketplace')"><i class="ti ti-link" aria-hidden="true"></i>Collega un coach</button>
+      <button class="cc-how press" (click)="toast.show('Come funziona il coaching', 'ti-info-circle')">Come funziona<i class="ti ti-chevron-right" aria-hidden="true"></i></button>
     </div>
-    <div class="row gap8">
-      <!-- Chip streak: {{ w.user.streak }} = interpolazione — inserisce il valore del signal nel testo -->
-      <button class="chip" (click)="go('profile')" style="padding:8px 12px">
-        <i class="ti ti-flame-filled" style="font-size:15px;color:var(--amber)" aria-hidden="true"></i>
-        <span style="color:var(--ink)">{{ w.user.streak }}</span>
-        <span style="color:var(--ink-3);font-weight:600">sett.</span>
-      </button>
-      <!-- Pulsante notifiche (naviga al profilo) -->
-      <button (click)="go('profile')"
-        style="width:42px;height:42px;border-radius:13px;background:var(--surface-2);border:1px solid var(--hairline);display:flex;align-items:center;justify-content:center;position:relative">
-        <i class="ti ti-bell" style="font-size:20px;color:var(--ink)" aria-hidden="true"></i>
-        <!-- Pallino di notifica -->
-        <span style="position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 2px var(--surface-2)"></span>
-      </button>
-    </div>
-  </div>
+  }
 
-  <!-- ===== AZIONI RAPIDE: griglia 4 pulsanti ===== -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:22px">
-    <!-- (click)="go('new-scheda')": event binding — chiama go() al click -->
-    <button (click)="go('new-scheda')" style="display:flex;flex-direction:column;align-items:center;gap:8px">
-      <div class="itile t-green" style="width:58px;height:58px;border-radius:18px"><i class="ti ti-plus" style="font-size:25px" aria-hidden="true"></i></div>
-      <span style="font-size:11px;font-weight:700;color:var(--ink-2);text-align:center;line-height:1.15">Nuova Scheda</span>
-    </button>
-    <button (click)="go('progress')" style="display:flex;flex-direction:column;align-items:center;gap:8px">
-      <div class="itile t-cyan" style="width:58px;height:58px;border-radius:18px"><i class="ti ti-chart-line" style="font-size:25px" aria-hidden="true"></i></div>
-      <span style="font-size:11px;font-weight:700;color:var(--ink-2);text-align:center;line-height:1.15">Progressi</span>
-    </button>
-    <button (click)="go('history')" style="display:flex;flex-direction:column;align-items:center;gap:8px">
-      <div class="itile t-violet" style="width:58px;height:58px;border-radius:18px"><i class="ti ti-history" style="font-size:25px" aria-hidden="true"></i></div>
-      <span style="font-size:11px;font-weight:700;color:var(--ink-2);text-align:center;line-height:1.15">Storico</span>
-    </button>
-    <button (click)="go('help')" style="display:flex;flex-direction:column;align-items:center;gap:8px">
-      <div class="itile t-amber" style="width:58px;height:58px;border-radius:18px"><i class="ti ti-lifebuoy" style="font-size:25px" aria-hidden="true"></i></div>
-      <span style="font-size:11px;font-weight:700;color:var(--ink-2);text-align:center;line-height:1.15">Help Desk</span>
-    </button>
-  </div>
+  <!-- ===== SCHEDE: carosello ===== -->
+  <div class="coach-eyebrow">Le tue schede</div>
 
-  <!-- ===== TITOLO SEZIONE SCHEDE ===== -->
-  <div style="margin-top:26px;padding-top:18px;border-top:1px solid var(--hairline)">
-    <div class="row between" style="align-items:baseline">
-      <h2 style="font-size:17px;font-weight:800;letter-spacing:-0.3px">Le tue schede</h2>
-      <button class="section-link" (click)="go('schede')">Tutte<i class="ti ti-chevron-right" style="font-size:15px" aria-hidden="true"></i></button>
-    </div>
-  </div>
-
-  <!-- ===== CONTENUTO PRINCIPALE ===== -->
   <!-- stagger: classe CSS che anima i figli in sequenza -->
   <div class="stagger" style="margin-top:10px">
 
@@ -76,51 +77,61 @@
     <!-- [activeId]="state.activeSchedaId()": property binding con un signal -->
     <!-- (open)="state.openScheda($event)": event binding — $event è il valore emesso dall'@Output -->
     <!-- (start)="startTarget.set($event)": aggiorna il signal locale con la scheda selezionata -->
-    <ff-coverflow
-      [schede]="carousel()"
-      [activeId]="state.activeSchedaId()"
-      (open)="state.openScheda($event)"
-      (start)="startTarget.set($event)">
-    </ff-coverflow>
-  <div style="margin-top:26px;padding-top:18px;border-top:1px solid var(--hairline)"></div>
-    <!-- ===== RECAP SETTIMANALE ===== -->
-    <div class="section-hdr">
-      <h2>Recap settimanale</h2>
-      <button class="section-link" (click)="go('progress')">Progressi<i class="ti ti-chevron-right" style="font-size:15px" aria-hidden="true"></i></button>
-    </div>
-    <div class="card card-pad">
-      <div class="row between" style="display:flex;gap:6px">
-        <!-- @for: blocco di ripetizione Angular (sostituisce *ngFor nelle versioni moderne) -->
-        <!-- w.week è un array di WeekDay; track $index usa l'indice come chiave di tracking -->
-        @for (day of w.week; track $index) {
-          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1">
-            <!-- [style.background]="...": style binding — imposta la proprietà CSS background dinamicamente -->
-            <!-- [style.color]="...": style binding per il colore del testo -->
-            <!-- [style.border]="...": style binding per il bordo -->
-            <div
-              [style.background]="day.state === 'done' ? 'var(--green)' : day.state === 'rest' ? 'var(--surface-3)' : 'transparent'"
-              [style.color]="day.state === 'done' ? '#06180E' : day.state === 'today' ? 'var(--amber)' : 'var(--ink-4)'"
-              [style.border]="day.state === 'today' ? '2px solid var(--amber)' : 'none'"
-              style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800">
-              <!-- @if/@else if/@else: blocco condizionale Angular (sostituisce *ngIf) -->
-              @if (day.state === 'done') { <i class="ti ti-check" style="font-size:17px" aria-hidden="true"></i> }
-              @else if (day.state === 'today') { <i class="ti ti-target" style="font-size:17px" aria-hidden="true"></i> }
-              @else { {{ day.d }} }
-            </div>
-            <span style="font-size:11px;font-weight:700;letter-spacing:0.3px"
-              [style.color]="day.state === 'done' ? 'var(--green)' : day.state === 'today' ? 'var(--amber)' : 'var(--ink-4)'">{{ day.d }}</span>
-          </div>
-        }
+    @if (carousel().length) {
+      <ff-coverflow
+        [schede]="carousel()"
+        [activeId]="state.activeSchedaId()"
+        (open)="state.openScheda($event)"
+        (start)="startTarget.set($event)">
+      </ff-coverflow>
+    } @else {
+      <!-- Empty-state: nessuna scheda → guida alla creazione della prima -->
+      <div class="sc-empty">
+        <img class="sc-ic" src="assets/icons/box.png" alt="" aria-hidden="true" />
+        <div class="sc-t">Crea la tua prima scheda</div>
+        <div class="sc-s">Costruisci un allenamento su misura. Comparirà qui nel carosello: da lì un tap sulla scheda e l'allenamento parte.</div>
+        <button class="sc-cta press" (click)="go('new-scheda')"><i class="ti ti-plus" aria-hidden="true"></i>Crea scheda</button>
       </div>
-      <!-- [style.width.%]="weekPct": imposta width come percentuale — Angular gestisce l'unità CSS -->
-      <div class="track" style="margin-top:18px;height:8px"><div class="fill green" [style.width.%]="weekPct"></div></div>
-      <div class="row between" style="margin-top:12px">
-        <span style="font-size:13.5px;color:var(--ink-2);font-weight:600">{{ w.weekDone }} di {{ w.weekGoal }} allenamenti</span>
-        <span style="font-size:15px;font-weight:800;color:var(--green)">{{ weekPct }}%</span>
-      </div>
+    }
+
+  <!-- ===== CARD ALLENAMENTO LIBERO (card-bottone) ===== -->
+  <button class="card free2 press" (click)="freeWorkout()">
+    <span class="f2-ic"><i class="ti ti-bolt-filled" aria-hidden="true"></i></span>
+    <span class="f2-txt">
+      <span class="f2-t">Allenati libero</span>
+      <span class="f2-s">Senza scheda, come vuoi tu</span>
+    </span>
+    <span class="f2-btn"><i class="ti ti-plus" aria-hidden="true"></i>Crea</span>
+  </button>
+
+  <!-- ===== BLOCCO SETTIMANA: calendario mensile (sotto il carosello) ===== -->
+  <button class="wk-cal press" (click)="go('agenda')" aria-label="Apri il calendario mensile">
+    <div class="wk-cal-hd">
+      <span class="wk-cal-t"><i class="ti ti-calendar-week" aria-hidden="true"></i>La tua settimana</span>
+      <span class="wk-cal-go">Calendario<i class="ti ti-chevron-right" aria-hidden="true"></i></span>
     </div>
-  <div style="margin-top:26px;padding-top:18px;border-top:1px solid var(--hairline)"></div>
- 
+    <div class="wk-days">
+      @for (day of w.week; track $index; let i = $index) {
+        <span class="wk-d" [class.is-today]="day.state === 'today'">
+          <span class="wk-dow">{{ day.d }}</span>
+          <span class="wk-num" [class.is-today]="day.state === 'today'">{{ weekDates()[i] }}</span>
+          @if (weekCoach()[i]; as cs) {
+            <span class="wk-coach" [class.done]="cs.status === 'done'">
+              @if (trainer.trainer.photoUrl) { <img [src]="trainer.trainer.photoUrl" [alt]="trainer.trainer.name" /> }
+              @else { <span>{{ trainer.trainer.initials }}</span> }
+            </span>
+            <span class="wk-time" [class.done]="cs.status === 'done'">{{ cs.time }}</span>
+          } @else if (day.state === 'done') {
+            <i class="ti ti-flame-filled wk-fire" aria-hidden="true"></i>
+          } @else if (day.state === 'today') {
+            <span class="wk-dot-today"></span>
+          } @else {
+            <span class="wk-dot-rest"></span>
+          }
+        </span>
+      }
+    </div>
+  </button>
 
   <!-- ===== DIALOG DI AVVIO RAPIDO ===== -->
   <!-- @if (startTarget(); as t): mostra il dialog se startTarget non è null -->
@@ -143,9 +154,9 @@
         <button class="btn btn-primary btn-block btn-lg" (click)="confirmStart()">
           <i class="ti ti-player-play-filled" style="font-size:18px" aria-hidden="true"></i> Inizia allenamento
         </button>
-        <!-- Pulsante secondario: vai alla schermata di dettaglio -->
+        <!-- Pulsante secondario: apri la scheda per vederla/modificarla -->
         <button class="btn btn-ghost btn-block" style="margin-top:10px" (click)="toDetail()">
-          <i class="ti ti-eye" style="font-size:17px" aria-hidden="true"></i> Vedi contenuto scheda
+          <i class="ti ti-pencil" style="font-size:17px" aria-hidden="true"></i> Apri e modifica scheda
         </button>
       </div>
     </div>

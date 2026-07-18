@@ -1,0 +1,71 @@
+<!-- Header di sezione condiviso (brand + streak + avatar utente) -->
+<ff-app-header style="padding:0 16px"></ff-app-header>
+
+<!-- Header chat: avatar PT + nome (tap → scheda PT) -->
+<header class="chat-hd">
+  <button class="who press" (click)="toTrainer()">
+    <span class="av" [style.background]="trainer.trainer.photoUrl ? 'transparent' : trainer.trainer.color">
+      @if (trainer.trainer.photoUrl) { <img [src]="trainer.trainer.photoUrl" [alt]="trainer.trainer.name" /> }
+      @else { {{ trainer.trainer.initials }} }
+    </span>
+    <span class="who-txt">
+      <span class="nm">{{ trainer.trainer.name }}</span>
+      <span class="rl">{{ trainer.trainer.role }} · <span class="dot"></span> online</span>
+    </span>
+  </button>
+</header>
+
+<!-- Bolle messaggi (scroll) -->
+<div class="msgs" #scrollEl>
+  @for (m of trainer.messages(); track m.id) {
+    <div class="row" [class.me]="m.from === 'me'">
+      <div class="bubble">
+        <span class="bt">{{ m.text }}</span>
+        <span class="tm">{{ m.time }}</span>
+      </div>
+    </div>
+  }
+
+  <!-- Proposte/spostamenti del coach = ultimi messaggi ricevuti (card azione) -->
+  @for (s of trainer.reschedules(); track s.id) {
+    @if (s.movingTo; as mv) {
+      <div class="row">
+        <div class="bubble action">
+          <div class="ac-hd"><i class="ti ti-arrows-exchange" aria-hidden="true"></i>Proposta di spostamento</div>
+          <div class="ac-txt"><b>{{ s.title }}</b><span class="ac-when"><span class="from">{{ dowShort(s.date) }} · {{ s.time }}</span><i class="ti ti-arrow-right" aria-hidden="true"></i><span class="to">{{ dowShort(mv.date) }} · {{ mv.time }}</span></span></div>
+          <div class="ac-acts">
+            <button class="ac-ok press" (click)="confirmMove(s.id)"><i class="ti ti-check" aria-hidden="true"></i>Conferma</button>
+            <button class="ac-no press" (click)="rejectMove(s.id)">Rifiuta</button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+  @for (s of trainer.proposals(); track s.id) {
+    <div class="row">
+      <div class="bubble action">
+        <div class="ac-hd"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Nuova seduta proposta</div>
+        <div class="ac-txt"><b>{{ s.title }}</b><span class="ac-when">{{ dowShort(s.date) }} · {{ s.time }} · {{ s.durationMin }} min</span></div>
+        <div class="ac-acts">
+          <button class="ac-ok press" (click)="accept(s.id)"><i class="ti ti-check" aria-hidden="true"></i>Accetta</button>
+          <button class="ac-no press" (click)="decline(s.id)">Rifiuta</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Composer -->
+<div class="composer">
+  <textarea
+    class="cin"
+    rows="1"
+    placeholder="Scrivi al tuo PT…"
+    [value]="draft()"
+    (input)="onInput($event)"
+    (keydown)="onKeydown($event)"
+  ></textarea>
+  <button class="cbtn press" [disabled]="!draft().trim()" (click)="send()" aria-label="Invia">
+    <i class="ti ti-send" aria-hidden="true"></i>
+  </button>
+</div>

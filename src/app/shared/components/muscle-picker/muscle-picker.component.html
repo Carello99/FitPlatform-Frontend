@@ -69,7 +69,7 @@
 
             <!-- Badge count -->
             @if (exerciseCountForMuscle(m.id) > 0) {
-              <span style="position:absolute;top:10px;right:10px;font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;color:#fff"
+              <span style="position:absolute;top:10px;right:10px;font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;color:var(--on-accent)"
                 [style.background]="m.color">{{ exerciseCountForMuscle(m.id) }}</span>
             }
           </button>
@@ -90,7 +90,7 @@
               <button (click)="removeExercise(ex.name)" aria-label="Rimuovi esercizio"
                 style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none"
                 [style.background]="metaForExercise(ex.name)?.color ?? 'var(--ink-3)'">
-                <i class="ti ti-x" style="font-size:12px;color:#fff" aria-hidden="true"></i>
+                <i class="ti ti-x" style="font-size:12px;color:var(--on-accent)" aria-hidden="true"></i>
               </button>
             </ff-exercise-card>
           }
@@ -135,7 +135,7 @@
           <!-- Badge aggiunto (top-right) -->
           @if (isExerciseAdded(ex)) {
             <div style="position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;z-index:2">
-              <i class="ti ti-check" style="font-size:11px;color:#fff" aria-hidden="true"></i>
+              <i class="ti ti-check" style="font-size:11px;color:var(--on-accent)" aria-hidden="true"></i>
             </div>
           }
 
@@ -155,7 +155,7 @@
 
           <!-- Nome + config in overlay sfumato in fondo -->
           <div style="position:absolute;bottom:0;left:0;right:0;padding:22px 10px 10px;background:linear-gradient(to top,rgba(0,0,0,0.72) 0%,transparent 100%)">
-            <div style="font-size:11.5px;font-weight:800;color:#fff;line-height:1.25;text-shadow:0 1px 4px rgba(0,0,0,0.5)">{{ ex }}</div>
+            <div style="font-size:11.5px;font-weight:800;color:var(--on-accent);line-height:1.25;text-shadow:0 1px 4px rgba(0,0,0,0.5)">{{ ex }}</div>
             @if (isExerciseAdded(ex)) {
               <div style="font-size:10px;font-weight:700;color:var(--amber);margin-top:2px">
                 {{ getAddedConfig(ex)!.sets }}×{{ getAddedConfig(ex)!.reps }}@if (getAddedConfig(ex)!.kg > 0) { · {{ getAddedConfig(ex)!.kg }}kg }
@@ -260,9 +260,9 @@
         <button (click)="selectPreset(p)"
           style="padding:13px 6px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:3px;border:2.5px solid transparent;transition:all 0.15s"
           [class]="p.tile"
-          [style.borderColor]="configSets() === p.sets && configReps() === p.reps ? 'rgba(255,255,255,0.6)' : 'transparent'"
+          [style.borderColor]="configSets() === p.sets && configReps() === p.reps ? 'color-mix(in srgb, var(--on-accent) 60%, transparent)' : 'transparent'"
           [style.transform]="configSets() === p.sets && configReps() === p.reps ? 'scale(1.06)' : 'scale(1)'">
-          <span style="font-size:17px;font-weight:900;letter-spacing:-0.5px">{{ p.label }}</span>
+          <span style="font-size:17px;font-weight:800;letter-spacing:-0.5px">{{ p.label }}</span>
           <span style="font-size:9px;font-weight:700;opacity:0.75;text-align:center">{{ p.desc }}</span>
         </button>
       }

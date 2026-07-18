@@ -1,0 +1,38 @@
+/* =====================================================
+   Riepilogo allenamento svolto — gemello di scheda-detail
+   Hero, riga meta e accordion NON stanno qui: sono le stesse regole del
+   dettaglio scheda (.sd-* / .ex-acc-*) e vivono in styles/_components.scss.
+   Qui resta solo ciò che esiste unicamente al passato.
+   ===================================================== */
+
+/* ---------- Dettaglio esercizi non disponibile ---------- */
+.wd-none {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-3);
+  line-height: 1.45;
+}
+.wd-none .ti {
+  font-size: 20px;
+  flex: none;
+}
+
+/* ---------- CTA sticky ---------- */
+/* Stessa collocazione del "Inizia Allenamento" di scheda-detail: sopra la
+   bottom nav della shell, con la sfumatura che stacca dal contenuto. */
+.wd-cta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(95px + env(safe-area-inset-bottom));
+  padding: 16px 16px 12px;
+  background: linear-gradient(to top, var(--bg-app) 70%, transparent);
+  z-index: 30;
+}

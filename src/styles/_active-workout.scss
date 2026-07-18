@@ -5,7 +5,7 @@
    ============================================================ */
 
 /* exercise card states */
-.ex-card{padding:16px;transition:border-color 0.3s,opacity 0.3s}
+.ex-card{padding:14px;transition:border-color 0.3s,opacity 0.3s}
 .ex-card.is-current{border-color:rgba(245,166,35,0.32)}
 .ex-card.is-complete{border-color:rgba(57,197,110,0.38)}
 
@@ -80,7 +80,7 @@
 }
 .set-check:active{transform:scale(0.88)}
 .set-row.active .set-check{border-color:rgba(245,166,35,0.5);color:var(--amber)}
-.set-check.on{background:var(--green);border-color:transparent;color:#06180E}
+.set-check.on{background:var(--green);border-color:transparent;color:var(--green-ink)}
 
 /* rest timer bar */
 .rest-bar{

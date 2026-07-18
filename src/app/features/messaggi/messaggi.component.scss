@@ -1,0 +1,52 @@
+/* ============================================================================
+ *  Chat col PT (selfLayout: gestisce il proprio scroll).
+ *  Colonna: header (fisso) · bolle (scroll) · composer (sopra la bottom nav).
+ * ========================================================================== */
+:host { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+/* ---- Header ---- */
+.chat-hd { flex: none; display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--hairline); background: var(--surface-0); }
+.who { display: flex; align-items: center; gap: 11px; background: none; border: none; padding: 0; font-family: inherit; cursor: pointer; }
+.av { width: 40px; height: 40px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--amber-ink); font-size: 14px; font-weight: 800; overflow: hidden; }
+.av img { width: 100%; height: 100%; object-fit: cover; }
+.who-txt { display: flex; flex-direction: column; align-items: flex-start; }
+.nm { font-size: 15px; font-weight: 800; letter-spacing: -.3px; color: var(--ink); }
+.rl { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--ink-3); }
+.rl .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; }
+
+/* ---- Bolle ---- */
+.msgs { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 8px; padding: 16px; }
+.msgs::-webkit-scrollbar { display: none; }
+.row { display: flex; }
+.row.me { justify-content: flex-end; }
+.bubble { max-width: 78%; display: flex; flex-direction: column; gap: 3px; padding: 9px 13px; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--hairline); }
+.row.me .bubble { background: var(--amber); border-color: transparent; }
+.bt { font-size: 14px; font-weight: 600; line-height: 1.42; color: var(--ink); white-space: pre-wrap; word-break: break-word; }
+.row.me .bt { color: var(--amber-ink); }
+.tm { align-self: flex-end; font-size: 9.5px; font-weight: 700; color: var(--ink-4); }
+.row.me .tm { color: rgba(26,14,0,.5); }
+
+/* ---- Bolla-azione: proposta/spostamento del coach (accetta/rifiuta) ---- */
+.bubble.action { max-width: 82%; padding: 12px 13px; gap: 0; border-color: rgba(245,166,35,.35); background: linear-gradient(150deg, rgba(245,166,35,.14), var(--surface-2) 62%); }
+.ac-hd { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px; color: var(--amber); }
+.ac-hd .ti { font-size: 15px; }
+.ac-txt { display: flex; flex-direction: column; gap: 2px; margin-top: 7px; font-size: 13px; font-weight: 600; color: var(--ink); }
+.ac-txt b { font-weight: 800; }
+.ac-when { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 3px 6px; font-size: 12px; font-weight: 700; color: var(--ink-2); }
+.ac-when .from { text-decoration: line-through; color: var(--ink-3); }
+.ac-when .to { color: var(--amber); font-weight: 800; }
+.ac-when .ti { font-size: 13px; color: var(--ink-3); }
+.ac-acts { display: flex; gap: 8px; margin-top: 11px; }
+.ac-ok, .ac-no { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 9px 14px; border-radius: 11px; font-family: inherit; font-size: 12.5px; font-weight: 800; border: none; cursor: pointer; }
+.ac-ok { background: var(--amber); color: var(--amber-ink); }
+.ac-ok .ti { font-size: 15px; }
+.ac-no { background: var(--surface-3); color: var(--ink-2); }
+
+/* ---- Composer (sopra la bottom nav) ---- */
+.composer { flex: none; display: flex; align-items: flex-end; gap: 9px; padding: 10px 14px calc(100px + env(safe-area-inset-bottom)); border-top: 1px solid var(--hairline); background: var(--surface-0); }
+.cin { flex: 1; resize: none; max-height: 120px; padding: 11px 14px; border-radius: 20px; background: var(--surface-2); border: 1px solid var(--hairline); color: var(--ink); font-family: inherit; font-size: 14px; font-weight: 600; line-height: 1.4; }
+.cin::placeholder { color: var(--ink-4); }
+.cin:focus { outline: none; border-color: var(--hairline-strong); }
+.cbtn { flex: none; width: 42px; height: 42px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--amber); color: var(--amber-ink); border: none; cursor: pointer; box-shadow: var(--shadow-amber); }
+.cbtn:disabled { opacity: .4; box-shadow: none; cursor: not-allowed; }
+.cbtn .ti { font-size: 20px; }

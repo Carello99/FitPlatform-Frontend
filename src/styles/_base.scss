@@ -29,6 +29,10 @@ body{
     radial-gradient(1200px 700px at 50% -10%, var(--bg-radial) 0%, transparent 60%),
     var(--bg);
   color:var(--ink);
+  /* Come PT: assottiglia i glifi su macOS. Senza questo il testo eredita
+     lo smoothing subpixel del browser e appare più "grasso" di PT. */
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
 /* Elementi host Angular: devono occupare l'intera viewport */
 ff-root,ff-phone-shell{display:block;height:100%}

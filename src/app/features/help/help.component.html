@@ -1,6 +1,8 @@
 <!-- Template Help Desk -->
 <div class="screen-pad screen-anim">
 
+  <ff-app-header></ff-app-header>
+
   <!-- ===== HEADER ===== -->
   <div class="appbar">
     <button class="iconbtn" (click)="back()" aria-label="Indietro"><i class="ti ti-chevron-left" style="font-size:22px" aria-hidden="true"></i></button>
@@ -19,13 +21,13 @@
   <!-- ===== PULSANTI CHAT E EMAIL ===== -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
     <!-- chat.set(true): apre il bottom sheet della chat -->
-    <button class="card" style="padding:16px;text-align:left" (click)="chat.set(true)">
+    <button class="card" style="padding:14px;text-align:left" (click)="chat.set(true)">
       <div class="itile sm t-amber" style="margin-bottom:10px"><i class="ti ti-message-circle" style="font-size:20px" aria-hidden="true"></i></div>
       <div style="font-size:14.5px;font-weight:800">Chat di supporto</div>
       <div style="font-size:11.5px;color:var(--green);font-weight:700;margin-top:2px">● Online ora</div>
     </button>
     <!-- toast.show(...): mostra una notifica (simulazione apertura email) -->
-    <button class="card" style="padding:16px;text-align:left" (click)="toast.show('Apertura email…', 'ti-mail')">
+    <button class="card" style="padding:14px;text-align:left" (click)="toast.show('Apertura email…', 'ti-mail')">
       <div class="itile sm t-cyan" style="margin-bottom:10px"><i class="ti ti-mail" style="font-size:20px" aria-hidden="true"></i></div>
       <div style="font-size:14.5px;font-weight:800">Contattaci</div>
       <div style="font-size:11.5px;color:var(--ink-3);font-weight:600;margin-top:2px">Risposta in 24h</div>
@@ -37,7 +39,7 @@
   <div class="scroll-x">
     <!-- w.guides: array di guide dallo store (dal file mock JSON) -->
     @for (g of w.guides; track g.t) {
-      <button class="card" style="width:150px;flex-shrink:0;padding:16px;text-align:left" (click)="toast.show('Apertura guida…', 'ti-book')">
+      <button class="card" style="width:150px;flex-shrink:0;padding:14px;text-align:left" (click)="toast.show('Apertura guida…', 'ti-book')">
         <div class="itile sm" [class]="TILE_CLASS[g.tile]" style="margin-bottom:12px"><i class="ti" [class]="g.icon" style="font-size:20px" aria-hidden="true"></i></div>
         <div style="font-size:14px;font-weight:800;line-height:1.25">{{ g.t }}</div>
         <div style="font-size:11.5px;color:var(--ink-3);font-weight:600;margin-top:3px">{{ g.s }}</div>
@@ -53,7 +55,7 @@
     @for (f of w.faq; track f.q; let i = $index) {
       <div class="card" style="padding:0;overflow:hidden">
         <!-- toggle(i): apre la FAQ i o la chiude se è già aperta -->
-        <button class="row between" style="width:100%;padding:16px;text-align:left;gap:12px" (click)="toggle(i)">
+        <button class="row between" style="width:100%;padding:14px;text-align:left;gap:12px" (click)="toggle(i)">
           <span style="font-size:14px;font-weight:700;line-height:1.35">{{ f.q }}</span>
           <!-- Icona chevron: ruotata di 180° quando la FAQ è aperta -->
           <!-- [style.transform]: binding CSS per la rotazione dell'icona -->

@@ -1,0 +1,198 @@
+<!-- ============================================================
+     HEADER: mese (tap = oggi) · chevron per cambiare mese
+     ============================================================ -->
+<header class="ahead">
+  <button class="mtitle press" (click)="goToday()" aria-label="Vai a oggi">
+    <span class="mn">{{ monthName() }}</span> <span class="my">{{ viewYear() }}</span>
+  </button>
+</header>
+
+<div class="subhead">
+  <div class="legend">
+    <span class="lg"><span class="lg-sq"></span>Allenamento</span>
+    <span class="lg"><span class="lg-av"><img [src]="trainer.trainer.photoUrl" [alt]="trainer.trainer.name" /></span>Coach</span>
+  </div>
+  <div class="mctl">
+    @if (!isCurrentMonth()) { <button class="oggi-mini press" (click)="goToday()"><span class="om-dot"></span>oggi</button> }
+    <button class="navb press" (click)="prevMonth()" aria-label="Mese precedente"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+    <button class="navb press" (click)="nextMonth()" aria-label="Mese successivo"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+  </div>
+</div>
+
+<!-- ============================================================
+     CALENDARIO (swipe per cambiare mese)
+     ============================================================ -->
+<div class="cal" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
+  <div class="wdh">@for (w of weekdays; track $index) { <span>{{ w }}</span> }</div>
+  <div class="grid">
+    @for (c of grid(); track c.iso) {
+      <button
+        class="cell press"
+        [class.out]="!c.inMonth"
+        [class.today]="c.today"
+        [class.sel]="c.iso === selected()"
+        [class.proposed]="c.proposed"
+        [class.dragover]="dragOverIso() === c.iso"
+        (click)="select(c)"
+        (dragover)="onDragOver(c, $event)"
+        (dragleave)="onDragLeave(c)"
+        (drop)="onDrop(c, $event)"
+      >
+        <span class="dnum">{{ c.day }}</span>
+        <span class="badges">
+          @for (wb of c.workouts.slice(0, 2); track $index) {
+            <span class="bd-sq" [class]="TILE_CLASS[wb.accent]"><i class="ti" [class]="wb.icon" aria-hidden="true"></i></span>
+          }
+          @if (c.workouts.length > 2) { <span class="bd-more">+{{ c.workouts.length - 2 }}</span> }
+          @if (c.coach) {
+            <span class="bd-av" [class.done]="c.coachDone">
+              @if (trainer.trainer.photoUrl) { <img [src]="trainer.trainer.photoUrl" [alt]="trainer.trainer.name" /> }
+              @else { <span>{{ trainer.trainer.initials }}</span> }
+            </span>
+          }
+        </span>
+      </button>
+    }
+  </div>
+</div>
+
+<!-- ============================================================
+     AGENDA DEL GIORNO
+     ============================================================ -->
+<div class="dayhead">
+  <span class="dh-day">{{ selectedLabel() }}</span>
+  @if (dayCount().workouts || dayCount().coach) {
+    <span class="dh-count">
+      @if (dayCount().workouts) { {{ dayCount().workouts }} {{ dayCount().workouts === 1 ? 'allenamento' : 'allenamenti' }} }
+      @if (dayCount().workouts && dayCount().coach) { · }
+      @if (dayCount().coach) { {{ dayCount().coach }} coach }
+    </span>
+  }
+</div>
+
+@if (dayTimeline().length) {
+  <div class="timeline">
+    @for (en of dayTimeline(); track $index) {
+
+      <!-- ---- Allenamento svolto: card riepilogo → deep-link allo Storico ---- -->
+      @if (en.workout; as w) {
+        <div class="tl">
+          <span class="t"><b>{{ w.time }}</b></span>
+          <span class="conn"><span class="d" [style.background]="ACCENT_VAR[w.accent]"></span><span class="line"></span></span>
+          <button class="wk-card press" (click)="openWorkout(w)">
+            <span class="bar" [style.background]="ACCENT_VAR[w.accent]"></span>
+            <span class="wk-ic" [class]="TILE_CLASS[w.accent]"><i class="ti" [class]="w.icon" aria-hidden="true"></i></span>
+            <div class="wk-main">
+              <span class="wk-eyebrow">Allenamento svolto</span>
+              <div class="wk-top">
+                <span class="nm">{{ w.name }}</span>
+                @if (w.prs) { <span class="wk-pr"><i class="ti ti-trophy" aria-hidden="true"></i>{{ w.prs }} PR</span> }
+              </div>
+              <div class="wk-stats">
+                <span><i class="ti ti-clock" aria-hidden="true"></i>{{ w.durMin }} min</span>
+                <span><i class="ti ti-list-numbers" aria-hidden="true"></i>{{ w.ex }} esercizi</span>
+                <span class="wk-link">Vedi dettaglio<i class="ti ti-arrow-right" aria-hidden="true"></i></span>
+              </div>
+            </div>
+            <i class="ti ti-chevron-right wk-go" aria-hidden="true"></i>
+          </button>
+        </div>
+      }
+
+      <!-- ---- Sessione col coach (programmata / spostata in attesa) ---- -->
+      @else if (en.session; as e) {
+        <div class="tl">
+          <span class="t"><b>{{ e.time }}</b></span>
+          <span class="conn"><span class="d" [style.background]="e.color"></span><span class="line"></span></span>
+          <div
+            class="pt-card"
+            [class.is-done]="e.status === 'done'"
+            [class.dragging]="draggingSid() === e.id"
+            [attr.draggable]="canDrag(e) ? true : null"
+            (dragstart)="onDragStart(e, $event)"
+            (dragend)="onDragEnd()"
+          >
+            <div class="pt-row">
+              <span class="pt-av" [class.done]="e.status === 'done'">
+                @if (trainer.trainer.photoUrl) { <img [src]="trainer.trainer.photoUrl" [alt]="trainer.trainer.name" /> }
+                @else { <span>{{ trainer.trainer.initials }}</span> }
+              </span>
+              <div class="pt-main">
+                <span class="pt-eyebrow">Sessione col coach</span>
+                <div class="pt-title">{{ e.title }}</div>
+                <div class="pt-coach">con {{ trainer.trainer.name }} · {{ e.durationMin }} min</div>
+              </div>
+              <div class="pt-side">
+                <span class="pt-status" [class]="'st-' + sessionState(e).cls">{{ sessionState(e).label }}</span>
+                @if (canDrag(e)) { <span class="pt-grip" aria-hidden="true"><i class="ti ti-grip-vertical"></i></span> }
+              </div>
+            </div>
+            @if (e.pendingMove) {
+              <div class="pt-foot">
+                <span class="pt-note"><i class="ti ti-clock-exclamation" aria-hidden="true"></i>In attesa di conferma del PT</span>
+                <button class="pt-cancel press" (click)="undoPending(e.id)" aria-label="Annulla richiesta di spostamento"><i class="ti ti-x" aria-hidden="true"></i>Annulla</button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Azione: richiedi una sessione in questo giorno (solo se il giorno è libero da sessioni) -->
+  @if (canRequest()) {
+    <button class="ff-req-line press" (click)="openRequest()"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Richiedi una sessione col coach</button>
+  }
+} @else {
+  <div class="dp-empty">
+    <i class="ti ti-calendar-off" aria-hidden="true"></i>
+    <span>Nessun allenamento o sessione in questo giorno.</span>
+    <button class="ff-req press" (click)="openRequest()"><i class="ti ti-plus" aria-hidden="true"></i>Richiedi una sessione</button>
+  </div>
+}
+
+<!-- ============================================================
+     BOTTOM-SHEET: richiesta seduta (scelta orario)
+     ============================================================ -->
+@if (requestOpen()) {
+  <div class="sheet-bg" (click)="closeRequest()"></div>
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-hd"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Richiedi sessione · {{ selectedLabel() }}</div>
+    <p class="sheet-sub">Scegli un orario: il tuo PT confermerà la sessione.</p>
+    <div class="timegrid">
+      @for (t of slotOptions; track t) {
+        <button class="tslot press" [disabled]="takenTimes().has(t)" (click)="confirmRequest(t)">{{ t }}</button>
+      }
+    </div>
+    <button class="ff-cancel press" (click)="closeRequest()">Annulla</button>
+  </div>
+}
+
+<!-- ============================================================
+     BOTTOM-SHEET: sposta seduta (dopo drag&drop) — orario + messaggio
+     ============================================================ -->
+@if (moveTarget(); as mt) {
+  <div class="sheet-bg" (click)="cancelMove()"></div>
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-hd"><i class="ti ti-calendar-share" aria-hidden="true"></i>Sposta "{{ mt.title }}" · {{ moveDateLabel() }}</div>
+    @if (mt.times.length) {
+      <p class="sheet-sub">Scegli il nuovo orario:</p>
+      <div class="timegrid">
+        @for (t of mt.times; track t) {
+          <button class="tslot press" [class.on]="moveTime() === t" (click)="pickTime(t)">{{ t }}</button>
+        }
+      </div>
+      <div class="field" style="margin:16px 0 0">
+        <label for="moveMsg">Messaggio per il PT (facoltativo)</label>
+        <textarea id="moveMsg" class="input" rows="3" placeholder="Es. Mi è uscito un imprevisto, possiamo spostare?" [value]="moveMsg()" (input)="onMoveMsg($event)"></textarea>
+      </div>
+      <p class="sheet-note"><i class="ti ti-info-circle" aria-hidden="true"></i> Lo spostamento resta <b>da confermare</b> dal tuo PT.</p>
+      <button class="ff-req press" [disabled]="!moveTime()" (click)="confirmMove()"><i class="ti ti-send" aria-hidden="true"></i>Invia richiesta</button>
+    } @else {
+      <p class="sheet-sub">Nessuno slot libero in quel giorno. Prova un altro giorno.</p>
+    }
+    <button class="ff-cancel press" (click)="cancelMove()">Annulla</button>
+  </div>
+}

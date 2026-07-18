@@ -61,6 +61,8 @@ export interface Scheda {
   icon: string;        // Classe CSS icona
   tag: string;         // Etichetta breve (es. "In corso", "Veloce")
   desc: string;        // Descrizione lunga
+  author?: 'coach' | 'self'; // Chi ha creato la scheda: il PT o l'utente stesso
+  archived?: boolean;   // true = scheda scaduta/archiviata (non più attiva)
   exercises: Exercise[]; // Lista degli esercizi contenuti
 }
 
@@ -89,15 +91,40 @@ export interface Badge {
   got: boolean;  // true se l'utente lo ha già sbloccato
 }
 
-// Voce nello storico degli allenamenti
+/**
+ * Un esercizio come è stato REALMENTE svolto in una sessione.
+ * Non è la sua programmazione (quella sta in `Exercise`, dentro la Scheda):
+ * qui c'è ciò che è successo davvero, incluso se hai battuto il tuo record.
+ */
+export interface HistoryExercise {
+  name: string;   // Nome dell'esercizio
+  sets: number;   // Serie effettivamente completate
+  reps: number;   // Ripetizioni della serie più pesante
+  topKg: number;  // Carico massimo sollevato (0 = corpo libero)
+  pr?: boolean;   // true = in questo esercizio hai battuto il tuo record di carico
+}
+
+/**
+ * Voce nello storico degli allenamenti.
+ *
+ * REGOLA: i campi sono NUMERICI, la formattazione è della vista.
+ * Prima `vol` era una stringa già formattata ("4 280 kg"): impediva qualsiasi
+ * aggregazione (i totali per periodo dello Storico) e sfuggiva alle regole di
+ * formato numerico. Un dato non si conserva mai già scritto per l'occhio.
+ */
 export interface HistoryItem {
-  name: string;   // Nome della scheda eseguita
-  date: string;   // Data formattata (es. "3 Giu 2026")
-  dur: string;    // Durata (es. "45 min")
-  vol: string;    // Volume totale sollevato
-  ex: number;     // Numero di esercizi completati
-  accent: Accent; // Colore tematico
-  icon: string;   // Classe CSS icona
+  id?: string;      // Identificatore univoco (per il deep-link dal calendario)
+  name: string;     // Nome della scheda eseguita
+  dateIso: string;  // Data ISO 'YYYY-MM-DD' — la fonte di verità del "quando"
+  time: string;     // Orario 'HH:MM'
+  durMin: number;   // Durata in minuti
+  volKg: number;    // Volume totale sollevato, in kg
+  ex: number;       // Numero di esercizi completati
+  kcal?: number;    // Calorie stimate bruciate
+  prs?: number;     // Quanti record di carico hai battuto in questa sessione
+  accent: Accent;   // Colore tematico (dalla scheda eseguita)
+  icon: string;     // Classe CSS icona (dalla scheda eseguita)
+  exercises?: HistoryExercise[]; // Cosa hai fatto, esercizio per esercizio
 }
 
 // Barra di un grafico a barre

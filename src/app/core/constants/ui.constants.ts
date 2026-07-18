@@ -135,6 +135,41 @@ export function macroForMuscle(muscleId: string | null): MacroSectionId | null {
 }
 
 /**
+ * Preset di programmazione di un esercizio (serie × ripetizioni + recupero).
+ * `desc` è l'obiettivo di allenamento che il preset esprime, `tile` la classe
+ * colore con cui è reso: la coppia label→colore deve restare stabile in tutta
+ * l'app, così "4×8 ambra = Forza & Massa" è riconoscibile ovunque appaia.
+ */
+export interface SetPreset {
+  label: string; // testo principale, es. "3×12"
+  sets: number;
+  reps: string;
+  rest: number;  // secondi di recupero
+  desc: string;  // obiettivo, es. "Ipertrofia"
+  tile: string;  // classe tile del colore, es. "t-cyan"
+}
+
+/**
+ * I preset offerti ovunque si programmi un esercizio (creazione scheda,
+ * modifica scheda, picker muscolare). Fonte unica: erano tre copie identiche
+ * nei rispettivi componenti e potevano divergere a ogni ritocco.
+ */
+export const SET_PRESETS: readonly SetPreset[] = [
+  { label: '3×12', sets: 3, reps: '12', rest: 60,  desc: 'Ipertrofia',    tile: 't-cyan'   },
+  { label: '3×10', sets: 3, reps: '10', rest: 75,  desc: 'Ipertrofia',    tile: 't-violet' },
+  { label: '4×8',  sets: 4, reps: '8',  rest: 90,  desc: 'Forza & Massa', tile: 't-amber'  },
+  { label: '3×6',  sets: 3, reps: '6',  rest: 120, desc: 'Forza',         tile: 't-rose'   },
+  { label: '5×5',  sets: 5, reps: '5',  rest: 180, desc: 'Forza Max',     tile: 't-green'  },
+  { label: '2×15', sets: 2, reps: '15', rest: 45,  desc: 'Tonific.',      tile: 't-slate'  },
+];
+
+/** Carichi rapidi (kg) offerti negli editor di esercizio. */
+export const KG_QUICK: readonly number[] = [0, 5, 10, 20, 30, 40, 60, 80];
+
+/** Tempi di recupero rapidi (secondi) offerti negli editor di esercizio. */
+export const REST_QUICK: readonly number[] = [45, 60, 75, 90, 120, 180];
+
+/**
  * Mappa il numero di livello alla sua etichetta testuale.
  * Es: LEVEL_LABEL[2] → 'Intermedio'
  */

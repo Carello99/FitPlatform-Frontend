@@ -22,6 +22,8 @@ import { Accent } from '../../core/models/workout.models';
 import { WorkoutStore } from '../../core/services/workout-store.service';
 import { BarChartComponent } from '../../shared/components/bar-chart/bar-chart.component';
 import { LineChartComponent } from '../../shared/components/line-chart/line-chart.component';
+import { RingComponent } from '../../shared/components/ring/ring.component';
+import { AppHeaderComponent } from '../../layout/app-header/app-header.component';
 
 // Interfacce locali per i tipi di dati usati in questa schermata
 interface Totals {
@@ -54,7 +56,7 @@ interface Pr {
   selector: 'ff-progress',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BarChartComponent, LineChartComponent],
+  imports: [BarChartComponent, LineChartComponent, RingComponent, AppHeaderComponent],
   templateUrl: './progress.component.html',
 })
 export class ProgressComponent {
@@ -98,6 +100,11 @@ export class ProgressComponent {
     { ex: 'Stacco',      v: '150 kg',   d: 'nuovo PR', ic: 'ti-barbell', tile: 'green' },
   ];
 
+  /** Avanzamento verso il livello successivo, 0..1 (per l'anello XP). */
+  get xpPct(): number {
+    return this.w.user.xpNext > 0 ? this.w.user.xp / this.w.user.xpNext : 0;
+  }
+
   /** Ultimo peso registrato (ultimo elemento dell'array weightTrend). */
   get lastWeight(): number {
     const t = this.w.weightTrend;
@@ -109,4 +116,10 @@ export class ProgressComponent {
   go(route: string): void {
     void this.router.navigate(['/' + route]);
   }
+
+  /** Storico allenamenti = tab "Allenamenti" della sezione Schede (DECISIONS D-38). */
+  goStorico(): void {
+    void this.router.navigate(['/schede'], { queryParams: { tab: 'allenamenti' } });
+  }
+
 }

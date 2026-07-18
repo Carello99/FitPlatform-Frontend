@@ -35,8 +35,9 @@
  *     muscle/icon ricadono ai default. Attenzione modificando questa mappatura.
  *   - flashSaved usa un setTimeout con un solo timer condiviso (flashTimer):
  *     un nuovo cambio resetta il timer precedente (corretto).
- *   - La conferma di eliminazione può essere disattivata (localStorage
- *     'ff_skip_del_confirm'): se "non chiede più conferma", la causa è quella.
+ *   - La conferma di eliminazione può essere disattivata dall'utente: la
+ *     preferenza vive in PreferencesService (persistita). Se il dialog "non
+ *     chiede più conferma", la causa è quella.
  *   - editExs è la bozza: finché non si salva, lo store NON cambia (un back
  *     prima di Salva perde le modifiche, come previsto).
  * ============================================================================
@@ -44,15 +45,19 @@
 
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ACCENT_VAR, LEVEL_LABEL, MUSCLE_META, MuscleInfo, TILE_CLASS } from '../../core/constants/ui.constants';
+import {
+  ACCENT_VAR, KG_QUICK, LEVEL_LABEL, MUSCLE_META, MuscleInfo, REST_QUICK, SET_PRESETS, SetPreset, TILE_CLASS,
+} from '../../core/constants/ui.constants';
 import { Accent, Scheda } from '../../core/models/workout.models';
 import { ExerciseImageService } from '../../core/services/exercise-image.service';
 import { SessionService } from '../../core/services/session.service';
 import { ToastService } from '../../core/services/toast.service';
+import { PreferencesService } from '../../core/services/preferences.service';
 import { WorkoutStore } from '../../core/services/workout-store.service';
 import { DiffComponent } from '../../shared/components/diff/diff.component';
 import { ExerciseCardComponent } from '../../shared/components/exercise-card/exercise-card.component';
 import { MusclePickerComponent, PickedExercise } from '../../shared/components/muscle-picker/muscle-picker.component';
+import { AppHeaderComponent } from '../../layout/app-header/app-header.component';
 
 interface PickedEx {
   name: string;
@@ -62,20 +67,12 @@ interface PickedEx {
   kg: number;
 }
 
-interface Preset {
-  label: string;
-  sets: number;
-  reps: string;
-  rest: number;
-  desc: string;
-  tile: string;
-}
 
 @Component({
   selector: 'ff-scheda-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DiffComponent, MusclePickerComponent, ExerciseCardComponent],
+  imports: [DiffComponent, MusclePickerComponent, ExerciseCardComponent, AppHeaderComponent],
   templateUrl: './scheda-detail.component.html',
 })
 export class SchedaDetailComponent {
@@ -85,6 +82,7 @@ export class SchedaDetailComponent {
   private readonly route  = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly imgs   = inject(ExerciseImageService);
+  private readonly prefs  = inject(PreferencesService);
 
   readonly ACCENT_VAR  = ACCENT_VAR;
   readonly TILE_CLASS  = TILE_CLASS;
@@ -108,18 +106,50 @@ export class SchedaDetailComponent {
     'ti-shield',
   ];
 
-  readonly PRESETS: Preset[] = [
-    { label: '3×12', sets: 3, reps: '12', rest: 60,  desc: 'Ipertrofia',    tile: 't-cyan'   },
-    { label: '3×10', sets: 3, reps: '10', rest: 75,  desc: 'Ipertrofia',    tile: 't-violet' },
-    { label: '4×8',  sets: 4, reps: '8',  rest: 90,  desc: 'Forza & Massa', tile: 't-amber'  },
-    { label: '3×6',  sets: 3, reps: '6',  rest: 120, desc: 'Forza',         tile: 't-rose'   },
-    { label: '5×5',  sets: 5, reps: '5',  rest: 180, desc: 'Forza Max',     tile: 't-green'  },
-    { label: '2×15', sets: 2, reps: '15', rest: 45,  desc: 'Tonific.',      tile: 't-slate'  },
-  ];
+  readonly PRESETS = SET_PRESETS;
 
   private readonly id = this.route.snapshot.paramMap.get('id');
 
   readonly scheda = computed(() => this.w.getScheda(this.state.viewSchedaId() ?? this.id));
+
+  // ---- Navigazione tra schede (le frecce ai lati dell'hero) ----
+  /**
+   * Le schede sfogliabili: solo le attive, nell'ordine della libreria — lo
+   * stesso che l'utente vede in /schede. Le archiviate restano fuori: sfogliando
+   * ci si aspetta ciò che si può fare, non ciò che è scaduto.
+   */
+  private readonly siblings = computed<Scheda[]>(() =>
+    this.w.schede.filter((s) => !s.archived),
+  );
+
+  private readonly index = computed(() => {
+    const s = this.scheda();
+    return s ? this.siblings().findIndex((x) => x.id === s.id) : -1;
+  });
+
+  /** La scheda precedente, se c'è (undefined sulla prima). */
+  readonly prevScheda = computed<Scheda | undefined>(() => {
+    const i = this.index();
+    return i > 0 ? this.siblings()[i - 1] : undefined;
+  });
+
+  /** La scheda successiva, se c'è (undefined sull'ultima). */
+  readonly nextScheda = computed<Scheda | undefined>(() => {
+    const i = this.index();
+    const list = this.siblings();
+    return i >= 0 && i < list.length - 1 ? list[i + 1] : undefined;
+  });
+
+  /**
+   * Passa a un'altra scheda. Azzera lo stato di vista locale: senza, un
+   * accordion aperto o il dialog di avvio sopravvivrebbero al cambio di scheda
+   * (il componente viene RIUSATO da Angular quando cambia solo il parametro).
+   */
+  goScheda(id: string): void {
+    this.openEx.set(null);
+    this.showDialog.set(false);
+    this.state.openScheda(id);
+  }
 
   readonly showDialog = signal<boolean>(this.state.autoStartDialog());
 
@@ -135,8 +165,9 @@ export class SchedaDetailComponent {
   readonly showAddEx        = signal(false);
   readonly pendingDeleteEx  = signal<string | null>(null);
   readonly deleteCheckbox   = signal(false);
-  // Preferenza persistita: se true il dialog non viene più mostrato
-  readonly skipDeleteConfirm = signal(localStorage.getItem('ff_skip_del_confirm') === '1');
+  // Preferenza persistita: se true il dialog non viene più mostrato.
+  // La persistenza vive in PreferencesService — il componente legge solo il signal.
+  readonly skipDeleteConfirm = this.prefs.skipDeleteConfirm;
 
   readonly editCardBg = computed(() =>
     `linear-gradient(155deg, ${ACCENT_VAR[this.editAccent()]} -10%, #14141d 115%)`
@@ -266,7 +297,7 @@ export class SchedaDetailComponent {
     this.openLibEx.set(this.openLibEx() === name ? null : name);
   }
 
-  selectEditPreset(exName: string, p: Preset): void {
+  selectEditPreset(exName: string, p: SetPreset): void {
     const idx = this.editExs().findIndex((e) => e.name === exName);
     if (idx >= 0) {
       this.editExs.update((list) =>
@@ -291,8 +322,7 @@ export class SchedaDetailComponent {
 
   confirmDeleteEx(): void {
     if (this.deleteCheckbox()) {
-      localStorage.setItem('ff_skip_del_confirm', '1');
-      this.skipDeleteConfirm.set(true);
+      this.prefs.setSkipDeleteConfirm(true);
     }
     const name = this.pendingDeleteEx();
     if (name) this.removeEditEx(name);
@@ -320,8 +350,8 @@ export class SchedaDetailComponent {
     return this.editExs().find((e) => e.name === name);
   }
 
-  readonly KG_QUICK: number[] = [0, 5, 10, 20, 30, 40, 60, 80];
-  readonly REST_QUICK: number[] = [45, 60, 75, 90, 120, 180];
+  readonly KG_QUICK = KG_QUICK;
+  readonly REST_QUICK = REST_QUICK;
 
   adjustEditExKg(exName: string, delta: number): void {
     this.editExs.update((list) =>

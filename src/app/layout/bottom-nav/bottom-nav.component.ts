@@ -1,11 +1,13 @@
 /**
  * ============================================================================
- *  FILE: bottom-nav.component.ts  —  BARRA DI NAVIGAZIONE INFERIORE (4 tab)
+ *  FILE: bottom-nav.component.ts  —  BARRA DI NAVIGAZIONE INFERIORE (5 tab)
  * ============================================================================
  *
  * SCOPO DEL FILE
- *   La barra fissa in basso con i tab principali (Home, Schede, Progressi,
- *   Profilo). Naviga e mostra quale sezione è attiva.
+ *   La barra fissa in basso: Home · Schede · CTA "Allena" (avvio rapido) ·
+ *   Progressi · Coach. L'hub Coach raccoglie la relazione col PT (agenda e
+ *   messaggi si aprono da lì, come sotto-pagine). Il Profilo è raggiungibile
+ *   dall'avatar con le iniziali nell'header di sezione.
  *
  * COSA RAPPRESENTA / DOVE VIVE
  *   Componente standalone renderizzato dalla shell quando la rotta ha
@@ -23,7 +25,7 @@
  *
  * PUNTI CRITICI PER IL DEBUGGING
  *   - resolve() rimappa di proposito alcune rotte sul tab "genitore":
- *     '/scheda/*' → tab "schede", '/history' → tab "profile". Se il tab
+ *     '/scheda/*' → tab "schede". Se il tab
  *     evidenziato sembra "sbagliato" su quelle pagine, la regola è qui.
  *   - Le icone PNG attive NON si colorano via CSS color: si usa un filtro
  *     (brightness/sepia/hue-rotate) per simulare l'accento amber sui raster.
@@ -52,27 +54,32 @@ import { SessionService } from '../../core/services/session.service';
 
       <!-- [class.active]="condizione": aggiunge la classe CSS "active" solo se la condizione è vera -->
       <!-- (click)="metodo()": event binding — chiama il metodo al click -->
-      <!-- Quando il pulsante ha la classe "active", il CSS in _layout.scss applica un filtro
-           amber all'immagine tramite brightness/invert/sepia/hue-rotate, replicando l'effetto
-           di "color:var(--amber)" che funziona solo sulle icone font -->
+      <!-- Icone Tabler (font): l'accento amber sul tab attivo è applicato via
+           color:var(--amber) in _layout.scss, coerente con le altre voci e con
+           la barra di navigazione di FitPlatform PT. -->
       <button class="bn-item" [class.active]="current() === 'home'" (click)="go('home')">
-        <img src="assets/icons/home.png" alt="" aria-hidden="true" />
+        <i class="ti ti-home" aria-hidden="true"></i>
         <span class="bn-label">Home</span>
       </button>
 
       <button class="bn-item" [class.active]="current() === 'schede'" (click)="go('schede')">
-        <img src="assets/icons/weightlifting.png" alt="" aria-hidden="true"/>
+        <i class="ti ti-barbell" aria-hidden="true"></i>
         <span class="bn-label">Schede</span>
       </button>
 
-      <button class="bn-item" [class.active]="current() === 'progress'" (click)="go('progress')">
-        <i class="ti ti-chart-line" aria-hidden="true"></i>
-        <span class="bn-label">Progressi</span>
+      <button class="bn-item" [class.active]="current() === 'messaggi'" (click)="go('messaggi')">
+        <i class="ti ti-message-circle" aria-hidden="true"></i>
+        <span class="bn-label">Messaggi</span>
       </button>
 
-      <button class="bn-item" [class.active]="current() === 'profile'" (click)="go('profile')">
-        <i class="ti ti-user" aria-hidden="true"></i>
-        <span class="bn-label">Profilo</span>
+      <button class="bn-item" [class.active]="current() === 'agenda'" (click)="go('agenda')">
+        <i class="ti ti-calendar" aria-hidden="true"></i>
+        <span class="bn-label">Agenda</span>
+      </button>
+
+      <button class="bn-item" [class.active]="current() === 'personal-trainer'" (click)="go('personal-trainer')">
+        <i class="ic-mask ic-gym" aria-hidden="true"></i>
+        <span class="bn-label">Coach</span>
       </button>
     </nav>
   `,
@@ -103,16 +110,18 @@ export class BottomNavComponent {
 
   /**
    * Converte l'URL corrente nel nome del tab da evidenziare.
-   * Es: '/scheda/push' → 'schede', '/history' → 'profile'
+   * Es: '/scheda/push' → 'schede'. Le pagine fuori dai 5 tab (profilo,
+   * progressi, storico…) non evidenziano alcuna voce.
    */
   private resolve(url: string): string {
     // Le pagine di dettaglio scheda appartengono al tab "schede"
-    if (url.startsWith('/scheda')) {
+    // '/scheda/:id' e '/allenamento/:id' sono sotto-pagine dell'hub Schede.
+    if (url.startsWith('/scheda') || url.startsWith('/allenamento')) {
       return 'schede';
     }
-    // Lo storico è accessibile dal tab "profilo"
-    if (url.startsWith('/history')) {
-      return 'profile';
+    // Il marketplace è sotto-pagina dell'hub Coach → tiene acceso "Coach"
+    if (url.startsWith('/coach-marketplace')) {
+      return 'personal-trainer';
     }
     // Rimuove query string (?...) e lo slash iniziale per ottenere il nome semplice
     const seg = url.split('?')[0].replace('/', '');

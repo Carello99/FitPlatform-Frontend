@@ -109,6 +109,15 @@ export class WorkoutStore {
   readonly loading = computed(() => this._status() === 'loading' || this._status() === 'idle');
   readonly error = this._error.asReadonly();
 
+  /** Toggle demo: simula la presenza/assenza di schede di allenamento.
+   *  Se false nasconde SOLO le schede demo (seed): le schede create dall'utente
+   *  restano sempre visibili → creare una scheda in modalità "senza schede" la
+   *  fa comparire subito nel carosello e nella lista. */
+  readonly hasSchede = signal(true);
+
+  /** ID delle schede create dall'utente in-app: bypassano il gate `hasSchede`. */
+  private readonly _createdIds = signal<Set<string>>(new Set());
+
   /** Avvia il caricamento dei dati. Sicuro da chiamare più volte (es. per il retry). */
   load(): void {
     // Evita di avviare un secondo caricamento se uno è già in corso
@@ -153,7 +162,14 @@ export class WorkoutStore {
   }
   get schede(): Scheda[] {
     // ?? è l'operatore "nullish coalescing": se data() è null/undefined, restituisce []
-    return this.data()?.schede ?? [];
+    const all = this.data()?.schede ?? [];
+    // Toggle demo: se disattivato, mostra SOLO le schede create dall'utente
+    // (le demo/seed spariscono, ma ciò che l'utente crea resta sempre visibile).
+    if (!this.hasSchede()) {
+      const created = this._createdIds();
+      return all.filter((s) => created.has(s.id));
+    }
+    return all;
   }
   get week(): WeekDay[] {
     return this.data()?.week ?? [];
@@ -268,6 +284,9 @@ export class WorkoutStore {
    */
   addScheda(scheda: Scheda): void {
     this.data.update((d) => (d ? { ...d, schede: [...d.schede, scheda] } : d));
+    // Registra l'id come "creato dall'utente": resta visibile anche in modalità
+    // "senza schede" (bypassa il gate hasSchede).
+    this._createdIds.update((ids) => new Set(ids).add(scheda.id));
   }
 
   updateScheda(scheda: Scheda): void {

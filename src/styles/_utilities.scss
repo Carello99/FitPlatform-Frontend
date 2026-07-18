@@ -18,3 +18,12 @@
 .num{font-variant-numeric:tabular-nums}
 .hero-num{font-size:44px;font-weight:800;letter-spacing:-1.5px;line-height:1}
 
+/* Feedback al tap per superfici cliccabili che NON sono .btn/.chip (card, celle
+   calendario, righe liste, wordmark). Scala volutamente più contenuta di
+   .btn:active (0.96): .press è applicata anche a superfici grandi, dove una
+   scala marcata risulterebbe elastica. Chi ha bisogno di un valore diverso
+   sovrascrive con la propria regola :active (vince per ordine di cascata). */
+.press{transition:transform 0.14s cubic-bezier(.34,1.56,.64,1)}
+.press:active{transform:scale(0.97)}
+.press:disabled{transform:none}
+
