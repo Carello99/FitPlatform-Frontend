@@ -19,6 +19,7 @@ import { TILE_CLASS } from '../../core/constants/ui.constants';
 import { ToastService } from '../../core/services/toast.service';
 import { WorkoutStore } from '../../core/services/workout-store.service';
 import { AppHeaderComponent } from '../../layout/app-header/app-header.component';
+import { ModalComponent } from '../../shared/components/modal/modal.component';
 
 // Interfaccia locale per i messaggi della chat di supporto
 interface ChatMsg {
@@ -35,7 +36,7 @@ interface ChatMsg {
 @Component({
   selector: 'ff-help',
   standalone: true,
-  imports: [AppHeaderComponent],
+  imports: [AppHeaderComponent, ModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './help.component.html',
 })

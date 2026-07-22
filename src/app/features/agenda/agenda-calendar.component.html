@@ -7,10 +7,18 @@
   </button>
 </header>
 
+<!-- ============================================================
+     STRIP "DA CONFERMARE" — esiste solo se c'è qualcosa in sospeso.
+     Sta subito sotto al mese: è ciò che si legge per primo entrando, e
+     ogni riga scende al giorno che la riguarda.
+     ============================================================ -->
+<ff-request-strip (focusDay)="goToDay($event)" />
+
 <div class="subhead">
   <div class="legend">
     <span class="lg"><span class="lg-sq"></span>Allenamento</span>
     <span class="lg"><span class="lg-av"><img [src]="trainer.trainer.photoUrl" [alt]="trainer.trainer.name" /></span>Coach</span>
+    @if (store.open().length) { <span class="lg"><span class="lg-gh"></span>Proposta</span> }
   </div>
   <div class="mctl">
     @if (!isCurrentMonth()) { <button class="oggi-mini press" (click)="goToday()"><span class="om-dot"></span>oggi</button> }
@@ -19,10 +27,12 @@
   </div>
 </div>
 
+
+
 <!-- ============================================================
      CALENDARIO (swipe per cambiare mese)
      ============================================================ -->
-<div class="cal" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
+<div class="cal" [class.picking]="!!pickDayFor()" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
   <div class="wdh">@for (w of weekdays; track $index) { <span>{{ w }}</span> }</div>
   <div class="grid">
     @for (c of grid(); track c.iso) {
@@ -31,8 +41,9 @@
         [class.out]="!c.inMonth"
         [class.today]="c.today"
         [class.sel]="c.iso === selected()"
-        [class.proposed]="c.proposed"
+        [class.ghost]="(c.ghost || c.vacating) && linkedDays().has(c.iso)"
         [class.dragover]="dragOverIso() === c.iso"
+        [class.nodrop]="!!pickDayFor() && !canDropOn(c.iso, pickDayFor()!.id)"
         (click)="select(c)"
         (dragover)="onDragOver(c, $event)"
         (dragleave)="onDragLeave(c)"
@@ -41,11 +52,21 @@
         <span class="dnum">{{ c.day }}</span>
         <span class="badges">
           @for (wb of c.workouts.slice(0, 2); track $index) {
-            <span class="bd-sq" [class]="TILE_CLASS[wb.accent]"><i class="ti" [class]="wb.icon" aria-hidden="true"></i></span>
+            <span class="bd-sq tile-bd" [class]="TILE_CLASS[wb.accent]"><i class="ti" [class]="wb.icon" aria-hidden="true"></i></span>
           }
           @if (c.workouts.length > 2) { <span class="bd-more">+{{ c.workouts.length - 2 }}</span> }
+          <!-- I due giorni di uno spostamento portano lo STESSO segno: sono un
+               fatto solo in sospeso, non due stati diversi. Spegnere il giorno
+               di partenza e tratteggiare quello d'arrivo erano due sfumature
+               che a occhio (e a occhio anziano) non si distinguono. -->
           @if (c.coach) {
-            <span class="bd-av" [class.done]="c.coachDone">
+            <span class="bd-av" [class.done]="c.coachDone" [class.bd-ghost]="c.vacating">
+              @if (trainer.trainer.photoUrl) { <img [src]="trainer.trainer.photoUrl" [alt]="trainer.trainer.name" /> }
+              @else { <span>{{ trainer.trainer.initials }}</span> }
+            </span>
+          }
+          @if (c.ghost) {
+            <span class="bd-av bd-ghost" aria-label="Proposta da confermare">
               @if (trainer.trainer.photoUrl) { <img [src]="trainer.trainer.photoUrl" [alt]="trainer.trainer.name" /> }
               @else { <span>{{ trainer.trainer.initials }}</span> }
             </span>
@@ -55,20 +76,35 @@
     }
   </div>
 </div>
-
+    <!-- linea bianca leggera: divide le scelte rapide dal carosello -->
+  <div class="qa-sep"></div>
 <!-- ============================================================
      AGENDA DEL GIORNO
      ============================================================ -->
-<div class="dayhead">
-  <span class="dh-day">{{ selectedLabel() }}</span>
-  @if (dayCount().workouts || dayCount().coach) {
+<div class="dayhead" #dayAnchor>
+  <span class="dh-day">{{ selectedParts().dow }} <span class="dh-num">{{ selectedParts().num }}</span> {{ selectedParts().mon }}</span>
+  @if (dayCount().workouts || dayCount().coach || dayCount().requests) {
     <span class="dh-count">
       @if (dayCount().workouts) { {{ dayCount().workouts }} {{ dayCount().workouts === 1 ? 'allenamento' : 'allenamenti' }} }
       @if (dayCount().workouts && dayCount().coach) { · }
       @if (dayCount().coach) { {{ dayCount().coach }} coach }
+      @if ((dayCount().workouts || dayCount().coach) && dayCount().requests) { · }
+      @if (dayCount().requests) { {{ dayCount().requests }} {{ dayCount().requests === 1 ? 'proposta' : 'proposte' }} }
     </span>
   }
 </div>
+
+<!-- ============================================================
+     MODALITÀ "SCEGLI UN GIORNO" — il percorso alternativo al drag,
+     raggiungibile da tastiera e da screen reader.
+     ============================================================ -->
+@if (pickDayFor(); as pk) {
+  <div class="pickbar" role="status">
+    <i class="ti ti-hand-finger" aria-hidden="true"></i>
+    <span>Scegli il nuovo giorno per la sessione di <b>{{ pk.from }}</b></span>
+    <button class="pick-x press" (click)="cancelPick()" aria-label="Annulla">Annulla</button>
+  </div>
+}
 
 @if (dayTimeline().length) {
   <div class="timeline">
@@ -81,7 +117,7 @@
           <span class="conn"><span class="d" [style.background]="ACCENT_VAR[w.accent]"></span><span class="line"></span></span>
           <button class="wk-card press" (click)="openWorkout(w)">
             <span class="bar" [style.background]="ACCENT_VAR[w.accent]"></span>
-            <span class="wk-ic" [class]="TILE_CLASS[w.accent]"><i class="ti" [class]="w.icon" aria-hidden="true"></i></span>
+            <span class="wk-ic tile-bd" [class]="TILE_CLASS[w.accent]"><i class="ti" [class]="w.icon" aria-hidden="true"></i></span>
             <div class="wk-main">
               <span class="wk-eyebrow">Allenamento svolto</span>
               <div class="wk-top">
@@ -99,47 +135,122 @@
         </div>
       }
 
-      <!-- ---- Sessione col coach (programmata / spostata in attesa) ---- -->
+      <!-- ---- Seduta col coach ----
+           Se è GIÀ CONCLUSA prende la card di un allenamento svolto: è la
+           stessa cosa, un lavoro fatto, e cambiano solo i due segni che la
+           distinguono — la faccia del coach al posto dell'icona della scheda,
+           e l'insegna col calendario spuntato. Niente luogo, niente orario di
+           fine, nessuna azione: su una cosa già successa non si decide più.
+           Se invece deve ancora arrivare resta un appuntamento: linguetta,
+           orario, e la via per chiederne lo spostamento. -->
       @else if (en.session; as e) {
         <div class="tl">
           <span class="t"><b>{{ e.time }}</b></span>
           <span class="conn"><span class="d" [style.background]="e.color"></span><span class="line"></span></span>
-          <div
-            class="pt-card"
-            [class.is-done]="e.status === 'done'"
-            [class.dragging]="draggingSid() === e.id"
-            [attr.draggable]="canDrag(e) ? true : null"
-            (dragstart)="onDragStart(e, $event)"
-            (dragend)="onDragEnd()"
-          >
-            <div class="pt-row">
-              <span class="pt-av" [class.done]="e.status === 'done'">
+
+          @if (concluded(e)) {
+            <div class="wk-card is-pt">
+              <span class="bar" [style.background]="e.color"></span>
+              <span class="pt-pav">
                 @if (trainer.trainer.photoUrl) { <img [src]="trainer.trainer.photoUrl" [alt]="trainer.trainer.name" /> }
                 @else { <span>{{ trainer.trainer.initials }}</span> }
               </span>
-              <div class="pt-main">
-                <span class="pt-eyebrow">Sessione col coach</span>
-                <div class="pt-title">{{ e.title }}</div>
-                <div class="pt-coach">con {{ trainer.trainer.name }} · {{ e.durationMin }} min</div>
-              </div>
-              <div class="pt-side">
-                <span class="pt-status" [class]="'st-' + sessionState(e).cls">{{ sessionState(e).label }}</span>
-                @if (canDrag(e)) { <span class="pt-grip" aria-hidden="true"><i class="ti ti-grip-vertical"></i></span> }
+              <div class="wk-main">
+                <span class="wk-eyebrow ic"><i class="ti ti-calendar-check" aria-hidden="true"></i>Sessione</span>
+                <div class="wk-top">
+                  <span class="nm">{{ e.doneWorkout ?? 'Sessione col coach' }}</span>
+                </div>
+                <div class="wk-stats">
+                  <span><i class="ti ti-clock" aria-hidden="true"></i>{{ e.durationMin }} min</span>
+                  @if (e.doneExercises) {
+                    <span><i class="ti ti-list-numbers" aria-hidden="true"></i>{{ e.doneExercises }} esercizi</span>
+                  }
+                </div>
               </div>
             </div>
-            @if (e.pendingMove) {
-              <div class="pt-foot">
-                <span class="pt-note"><i class="ti ti-clock-exclamation" aria-hidden="true"></i>In attesa di conferma del PT</span>
-                <button class="pt-cancel press" (click)="undoPending(e.id)" aria-label="Annulla richiesta di spostamento"><i class="ti ti-x" aria-hidden="true"></i>Annulla</button>
+          } @else {
+            <div
+              class="pt-wrap"
+              [class.dragging]="draggingId() === e.id"
+              [attr.draggable]="canDrag(e) ? true : null"
+              (dragstart)="onDragStart(e.id, $event)"
+              (dragend)="onDragEnd()"
+            >
+              <!-- Insegna — gemella di quella della card richiesta. Qui è SEMPRE
+                   la linguetta: in questo ramo l'appuntamento è per definizione
+                   futuro e non svolto (`concluded()` porta gli altri altrove),
+                   quindi si può sempre spostare. Anche con una trattativa già
+                   aperta: chi ha chiesto di spostarlo può chiedere di nuovo, e
+                   un'insegna che cambia forma a metà strada farebbe sembrare
+                   perso un gesto che c'è ancora. -->
+              <div class="pt-card">
+                <div class="pt-tab">
+                  <i class="ti ti-grip-horizontal pt-tgrip" aria-hidden="true"></i>
+                  <span class="pt-tlbl"><i class="ti ti-calendar-check" aria-hidden="true"></i>Sessione</span>
+                </div>
+                <div class="pt-who">
+                  <span class="pt-face">
+                    @if (trainer.trainer.photoUrl) { <img [src]="trainer.trainer.photoUrl" [alt]="trainer.trainer.name" /> }
+                    @else { <span>{{ trainer.trainer.initials }}</span> }
+                  </span>
+                  <!-- Nome sopra, luogo sotto: gemella di `.rc-who`. -->
+                  <span class="pt-wtxt">
+                    <span class="pt-wname">{{ trainer.trainer.name }}</span>
+                    <span class="pt-wplace">{{ e.place }}</span>
+                  </span>
+                </div>
+                <!-- Il giorno è nell'intestazione dell'agenda e l'ora d'inizio
+                     nella colonna della timeline: qui resta solo ciò che nessuno
+                     dei due dice — quando finisce. Mai cosa allenerai (D-45). -->
+                <div class="pt-when">
+                  <span class="pt-wcol">
+                    <span class="pt-lbl">Orario</span>
+                    <span class="pt-span">{{ spanOf(e) }}</span>
+                  </span>
+                  @if (sessionState(e); as st) {
+                    <span class="pt-status" [class]="'st-' + st.cls">{{ st.label }}</span>
+                  }
+                </div>
               </div>
-            }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ---- Richiesta aperta: l'evento "in prova" ----
+           Uno spostamento passa di qui DUE volte, una per giorno: `en.side`
+           dice da quale lato lo stiamo guardando. La card è la stessa e le
+           azioni sono le stesse — nessun giorno rimanda all'altro. L'ora della
+           timeline è quella del giorno che si sta guardando, non sempre quella
+           proposta: il giorno di partenza segna ancora l'ora vecchia. -->
+      @else if (en.request; as r) {
+        <div class="tl">
+          <span class="t"><b>{{ en.time }}</b></span>
+          <span class="conn"><span class="d dashed"></span><span class="line"></span></span>
+          <div
+            class="rq-slot"
+            [class.dragging]="draggingId() === r.id"
+            [attr.draggable]="canDragRequest(r) ? true : null"
+            (dragstart)="onDragStart(r.id, $event)"
+            (dragend)="onDragEnd()"
+          >
+            <ff-request-card
+              [req]="r"
+              variant="inline"
+              [side]="en.side ?? null"
+              [grip]="canDragRequest(r)"
+              (accept)="accept($event)"
+              (decline)="decline($event)"
+              (counter)="startCounter($event)"
+              (withdraw)="withdraw($event)"
+            />
           </div>
         </div>
       }
     }
   </div>
 
-  <!-- Azione: richiedi una sessione in questo giorno (solo se il giorno è libero da sessioni) -->
+  <!-- Azione: richiedi una sessione in questo giorno (solo se il giorno è libero) -->
   @if (canRequest()) {
     <button class="ff-req-line press" (click)="openRequest()"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Richiedi una sessione col coach</button>
   }
@@ -147,52 +258,68 @@
   <div class="dp-empty">
     <i class="ti ti-calendar-off" aria-hidden="true"></i>
     <span>Nessun allenamento o sessione in questo giorno.</span>
-    <button class="ff-req press" (click)="openRequest()"><i class="ti ti-plus" aria-hidden="true"></i>Richiedi una sessione</button>
+    @if (canRequest()) {
+      <button class="ff-req press" (click)="openRequest()"><i class="ti ti-plus" aria-hidden="true"></i>Richiedi una sessione</button>
+    }
   </div>
 }
 
 <!-- ============================================================
      BOTTOM-SHEET: richiesta seduta (scelta orario)
-     ============================================================ -->
-@if (requestOpen()) {
-  <div class="sheet-bg" (click)="closeRequest()"></div>
-  <div class="sheet">
-    <div class="sheet-grip"></div>
-    <div class="sheet-hd"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Richiedi sessione · {{ selectedLabel() }}</div>
-    <p class="sheet-sub">Scegli un orario: il tuo PT confermerà la sessione.</p>
-    <div class="timegrid">
-      @for (t of slotOptions; track t) {
-        <button class="tslot press" [disabled]="takenTimes().has(t)" (click)="confirmRequest(t)">{{ t }}</button>
-      }
-    </div>
-    <button class="ff-cancel press" (click)="closeRequest()">Annulla</button>
-  </div>
-}
 
-<!-- ============================================================
-     BOTTOM-SHEET: sposta seduta (dopo drag&drop) — orario + messaggio
+     Il velo e il top layer li mette `ff-modal` (vedi il suo file: uno sheet
+     disegnato a mano qui dentro scorrerebbe via col contenuto).
      ============================================================ -->
-@if (moveTarget(); as mt) {
-  <div class="sheet-bg" (click)="cancelMove()"></div>
-  <div class="sheet">
-    <div class="sheet-grip"></div>
-    <div class="sheet-hd"><i class="ti ti-calendar-share" aria-hidden="true"></i>Sposta "{{ mt.title }}" · {{ moveDateLabel() }}</div>
-    @if (mt.times.length) {
-      <p class="sheet-sub">Scegli il nuovo orario:</p>
+<ff-modal [open]="requestOpen()" (closed)="closeRequest()">
+  @if (requestOpen()) {
+    <div class="sheet">
+      <div class="sheet-grip"></div>
+      <div class="sheet-hd"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Richiedi sessione · {{ selectedLabel() }}</div>
+      <p class="sheet-sub">Scegli un orario: il tuo PT confermerà la sessione.</p>
       <div class="timegrid">
-        @for (t of mt.times; track t) {
-          <button class="tslot press" [class.on]="moveTime() === t" (click)="pickTime(t)">{{ t }}</button>
+        @for (t of slotOptions; track t) {
+          <button class="tslot press" [disabled]="takenTimes().has(t)" (click)="confirmRequest(t)">{{ t }}</button>
         }
       </div>
-      <div class="field" style="margin:16px 0 0">
-        <label for="moveMsg">Messaggio per il PT (facoltativo)</label>
-        <textarea id="moveMsg" class="input" rows="3" placeholder="Es. Mi è uscito un imprevisto, possiamo spostare?" [value]="moveMsg()" (input)="onMoveMsg($event)"></textarea>
+      <button class="ff-cancel press" (click)="closeRequest()">Annulla</button>
+    </div>
+  }
+</ff-modal>
+
+<!-- ============================================================
+     BOTTOM-SHEET: spostamento o controproposta — orario + messaggio
+     ============================================================ -->
+<ff-modal [open]="!!moveTarget()" (closed)="cancelMove()">
+  @if (moveTarget(); as mt) {
+    <div class="sheet">
+      <div class="sheet-grip"></div>
+      <div class="sheet-hd">
+        <i class="ti ti-calendar-share" aria-hidden="true"></i>
+        {{ isCounter() ? 'Controproposta' : sameDay() ? 'Cambia orario' : 'Sposta la sessione' }}<br />
+        <small>{{ mt.from }} → {{ sameDay() ? 'stesso giorno' : moveDateLabel() }}</small>
       </div>
-      <p class="sheet-note"><i class="ti ti-info-circle" aria-hidden="true"></i> Lo spostamento resta <b>da confermare</b> dal tuo PT.</p>
-      <button class="ff-req press" [disabled]="!moveTime()" (click)="confirmMove()"><i class="ti ti-send" aria-hidden="true"></i>Invia richiesta</button>
-    } @else {
-      <p class="sheet-sub">Nessuno slot libero in quel giorno. Prova un altro giorno.</p>
-    }
-    <button class="ff-cancel press" (click)="cancelMove()">Annulla</button>
-  </div>
-}
+      @if (mt.times.length) {
+        <p class="sheet-sub">Scegli il nuovo orario:</p>
+        <div class="timegrid">
+          @for (t of mt.times; track t) {
+            <button class="tslot press" [class.on]="moveTime() === t" (click)="pickTime(t)">{{ t }}</button>
+          }
+        </div>
+        <div class="field" style="margin:16px 0 0">
+          <label for="moveMsg">Messaggio per il PT (facoltativo)</label>
+          <textarea id="moveMsg" class="input" rows="3" placeholder="Es. Mi è uscito un imprevisto, possiamo spostare?" [value]="moveMsg()" (input)="onMoveMsg($event)"></textarea>
+        </div>
+        <p class="sheet-note">
+          <i class="ti ti-info-circle" aria-hidden="true"></i>
+          Resta <b>da confermare</b> dal tuo PT.
+        </p>
+        <button class="ff-req press" [disabled]="!moveTime()" (click)="confirmMove()">
+          <i class="ti ti-send" aria-hidden="true"></i>{{ isCounter() ? 'Invia controproposta' : 'Invia richiesta' }}
+        </button>
+      } @else {
+        <p class="sheet-sub">Nessuno slot libero in quel giorno. Prova un altro giorno.</p>
+      }
+      <button class="ff-cancel press" (click)="cancelMove()">Annulla</button>
+    </div>
+  }
+</ff-modal>

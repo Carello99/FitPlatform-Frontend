@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 24 24"
+     style="transform:rotate(0deg);transform-origin:50% 50%;">
+  <defs></defs>
+  <style>
+    @keyframes draw1 {
+  0%          { stroke-dasharray:0.000 10.855; stroke-dashoffset:-10.855; opacity:1; animation-timing-function:cubic-bezier(0.455, 0.03, 0.515, 0.955); }
+  39.0625%      { stroke-dasharray:10.855 10.855; stroke-dashoffset:0.000; opacity:1; animation-timing-function:cubic-bezier(0.55, 0.055, 0.675, 0.19); }
+  78.1250%      { stroke-dasharray:0.000 10.855; stroke-dashoffset:0.000; opacity:1; }
+  78.2250%  { opacity:0; }
+  100%        { stroke-dasharray:0.000 10.855; stroke-dashoffset:0.000; opacity:0; }
+}
+    @keyframes draw2 {
+  0%          { stroke-dasharray:0.000 10.855; stroke-dashoffset:-10.855; opacity:1; animation-timing-function:cubic-bezier(0.455, 0.03, 0.515, 0.955); }
+  39.0625%      { stroke-dasharray:10.855 10.855; stroke-dashoffset:0.000; opacity:1; animation-timing-function:cubic-bezier(0.55, 0.055, 0.675, 0.19); }
+  78.1250%      { stroke-dasharray:0.000 10.855; stroke-dashoffset:0.000; opacity:1; }
+  78.2250%  { opacity:0; }
+  100%        { stroke-dasharray:0.000 10.855; stroke-dashoffset:0.000; opacity:0; }
+}
+    @keyframes draw3 {
+  0%          { stroke-dasharray:0.000 16.000; stroke-dashoffset:-16.000; opacity:1; animation-timing-function:cubic-bezier(0.455, 0.03, 0.515, 0.955); }
+  39.0625%      { stroke-dasharray:16.000 16.000; stroke-dashoffset:0.000; opacity:1; animation-timing-function:cubic-bezier(0.55, 0.055, 0.675, 0.19); }
+  78.1250%      { stroke-dasharray:0.000 16.000; stroke-dashoffset:0.000; opacity:1; }
+  78.2250%  { opacity:0; }
+  100%        { stroke-dasharray:0.000 16.000; stroke-dashoffset:0.000; opacity:0; }
+}
+    @keyframes draw4 {
+  0%          { stroke-dasharray:0.000 8.505; stroke-dashoffset:-8.505; opacity:1; animation-timing-function:cubic-bezier(0.455, 0.03, 0.515, 0.955); }
+  39.0625%      { stroke-dasharray:8.505 8.505; stroke-dashoffset:0.000; opacity:1; animation-timing-function:cubic-bezier(0.55, 0.055, 0.675, 0.19); }
+  78.1250%      { stroke-dasharray:0.000 8.505; stroke-dashoffset:0.000; opacity:1; }
+  78.2250%  { opacity:0; }
+  100%        { stroke-dasharray:0.000 8.505; stroke-dashoffset:0.000; opacity:0; }
+}
+    @keyframes draw5 {
+  0%          { stroke-dasharray:0.000 8.505; stroke-dashoffset:-8.505; opacity:1; animation-timing-function:cubic-bezier(0.455, 0.03, 0.515, 0.955); }
+  39.0625%      { stroke-dasharray:8.505 8.505; stroke-dashoffset:0.000; opacity:1; animation-timing-function:cubic-bezier(0.55, 0.055, 0.675, 0.19); }
+  78.1250%      { stroke-dasharray:0.000 8.505; stroke-dashoffset:0.000; opacity:1; }
+  78.2250%  { opacity:0; }
+  100%        { stroke-dasharray:0.000 8.505; stroke-dashoffset:0.000; opacity:0; }
+}
+    @keyframes draw6 {
+  0%          { stroke-dasharray:0.000 44.852; stroke-dashoffset:-44.852; opacity:1; animation-timing-function:cubic-bezier(0.455, 0.03, 0.515, 0.955); }
+  39.0625%      { stroke-dasharray:44.852 44.852; stroke-dashoffset:0.000; opacity:1; animation-timing-function:cubic-bezier(0.55, 0.055, 0.675, 0.19); }
+  78.1250%      { stroke-dasharray:0.000 44.852; stroke-dashoffset:0.000; opacity:1; }
+  78.2250%  { opacity:0; }
+  100%        { stroke-dasharray:0.000 44.852; stroke-dashoffset:0.000; opacity:0; }
+}
+    .p1 { animation: draw1 2.816s linear infinite; }
+    .p2 { animation: draw2 2.816s linear infinite; }
+    .p3 { animation: draw3 2.816s linear infinite; }
+    .p4 { animation: draw4 2.816s linear infinite; }
+    .p5 { animation: draw5 2.816s linear infinite; }
+    .p6 { animation: draw6 2.816s linear infinite; }
+  </style>
+  <path class="p1" d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" fill="none" stroke="#39c56d"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="p2" d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" fill="none" stroke="#39c56d"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="p3" d="M4 22h16" fill="none" stroke="#39c56d"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="p4" d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" fill="none" stroke="#39c56d"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="p5" d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" fill="none" stroke="#39c56d"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="p6" d="M18 2H6v7a6 6 0 0 0 12 0V2Z" fill="none" stroke="#39c56d"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

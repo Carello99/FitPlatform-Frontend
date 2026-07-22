@@ -1,0 +1,28 @@
+/* =====================================================
+   Cover Flow — profondità theme-aware.
+   La copertina resta scura in entrambi i temi (DESIGN_SYSTEM); qui si tara solo
+   il RIFLESSO, che su fondo chiaro va tenuto molto tenue per non sporcare.
+   ===================================================== */
+
+/* isolation:isolate → tutti gli z-index interni (carte, frecce, titolo sopra il
+   riflesso a z-index 130) restano CONTENUTI in questo stacking context. Senza,
+   quel 130 sfora sopra il velo del dialog della Home. */
+:host { display: block; isolation: isolate; }
+
+/* Riflesso sotto la carta: opacità dai token (bassa in tema chiaro). */
+.cover-reflect { opacity: var(--cover-reflect-side); }
+.cover-reflect.is-front { opacity: var(--cover-reflect-front); }
+
+/* Frecce di navigazione ai lati. Tema scuro: pillola scura, freccia chiara.
+   Tema chiaro: cerchio BIANCO, freccia NERA (contrasto pieno sul fondo crema). */
+.cf-nav {
+  position: absolute; top: 40%; z-index: 120;
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--cf-nav-bg); backdrop-filter: blur(4px);
+  border: 1px solid var(--cf-nav-border); box-shadow: var(--cf-nav-shadow, none);
+  cursor: pointer;
+}
+.cf-nav.left { left: 8px; }
+.cf-nav.right { right: 8px; }
+.cf-nav .ti { font-size: 20px; color: var(--cf-nav-ink); }

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1400" width="1000" height="1400" role="img" aria-label="Piano alimentare, pagina 1 di 3">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fbf9f2"/>
+      <stop offset="0.55" stop-color="#f3f0e6"/>
+      <stop offset="1" stop-color="#e6e2d5"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#000" flood-opacity="0.55"/>
+    </filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/>
+      <feColorMatrix in="n" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.045"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <style>
+    text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #23211c; }
+    .ttl  { font-size: 40px; font-weight: 700; letter-spacing: 2px; }
+    .sub  { font-size: 20px; fill: #6b675c; }
+    .day  { font-size: 23px; font-weight: 700; letter-spacing: 1.4px; fill: #3c3a32; }
+    .meal { font-size: 20px; font-weight: 700; fill: #55524a; }
+    .body { font-size: 20px; fill: #2c2a24; }
+    .foot { font-size: 19px; font-style: italic; fill: #55524a; }
+    .sign { font-size: 17px; fill: #6b675c; }
+    .sign.dim { fill: #8d897d; }
+    .rule { stroke: #23211c; stroke-width: 2; }
+    .rule-thin { stroke: #b9b4a5; stroke-width: 1; }
+  </style>
+  <rect width="1000" height="1400" fill="#15141a"/>
+  <g transform="rotate(-1.4 500 700)">
+    <rect x="24" y="24" width="952" height="1352" rx="6" fill="url(#paper)" filter="url(#soft)"/>
+    <text x="86" y="132" class="ttl">PIANO ALIMENTARE</text>
+    <text x="86" y="168" class="sub">Giorgio B. · settimana tipo · 1 di 3</text>
+    <line x1="86" y1="186" x2="914" y2="186" class="rule"/>
+    <text x="86" y="210" class="day">LUNEDÌ</text>
+    <line x1="86" y1="224" x2="914" y2="224" class="rule-thin"/>
+    <text x="86" y="258" class="meal">Colazione</text>
+    <text x="300" y="258" class="body">200 ml latte parz. scremato · 60 g fiocchi d’avena</text>
+    <text x="300" y="284" class="body">1 frutto di stagione · caffè</text>
+    <text x="86" y="320" class="meal">Spuntino</text>
+    <text x="300" y="320" class="body">1 yogurt greco 150 g · 15 g mandorle</text>
+    <text x="86" y="356" class="meal">Pranzo</text>
+    <text x="300" y="356" class="body">80 g riso integrale · 150 g petto di pollo</text>
+    <text x="300" y="382" class="body">verdure a foglia q.b. · 10 g olio evo</text>
+    <text x="86" y="418" class="meal">Spuntino</text>
+    <text x="300" y="418" class="body">1 frutto · 30 g fette biscottate integrali</text>
+    <text x="86" y="454" class="meal">Cena</text>
+    <text x="300" y="454" class="body">180 g merluzzo · 200 g patate lesse</text>
+    <text x="300" y="480" class="body">insalata mista · 10 g olio evo</text>
+    <text x="86" y="536" class="day">MARTEDÌ</text>
+    <line x1="86" y1="550" x2="914" y2="550" class="rule-thin"/>
+    <text x="86" y="584" class="meal">Colazione</text>
+    <text x="300" y="584" class="body">2 uova · 60 g pane integrale · 1 frutto</text>
+    <text x="86" y="620" class="meal">Spuntino</text>
+    <text x="300" y="620" class="body">1 banana media</text>
+    <text x="86" y="656" class="meal">Pranzo</text>
+    <text x="300" y="656" class="body">80 g pasta integrale · 60 g tonno al naturale</text>
+    <text x="300" y="682" class="body">pomodorini · 10 g olio evo</text>
+    <text x="86" y="718" class="meal">Spuntino</text>
+    <text x="300" y="718" class="body">150 g yogurt bianco · 10 g noci</text>
+    <text x="86" y="754" class="meal">Cena</text>
+    <text x="300" y="754" class="body">150 g tacchino · verdure grigliate</text>
+    <text x="300" y="780" class="body">50 g pane integrale · 10 g olio evo</text>
+    <text x="86" y="836" class="day">MERCOLEDÌ</text>
+    <line x1="86" y1="850" x2="914" y2="850" class="rule-thin"/>
+    <text x="86" y="884" class="meal">Colazione</text>
+    <text x="300" y="884" class="body">200 ml latte · 50 g cereali integrali · 1 frutto</text>
+    <text x="86" y="920" class="meal">Spuntino</text>
+    <text x="300" y="920" class="body">1 yogurt greco 150 g</text>
+    <text x="86" y="956" class="meal">Pranzo</text>
+    <text x="300" y="956" class="body">100 g legumi secchi (o 250 g lessati) · 60 g riso</text>
+    <text x="300" y="982" class="body">verdure · 10 g olio evo</text>
+    <text x="86" y="1018" class="meal">Spuntino</text>
+    <text x="300" y="1018" class="body">1 frutto · 20 g cioccolato fondente 85%</text>
+    <text x="86" y="1054" class="meal">Cena</text>
+    <text x="300" y="1054" class="body">180 g salmone · insalata · 200 g patate</text>
+    <text x="300" y="1080" class="body">10 g olio evo</text>
+    <line x1="86" y1="1250" x2="914" y2="1250" class="rule-thin"/>
+    <text x="86" y="1288" class="foot">Bere almeno 2 litri di acqua al giorno.</text>
+    <text x="86" y="1322" class="sign">Dott.ssa Chiara Bianchi — Biologa Nutrizionista</text>
+    <text x="86" y="1350" class="sign dim">Rilasciato il 12/07/2026 · pagina 1 di 3</text>
+    <rect x="24" y="24" width="952" height="1352" rx="6" filter="url(#grain)" opacity="0.7"/>
+  </g>
+</svg>

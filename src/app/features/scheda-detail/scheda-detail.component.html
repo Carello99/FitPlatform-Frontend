@@ -27,7 +27,7 @@
             <i class="ti ti-chevron-left" style="font-size:22px" aria-hidden="true"></i>
           </button>
 
-          <div class="itile" [class]="TILE_CLASS[s.accent]"><i class="ti" [class]="s.icon" aria-hidden="true"></i></div>
+          <div class="itile tile-bd" [class]="TILE_CLASS[s.accent]"><i class="ti" [class]="s.icon" aria-hidden="true"></i></div>
 
           <button class="iconbtn" (click)="toggleFav()" [attr.aria-label]="state.fav() ? 'Togli dai preferiti' : 'Aggiungi ai preferiti'">
             <i class="ti" [class]="state.fav() ? 'ti-heart-filled' : 'ti-heart'" style="font-size:20px" [style.color]="state.fav() ? 'var(--rose)' : 'var(--ink)'" aria-hidden="true"></i>
@@ -159,10 +159,10 @@
     </div>
 
     <!-- ===== DIALOG CONFERMA AVVIO ===== -->
-    @if (showDialog()) {
-      <div class="scrim center" (click)="showDialog.set(false)">
-        <div class="dialog" (click)="$event.stopPropagation()">
-          <div class="itile" [class]="TILE_CLASS[s.accent]" style="width:60px;height:60px;border-radius:18px;margin:0 auto 16px"><i class="ti" [class]="s.icon" style="font-size:30px" aria-hidden="true"></i></div>
+    <ff-modal [open]="showDialog()" [center]="true" (closed)="showDialog.set(false)">
+      @if (showDialog()) {
+        <div class="dialog">
+          <div class="itile tile-bd" [class]="TILE_CLASS[s.accent]" style="width:60px;height:60px;border-radius:18px;margin:0 auto 16px"><i class="ti" [class]="s.icon" style="font-size:30px" aria-hidden="true"></i></div>
           <h2 style="font-size:21px;font-weight:800;letter-spacing:-0.4px">Vuoi iniziare l'allenamento?</h2>
           <p style="font-size:14px;color:var(--ink-3);font-weight:500;margin:8px 0 6px;line-height:1.5">
             <b style="color:var(--ink-2)">{{ s.name }}</b> · {{ s.exercises.length }} esercizi · circa {{ s.duration }} min
@@ -176,12 +176,15 @@
           </button>
           <button class="btn btn-ghost btn-block" style="margin-top:10px" (click)="showDialog.set(false)">Più tardi</button>
         </div>
-      </div>
-    }
+      }
+    </ff-modal>
 
-    <!-- ===== MODAL MODIFICA SCHEDA ===== -->
-    @if (editMode()) {
-      <div style="position:fixed;inset:0;z-index:200;background:var(--bg-app);display:flex;flex-direction:column;overflow:hidden">
+    <!-- ===== MODAL MODIFICA SCHEDA =====
+         Pannello pieno dentro ff-modal: `position: fixed` qui dentro non
+         reggeva, perché `.screen` ha `contain: paint` e si prende i fissi. -->
+    <ff-modal [open]="editMode()" [full]="true" (closed)="cancelEdit()">
+      @if (editMode()) {
+      <div style="background:var(--bg-app);display:flex;flex-direction:column;overflow:hidden">
 
         <!-- Header modal -->
         <div style="display:flex;align-items:center;padding:14px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--hairline)">
@@ -424,10 +427,11 @@
           </div>
         }
 
-        <!-- ===== DIALOG CONFERMA ELIMINAZIONE ===== -->
-        @if (pendingDeleteEx()) {
-          <div class="scrim center" style="position:absolute;inset:0;z-index:20" (click)="cancelDeleteEx()">
-            <div class="dialog" (click)="$event.stopPropagation()">
+        <!-- ===== DIALOG CONFERMA ELIMINAZIONE =====
+             Modale dentro un modale: il top layer li impila da sé. -->
+        <ff-modal [open]="!!pendingDeleteEx()" [center]="true" (closed)="cancelDeleteEx()">
+          @if (pendingDeleteEx()) {
+            <div class="dialog">
               <!-- Icona cestino -->
               <div style="width:60px;height:60px;border-radius:18px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:28px" class="t-rose">
                 <i class="ti ti-trash" aria-hidden="true"></i>
@@ -450,10 +454,11 @@
               </button>
               <button class="btn btn-ghost btn-block" style="margin-top:10px" (click)="cancelDeleteEx()">Annulla</button>
             </div>
-          </div>
-        }
+          }
+        </ff-modal>
       </div>
-    }
+      }
+    </ff-modal>
 
   </div>
 }

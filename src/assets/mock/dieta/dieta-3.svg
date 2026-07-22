@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1400" width="1000" height="1400" role="img" aria-label="Piano alimentare, pagina 3 di 3">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fbf9f2"/>
+      <stop offset="0.55" stop-color="#f3f0e6"/>
+      <stop offset="1" stop-color="#e6e2d5"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#000" flood-opacity="0.55"/>
+    </filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/>
+      <feColorMatrix in="n" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.045"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <style>
+    text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #23211c; }
+    .ttl  { font-size: 40px; font-weight: 700; letter-spacing: 2px; }
+    .sub  { font-size: 20px; fill: #6b675c; }
+    .day  { font-size: 23px; font-weight: 700; letter-spacing: 1.4px; fill: #3c3a32; }
+    .meal { font-size: 20px; font-weight: 700; fill: #55524a; }
+    .body { font-size: 20px; fill: #2c2a24; }
+    .foot { font-size: 19px; font-style: italic; fill: #55524a; }
+    .sign { font-size: 17px; fill: #6b675c; }
+    .sign.dim { fill: #8d897d; }
+    .rule { stroke: #23211c; stroke-width: 2; }
+    .rule-thin { stroke: #b9b4a5; stroke-width: 1; }
+  </style>
+  <rect width="1000" height="1400" fill="#15141a"/>
+  <g transform="rotate(-0.7 500 700)">
+    <rect x="24" y="24" width="952" height="1352" rx="6" fill="url(#paper)" filter="url(#soft)"/>
+    <text x="86" y="132" class="ttl">DOMENICA E NOTE</text>
+    <text x="86" y="168" class="sub">Giorgio B. · settimana tipo · 3 di 3</text>
+    <line x1="86" y1="186" x2="914" y2="186" class="rule"/>
+    <text x="86" y="210" class="day">DOMENICA</text>
+    <line x1="86" y1="224" x2="914" y2="224" class="rule-thin"/>
+    <text x="86" y="258" class="meal">Colazione</text>
+    <text x="300" y="258" class="body">200 ml latte · 50 g cereali · 1 frutto</text>
+    <text x="86" y="294" class="meal">Spuntino</text>
+    <text x="300" y="294" class="body">150 g yogurt greco · 10 g miele</text>
+    <text x="86" y="330" class="meal">Pranzo</text>
+    <text x="300" y="330" class="body">80 g riso · 150 g pollo · verdure miste</text>
+    <text x="300" y="356" class="body">10 g olio evo</text>
+    <text x="86" y="392" class="meal">Spuntino</text>
+    <text x="300" y="392" class="body">1 frutto</text>
+    <text x="86" y="428" class="meal">Cena</text>
+    <text x="300" y="428" class="body">2 uova · 200 g verdure · 60 g pane integrale</text>
+    <text x="300" y="454" class="body">10 g olio evo</text>
+    <text x="86" y="510" class="day">NEI GIORNI DI ALLENAMENTO</text>
+    <line x1="86" y1="524" x2="914" y2="524" class="rule-thin"/>
+    <text x="86" y="558" class="meal">Pre-workout</text>
+    <text x="300" y="558" class="body">1 frutto o 30 g fette biscottate, 60 minuti prima</text>
+    <text x="86" y="594" class="meal">Post-workout</text>
+    <text x="300" y="594" class="body">Anticipare lo spuntino: 150 g yogurt greco + 1 frutto</text>
+    <text x="86" y="630" class="meal">Idratazione</text>
+    <text x="300" y="630" class="body">500 ml di acqua in più nella giornata</text>
+    <text x="86" y="686" class="day">SOSTITUZIONI AMMESSE</text>
+    <line x1="86" y1="700" x2="914" y2="700" class="rule-thin"/>
+    <text x="86" y="734" class="meal">Proteine</text>
+    <text x="300" y="734" class="body">Pollo ↔ tacchino ↔ pesce bianco, stesso peso</text>
+    <text x="86" y="770" class="meal">Carboidrati</text>
+    <text x="300" y="770" class="body">Riso ↔ pasta ↔ farro ↔ orzo, stesso peso a crudo</text>
+    <text x="86" y="806" class="meal">Latticini</text>
+    <text x="300" y="806" class="body">Yogurt greco ↔ skyr ↔ fiocchi di latte 200 g</text>
+    <line x1="86" y1="1250" x2="914" y2="1250" class="rule-thin"/>
+    <text x="86" y="1288" class="foot">Per qualsiasi dubbio scrivimi prima di modificare da solo.</text>
+    <text x="86" y="1322" class="sign">Dott.ssa Chiara Bianchi — Biologa Nutrizionista</text>
+    <text x="86" y="1350" class="sign dim">Rilasciato il 12/07/2026 · pagina 3 di 3</text>
+    <rect x="24" y="24" width="952" height="1352" rx="6" filter="url(#grain)" opacity="0.7"/>
+  </g>
+</svg>

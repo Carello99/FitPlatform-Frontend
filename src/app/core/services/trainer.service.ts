@@ -6,21 +6,22 @@
  *    - Personal Trainer (scheda del PT)
  *    - Agenda (sedute)
  *    - Messaggi (chat 1:1 col PT)
- *  COSA RAPPRESENTA: sostituto client-side dell'API. Espone stato reattivo e
- *    poche azioni (richiedi seduta, invia messaggio) che aggiornano i signal.
+ *  COSA RAPPRESENTA: sostituto client-side dell'API. Custodisce ciò che è
+ *    CONCORDATO (sedute, messaggi, profilo del coach).
+ *
+ *  COSA NON STA QUI: la negoziazione. Proposte, spostamenti e controproposte
+ *    vivono in `AgendaRequestStore`, che è l'unico a poter mutare le sedute in
+ *    conseguenza di una richiesta accettata. La dipendenza va in una direzione
+ *    sola (store → trainer), così non ci sono cicli: questo servizio non sa
+ *    nulla delle richieste.
  * ============================================================================
  */
 import { Injectable, computed, signal } from '@angular/core';
 import {
-  COACHES_CATALOG, CoachCard, MESSAGES_MOCK, PtMessage, PtSession, SESSIONS_MOCK, TRAINER_MOCK, TrainerProfile,
+  COACHES_CATALOG, CoachCard, DIETS_MOCK, DietPlan, MESSAGES_MOCK, PtMessage, PtSession, SESSIONS_MOCK,
+  TRAINER_MOCK, TrainerProfile,
 } from '../data/trainer-mock';
-
-const MESI_BREVI = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
-/** "2026-07-18" → "18 lug" (per i messaggi di spostamento). */
-function prettyDate(iso: string): string {
-  const d = new Date(iso + 'T00:00:00');
-  return `${d.getDate()} ${MESI_BREVI[d.getMonth()]}`;
-}
+import { isoDay } from '../utils/date.utils';
 
 @Injectable({ providedIn: 'root' })
 export class TrainerService {
@@ -38,7 +39,7 @@ export class TrainerService {
     return this.catalog.find((c) => c.id === id);
   }
 
-  /** Sedute in agenda (signal: si aggiorna quando l'utente richiede una seduta). */
+  /** Sedute concordate in agenda. */
   private readonly _sessions = signal<PtSession[]>([...SESSIONS_MOCK]);
   readonly sessions = this._sessions.asReadonly();
 
@@ -46,12 +47,40 @@ export class TrainerService {
   private readonly _messages = signal<PtMessage[]>([...MESSAGES_MOCK]);
   readonly messages = this._messages.asReadonly();
 
-  /** Prossime sedute (confermate o in attesa) ordinate per data/ora. */
-  readonly upcoming = computed(() =>
-    this._sessions()
-      .filter((s) => s.status !== 'done')
-      .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)),
-  );
+  // ==========================================================================
+  //  PIANO ALIMENTARE
+  //  Arriva come allegato di un messaggio del coach: la chat è dove viene
+  //  consegnato e resta l'archivio di tutti quelli passati. Qui si tiene solo
+  //  il puntatore a quello IN VIGORE, che è l'unico che la sezione Coach mostra.
+  // ==========================================================================
+
+  /** Piani alimentari ricevuti, dal più vecchio al più recente. */
+  private readonly _diets = signal<DietPlan[]>([...DIETS_MOCK]);
+  readonly diets = this._diets.asReadonly();
+
+  /** Il piano in vigore = l'ultimo arrivato (o null se il coach non ne ha mandati). */
+  readonly currentDiet = computed<DietPlan | null>(() => {
+    const list = [...this._diets()].sort((a, b) => a.sentAt.localeCompare(b.sentAt));
+    return list.length ? list[list.length - 1] : null;
+  });
+
+  /** Trova un piano per id (serve alla chat, che cita quello di allora). */
+  diet(id: string): DietPlan | undefined {
+    return this._diets().find((d) => d.id === id);
+  }
+
+  /**
+   * Prossime sedute in programma, ordinate per data/ora.
+   * «Prossime» vuol dire **da oggi in avanti**: una seduta concordata e mai
+   * chiusa resta `confirmed` per sempre, e senza il filtro sulla data sarebbe
+   * lei la «prossima» — con la Home che annuncia un appuntamento di ieri.
+   */
+  readonly upcoming = computed(() => {
+    const today = isoDay();
+    return this._sessions()
+      .filter((s) => s.status !== 'done' && s.date >= today)
+      .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  });
 
   /** Sedute svolte, dalla più recente. */
   readonly pastSessions = computed(() =>
@@ -84,102 +113,29 @@ export class TrainerService {
       .sort((a, b) => a.time.localeCompare(b.time));
   }
 
-  /** Proposte di seduta del coach da accettare (pending, proposte dal coach). */
-  readonly proposals = computed(() =>
-    this._sessions()
-      .filter((s) => s.status === 'pending' && s.proposedBy === 'coach')
-      .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)),
-  );
-
-  /** Spostamenti proposti dal coach, in attesa di conferma dell'utente. */
-  readonly reschedules = computed(() =>
-    this._sessions()
-      .filter((s) => !!s.movingTo)
-      .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)),
-  );
-
-  /** Totale cose da confermare (proposte + spostamenti) — per i badge. */
-  readonly toConfirm = computed(() => this.proposals().length + this.reschedules().length);
-
-  /** Accetta una proposta di seduta del coach → confermata. */
-  acceptSession(id: string): void {
-    this._sessions.update((list) =>
-      list.map((s) => (s.id === id ? { ...s, status: 'confirmed', proposedBy: undefined } : s)),
-    );
+  /** Trova una seduta per id. */
+  session(id: string): PtSession | undefined {
+    return this._sessions().find((s) => s.id === id);
   }
 
-  /** Rifiuta una proposta di seduta del coach → rimossa. */
-  declineSession(id: string): void {
-    this._sessions.update((list) => list.filter((s) => s.id !== id));
-  }
+  // ==========================================================================
+  //  MUTAZIONI DELLE SEDUTE
+  //  Le chiama SOLO AgendaRequestStore, quando una richiesta viene accettata.
+  //  Nessun componente muta direttamente l'agenda: passa sempre da una
+  //  richiesta, perché in agenda nessuno impone — si propone (UX §19).
+  // ==========================================================================
 
-  /** Conferma lo spostamento proposto → la seduta si sposta al nuovo slot. */
-  confirmMove(id: string): void {
-    this._sessions.update((list) =>
-      list.map((s) =>
-        s.id === id && s.movingTo
-          ? { ...s, date: s.movingTo.date, time: s.movingTo.time, status: 'confirmed', movingTo: undefined }
-          : s,
-      ),
-    );
-  }
-
-  /** Rifiuta lo spostamento → la seduta resta dov'è. */
-  rejectMove(id: string): void {
-    this._sessions.update((list) =>
-      list.map((s) => (s.id === id ? { ...s, movingTo: undefined } : s)),
-    );
-  }
-
-  /** Sedute con uno spostamento richiesto dall'utente, in attesa del PT. */
-  readonly pendingMoves = computed(() => this._sessions().filter((s) => !!s.pendingMove));
-
-  /**
-   * L'UTENTE richiede di spostare una propria seduta a un altro giorno/orario
-   * (drag&drop in agenda). La seduta viene già mostrata al NUOVO slot, marcata
-   * "in attesa del PT" e con memoria dello slot originale (per l'annullamento);
-   * parte un messaggio-notifica in chat al PT con l'eventuale testo allegato.
-   */
-  requestMove(sid: string, toDate: string, toTime: string, message?: string): void {
-    const orig = this._sessions().find((s) => s.id === sid);
-    if (!orig || orig.pendingMove) return;
-    const msg = message?.trim() || undefined;
-    const fromDate = orig.date;
-    const fromTime = orig.time;
-    this._sessions.update((list) =>
-      list.map((s) =>
-        s.id === sid ? { ...s, date: toDate, time: toTime, pendingMove: { fromDate, fromTime, message: msg } } : s,
-      ),
-    );
-    const base = `Ciao ${this.trainer.name}! Vorrei spostare "${orig.title}" dal ${prettyDate(fromDate)} · ${fromTime} al ${prettyDate(toDate)} · ${toTime}. Per te va bene?`;
-    this.sendMessage(msg ? `${base}\n${msg}` : base);
-  }
-
-  /** Annulla la richiesta: la seduta torna allo slot originale e sparisce il "da confermare". */
-  cancelMove(sid: string): void {
-    this._sessions.update((list) =>
-      list.map((s) =>
-        s.id === sid && s.pendingMove
-          ? { ...s, date: s.pendingMove.fromDate, time: s.pendingMove.fromTime, pendingMove: undefined }
-          : s,
-      ),
-    );
-  }
-
-  /** Richiede una nuova seduta: la aggiunge come 'pending' (proposta dall'utente). */
-  requestSession(date: string, time: string, title = 'Seduta'): void {
-    const s: PtSession = {
-      id: 'req-' + Date.now(),
-      date, time, title,
-      durationMin: 60,
-      status: 'pending',
-      color: 'var(--rose)',
-      proposedBy: 'me',
-    };
+  /** Aggiunge una seduta concordata. */
+  addSession(s: PtSession): void {
     this._sessions.update((list) => [...list, s]);
   }
 
-  /** Invia un messaggio dell'utente (e simula una breve risposta del PT). */
+  /** Sposta una seduta a un nuovo slot. */
+  moveSession(id: string, date: string, time: string): void {
+    this._sessions.update((list) => list.map((s) => (s.id === id ? { ...s, date, time } : s)));
+  }
+
+  /** Invia un messaggio dell'utente in chat. */
   sendMessage(text: string): void {
     const now = new Date();
     const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;

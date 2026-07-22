@@ -37,6 +37,8 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SessionService } from '../../core/services/session.service';
+import { TrainerService } from '../../core/services/trainer.service';
+import { AgendaRequestStore } from '../../core/services/agenda-request.service';
 
 /**
  * Barra di navigazione inferiore con 4 tab.
@@ -63,17 +65,21 @@ import { SessionService } from '../../core/services/session.service';
       </button>
 
       <button class="bn-item" [class.active]="current() === 'schede'" (click)="go('schede')">
-        <i class="ti ti-barbell" aria-hidden="true"></i>
+        <i class="ic-mask ic-weightlifting" aria-hidden="true"></i>
         <span class="bn-label">Schede</span>
       </button>
 
       <button class="bn-item" [class.active]="current() === 'messaggi'" (click)="go('messaggi')">
         <i class="ti ti-message-circle" aria-hidden="true"></i>
+        @if (trainer.unread(); as n) { <span class="bn-badge" [attr.aria-label]="n + ' messaggi non letti'">{{ n }}</span> }
         <span class="bn-label">Messaggi</span>
       </button>
 
+      <!-- Il badge Agenda è ciò che fa uscire una richiesta dalla sua schermata:
+           una cosa in sospeso non deve poter essere dimenticata (UX §19.4). -->
       <button class="bn-item" [class.active]="current() === 'agenda'" (click)="go('agenda')">
         <i class="ti ti-calendar" aria-hidden="true"></i>
+        @if (requests.toAnswerCount(); as n) { <span class="bn-badge" [attr.aria-label]="n + ' richieste da confermare'">{{ n }}</span> }
         <span class="bn-label">Agenda</span>
       </button>
 
@@ -87,6 +93,8 @@ import { SessionService } from '../../core/services/session.service';
 export class BottomNavComponent {
   // session è "readonly" ma non "private" perché il template lo usa direttamente
   readonly session = inject(SessionService);
+  readonly trainer = inject(TrainerService);
+  readonly requests = inject(AgendaRequestStore);
   private readonly router = inject(Router);
 
   // Inizializzato con il nome del tab corrispondente all'URL corrente

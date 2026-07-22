@@ -20,37 +20,38 @@
   @for (m of trainer.messages(); track m.id) {
     <div class="row" [class.me]="m.from === 'me'">
       <div class="bubble">
+        <!-- Allegato: il piano alimentare arriva così, come foto mandate dal
+             coach. Si aprono qui, dove sono state consegnate — la chat resta
+             l'archivio di tutti quelli passati, la sezione Coach inchioda solo
+             quello in vigore (D-46). -->
+        @if (dietOf(m); as d) {
+          <button class="att press" (click)="openDiet(d)">
+            <span class="att-shots">
+              @for (p of d.photos.slice(0, 3); track p) { <img [src]="p" alt="" /> }
+            </span>
+            <span class="att-txt">
+              <span class="att-n">Piano alimentare</span>
+              <span class="att-s">{{ d.photos.length === 1 ? '1 pagina' : d.photos.length + ' pagine' }} · tocca per leggere</span>
+            </span>
+          </button>
+        }
         <span class="bt">{{ m.text }}</span>
         <span class="tm">{{ m.time }}</span>
       </div>
     </div>
   }
 
-  <!-- Proposte/spostamenti del coach = ultimi messaggi ricevuti (card azione) -->
-  @for (s of trainer.reschedules(); track s.id) {
-    @if (s.movingTo; as mv) {
-      <div class="row">
-        <div class="bubble action">
-          <div class="ac-hd"><i class="ti ti-arrows-exchange" aria-hidden="true"></i>Proposta di spostamento</div>
-          <div class="ac-txt"><b>{{ s.title }}</b><span class="ac-when"><span class="from">{{ dowShort(s.date) }} · {{ s.time }}</span><i class="ti ti-arrow-right" aria-hidden="true"></i><span class="to">{{ dowShort(mv.date) }} · {{ mv.time }}</span></span></div>
-          <div class="ac-acts">
-            <button class="ac-ok press" (click)="confirmMove(s.id)"><i class="ti ti-check" aria-hidden="true"></i>Conferma</button>
-            <button class="ac-no press" (click)="rejectMove(s.id)">Rifiuta</button>
-          </div>
-        </div>
-      </div>
-    }
-  }
-  @for (s of trainer.proposals(); track s.id) {
+  <!-- Richieste aperte: la STESSA card dell'agenda, in densità chat.
+       "Sposta" qui non apre nulla: porta in Agenda, dove c'è il calendario. -->
+  @for (r of store.toAnswer(); track r.id) {
     <div class="row">
-      <div class="bubble action">
-        <div class="ac-hd"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Nuova seduta proposta</div>
-        <div class="ac-txt"><b>{{ s.title }}</b><span class="ac-when">{{ dowShort(s.date) }} · {{ s.time }} · {{ s.durationMin }} min</span></div>
-        <div class="ac-acts">
-          <button class="ac-ok press" (click)="accept(s.id)"><i class="ti ti-check" aria-hidden="true"></i>Accetta</button>
-          <button class="ac-no press" (click)="decline(s.id)">Rifiuta</button>
-        </div>
-      </div>
+      <ff-request-card
+        [req]="r"
+        variant="chat"
+        (accept)="accept($event)"
+        (decline)="decline($event)"
+        (counter)="toAgenda(r.payload.date)"
+      />
     </div>
   }
 </div>
@@ -69,3 +70,14 @@
     <i class="ti ti-send" aria-hidden="true"></i>
   </button>
 </div>
+
+<!-- Visore delle foto del piano: lo stesso della sezione Coach. -->
+@if (diet(); as d) {
+  <ff-photo-viewer
+    [open]="true"
+    [photos]="d.photos"
+    title="Piano alimentare"
+    [subtitle]="d.author + ' · ' + short(d.sentAt)"
+    (close)="diet.set(null)"
+  />
+}

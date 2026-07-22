@@ -43,6 +43,27 @@
       }
     } @else {
 
+    <!-- Esercizi già aggiunti — IN CIMA, visibili solo dopo il primo aggiunto -->
+    @if (added.length > 0) {
+      <div style="margin-bottom:22px;padding:0 2px">
+        <div style="font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">
+          {{ added.length }} {{ added.length === 1 ? 'esercizio aggiunto' : 'esercizi aggiunti' }}
+        </div>
+        <div class="col gap8">
+          @for (ex of added; track ex.name) {
+            <ff-exercise-card [name]="ex.name" [sets]="ex.sets" [reps]="ex.reps" [kg]="ex.kg">
+              <button (click)="removeExercise(ex.name)" aria-label="Rimuovi esercizio"
+                style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none"
+                [style.background]="metaForExercise(ex.name)?.color ?? 'var(--ink-3)'">
+                <i class="ti ti-x" style="font-size:12px;color:var(--on-accent)" aria-hidden="true"></i>
+              </button>
+            </ff-exercise-card>
+          }
+        </div>
+        <div class="ex-section-div"></div>
+      </div>
+    }
+
     @for (cat of MUSCLE_GROUPS; track cat.label) {
 
       <!-- Category header -->
@@ -76,30 +97,6 @@
         }
       </div>
 
-    }
-
-    <!-- Esercizi già aggiunti -->
-    @if (added.length > 0) {
-      <div style="margin-top:24px;padding:0 2px">
-        <div style="font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">
-          {{ added.length }} {{ added.length === 1 ? 'esercizio aggiunto' : 'esercizi aggiunti' }}
-        </div>
-        <div class="col gap8">
-          @for (ex of added; track ex.name) {
-            <ff-exercise-card [name]="ex.name" [sets]="ex.sets" [reps]="ex.reps" [kg]="ex.kg">
-              <button (click)="removeExercise(ex.name)" aria-label="Rimuovi esercizio"
-                style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none"
-                [style.background]="metaForExercise(ex.name)?.color ?? 'var(--ink-3)'">
-                <i class="ti ti-x" style="font-size:12px;color:var(--on-accent)" aria-hidden="true"></i>
-              </button>
-            </ff-exercise-card>
-          }
-        </div>
-      </div>
-    } @else {
-      <div style="text-align:center;margin-top:28px;color:var(--ink-4)">
-        <div style="font-size:13px;font-weight:600">Seleziona un gruppo muscolare per aggiungere esercizi</div>
-      </div>
     }
 
     }

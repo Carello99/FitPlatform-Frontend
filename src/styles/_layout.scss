@@ -59,6 +59,16 @@
 .bn-item.active .ti,
 .bn-item.active .ic-mask{color:var(--amber);transform:translateY(-1px)}
 .bn-item.active .bn-label{color:var(--amber)}
+/* Pastiglia di conteggio sull'icona di un tab (messaggi non letti, richieste da
+   confermare). Il tab è position:relative, quindi si ancora all'icona. */
+.bn-badge{
+  position:absolute;top:2px;left:50%;margin-left:5px;
+  min-width:16px;height:16px;padding:0 4px;border-radius:var(--r-pill);
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--amber);color:var(--amber-ink);
+  font-size:10px;font-weight:900;line-height:1;
+  border:2px solid var(--surface-0);
+}
 .bn-fab{
   width:60px;height:60px;border-radius:50%;
   background:var(--amber);color:var(--amber-ink);

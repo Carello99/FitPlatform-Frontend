@@ -114,6 +114,14 @@ export interface HistoryExercise {
  */
 export interface HistoryItem {
   id?: string;      // Identificatore univoco (per il deep-link dal calendario)
+  /**
+   * La scheda da cui è nato questo allenamento. Serve a rispondere «questa
+   * scheda sta funzionando?»: senza, l'unico aggancio sarebbe `name`, che è
+   * una copia del nome AL MOMENTO dell'esecuzione — se la scheda viene
+   * rinominata, lo storico si stacca in silenzio. Opzionale perché le voci
+   * vecchie non ce l'hanno: chi legge deve reggere l'assenza.
+   */
+  schedaId?: string;
   name: string;     // Nome della scheda eseguita
   dateIso: string;  // Data ISO 'YYYY-MM-DD' — la fonte di verità del "quando"
   time: string;     // Orario 'HH:MM'

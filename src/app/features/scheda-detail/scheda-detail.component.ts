@@ -58,6 +58,7 @@ import { DiffComponent } from '../../shared/components/diff/diff.component';
 import { ExerciseCardComponent } from '../../shared/components/exercise-card/exercise-card.component';
 import { MusclePickerComponent, PickedExercise } from '../../shared/components/muscle-picker/muscle-picker.component';
 import { AppHeaderComponent } from '../../layout/app-header/app-header.component';
+import { ModalComponent } from '../../shared/components/modal/modal.component';
 
 interface PickedEx {
   name: string;
@@ -72,7 +73,7 @@ interface PickedEx {
   selector: 'ff-scheda-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DiffComponent, MusclePickerComponent, ExerciseCardComponent, AppHeaderComponent],
+  imports: [DiffComponent, MusclePickerComponent, ExerciseCardComponent, AppHeaderComponent, ModalComponent],
   templateUrl: './scheda-detail.component.html',
 })
 export class SchedaDetailComponent {
@@ -170,7 +171,7 @@ export class SchedaDetailComponent {
   readonly skipDeleteConfirm = this.prefs.skipDeleteConfirm;
 
   readonly editCardBg = computed(() =>
-    `linear-gradient(155deg, ${ACCENT_VAR[this.editAccent()]} -10%, #14141d 115%)`
+    `linear-gradient(155deg, ${ACCENT_VAR[this.editAccent()]} -10%, var(--cover-end) 115%)`
   );
 
   readonly filteredEditLib = computed(() => {

@@ -198,6 +198,20 @@ export class WorkoutStore {
   get history(): HistoryItem[] {
     return this.data()?.history ?? [];
   }
+  /**
+   * Gli allenamenti nati da una scheda, dal più vecchio al più recente —
+   * l'ordine in cui si legge un progresso.
+   *
+   * L'aggancio è `schedaId`, con il nome come rete di sicurezza per le voci
+   * più vecchie che non ce l'hanno: se un giorno la scheda viene rinominata,
+   * quelle voci si staccheranno, ed è un male minore rispetto ad attribuire a
+   * una scheda l'allenamento di un'altra che si chiama uguale.
+   */
+  historyOf(schedaId: string, schedaName?: string): HistoryItem[] {
+    return this.history
+      .filter((h) => (h.schedaId ? h.schedaId === schedaId : !!schedaName && h.name === schedaName))
+      .sort((a, b) => (a.dateIso + a.time).localeCompare(b.dateIso + b.time));
+  }
   get faq(): FaqItem[] {
     return this.data()?.faq ?? [];
   }

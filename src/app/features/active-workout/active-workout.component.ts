@@ -66,6 +66,7 @@ import { SessionService } from '../../core/services/session.service';
 import { ToastService } from '../../core/services/toast.service';
 import { WorkoutStore } from '../../core/services/workout-store.service';
 import { RingComponent } from '../../shared/components/ring/ring.component';
+import { ModalComponent } from '../../shared/components/modal/modal.component';
 
 /** Log di una singola serie. */
 interface SetLog {
@@ -115,7 +116,7 @@ const targetReps = (e: Exercise): number => parseInt(String(e.reps).match(/\d+/)
   selector: 'ff-active-workout',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RingComponent],
+  imports: [RingComponent, ModalComponent],
   templateUrl: './active-workout.component.html',
   // L'host deve riempire la colonna della phone-shell, altrimenti height:100%
   // del contenitore collassa e l'area .screen non scrolla.
@@ -379,6 +380,7 @@ export class ActiveWorkoutComponent implements OnInit, OnDestroy {
     const s = this.scheda;
     const exDoneCount = s.exercises.filter((_, i) => !this.skipped()[i] && this.exDone(i)).length;
     return {
+      schedaId: s.id,
       schedaName: s.name,
       accent: s.accent,
       icon: s.icon,

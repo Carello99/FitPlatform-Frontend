@@ -15,8 +15,9 @@
         <!-- cover face (originale) + autore in alto a sinistra -->
         <div [style.background]="coverBg(s)" [style.boxShadow]="coverShadow(s, isFront(i))"
           style="width:164px;height:164px;border-radius:20px;position:relative;overflow:hidden">
-          <!-- watermark icona (originale) -->
-          <div style="position:absolute;right:-18px;bottom:-18px;opacity:0.18;color:#000">
+          <!-- watermark icona: segue la coda del gradiente (chiaro su copertina
+               scura, scuro su copertina illuminata) -->
+          <div style="position:absolute;right:-18px;bottom:-18px;opacity:0.18;color:var(--cover-watermark)">
             <i class="ti" [class]="s.icon" style="font-size:120px" aria-hidden="true"></i>
           </div>
           <!-- alto-sx: chi ha creato la scheda (coach = star, tu = utente) -->
@@ -29,14 +30,19 @@
               }
             </div>
           </div>
+          <!-- Le carte laterali si spengono: velo scuro in tema scuro, chiaro in
+               tema chiaro. Su fondo crema un velo nero non arretra la carta, la
+               sporca. -->
           @if (!isFront(i)) {
-            <div style="position:absolute;inset:0;background:rgba(8,8,14,0.42)"></div>
+            <div style="position:absolute;inset:0;background:var(--cover-veil)"></div>
           }
         </div>
 
         <!-- reflection: la mask sfuma proprio la CUCITURA (lato vicino alla carta)
-             così non si vede più la riga netta; il riflesso resta sotto, tenue. -->
-        <div [style.opacity]="isFront(i) ? 0.5 : 0.3"
+             così non si vede più la riga netta; il riflesso resta sotto, tenue.
+             L'opacità è theme-aware (token): in tema chiaro molto più bassa, così
+             il riflesso scuro non lascia una macchia sul fondo crema. -->
+        <div class="cover-reflect" [class.is-front]="isFront(i)"
           style="height:58px;margin-top:3px;overflow:hidden;transform:scaleY(-1);-webkit-mask-image:linear-gradient(to top, rgba(0,0,0,0.55), transparent 82%);mask-image:linear-gradient(to top, rgba(0,0,0,0.55), transparent 82%)">
           <!-- margin-top:-106 = 164-58 → nella finestra si vede il FONDO stondato
                della carta, così il riflesso ha gli angoli arrotondati come lei -->
@@ -48,23 +54,23 @@
     }
 
     <!-- edge chevrons -->
-    <button (click)="$event.stopPropagation(); step(-1)" aria-label="Precedente"
-      style="position:absolute;left:8px;top:40%;z-index:120;width:34px;height:34px;border-radius:50%;background:rgba(20,20,28,0.6);backdrop-filter:blur(4px);border:1px solid var(--hairline);display:flex;align-items:center;justify-content:center">
-      <i class="ti ti-chevron-left" style="font-size:20px;color:var(--ink-2)" aria-hidden="true"></i>
+    <button class="cf-nav left" (click)="$event.stopPropagation(); step(-1)" aria-label="Precedente">
+      <i class="ti ti-chevron-left" aria-hidden="true"></i>
     </button>
-    <button (click)="$event.stopPropagation(); step(1)" aria-label="Successiva"
-      style="position:absolute;right:8px;top:40%;z-index:120;width:34px;height:34px;border-radius:50%;background:rgba(20,20,28,0.6);backdrop-filter:blur(4px);border:1px solid var(--hairline);display:flex;align-items:center;justify-content:center">
-      <i class="ti ti-chevron-right" style="font-size:20px;color:var(--ink-2)" aria-hidden="true"></i>
+    <button class="cf-nav right" (click)="$event.stopPropagation(); step(1)" aria-label="Successiva">
+      <i class="ti ti-chevron-right" aria-hidden="true"></i>
     </button>
   </div>
 
   <!-- selected plan info + hint -->
-  <div style="text-align:center;margin-top:6px">
+  <!-- position:relative + z-index alto → il titolo (e la meta) stanno SOPRA il
+       riflesso/ombra delle card, che altrimenti (z-index delle card) lo copre. -->
+  <div style="text-align:center;margin-top:6px;position:relative;z-index:130">
     <div class="row center gap8" style="margin-bottom:4px">
 <!--      @if (center.id === activeId) {
         <span class="badge badge-amber"><i class="ti ti-bolt-filled" style="font-size:11px" aria-hidden="true"></i>ATTIVA</span>
       } -->
-      <h3 style="font-size:21px;font-weight:800;letter-spacing:-0.5px">{{ center.name }}</h3>
+      <h3 [style.color]="nameColor" style="font-size:21px;font-weight:800;letter-spacing:-0.5px;transition:color .35s cubic-bezier(.16,1,.3,1)">{{ center.name }}</h3>
     </div>
     <div style="font-size:13px;color:var(--ink-3);font-weight:600">{{ center.focus }}</div>
     <div class="row center gap14" style="margin:12px 0 14px;font-size:12.5px;font-weight:700;color:var(--ink-2)">

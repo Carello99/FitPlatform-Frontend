@@ -71,10 +71,10 @@
   </div>
 
   <!-- ===== BOTTOM SHEET CHAT ===== -->
-  @if (chat()) {
-    <!-- Scrim: sfondo semi-trasparente che chiude la chat al click -->
-    <div class="scrim" (click)="chat.set(false)">
-      <div class="sheet" (click)="$event.stopPropagation()">
+  <!-- Il velo e il top layer li mette ff-modal. -->
+  <ff-modal [open]="chat()" (closed)="chat.set(false)">
+    @if (chat()) {
+      <div class="sheet">
         <div class="sheet-grip"></div>
         <div class="row gap10" style="margin-bottom:16px;align-items:center">
           <div class="itile sm t-amber"><i class="ti ti-headset" style="font-size:20px" aria-hidden="true"></i></div>
@@ -108,6 +108,6 @@
           <button class="btn btn-primary" style="padding:0 18px;border-radius:14px" (click)="send()"><i class="ti ti-send" style="font-size:20px" aria-hidden="true"></i></button>
         </div>
       </div>
-    </div>
-  }
+    }
+  </ff-modal>
 </div>

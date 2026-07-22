@@ -67,7 +67,7 @@
   }
 
   <!-- ===== SCHEDE: carosello ===== -->
-  <div class="coach-eyebrow">Le tue schede</div>
+  <div class="coach-eyebrow">Schede</div>
 
   <!-- stagger: classe CSS che anima i figli in sequenza -->
   <div class="stagger" style="margin-top:10px">
@@ -101,15 +101,19 @@
       <span class="f2-t">Allenati libero</span>
       <span class="f2-s">Senza scheda, come vuoi tu</span>
     </span>
-    <span class="f2-btn"><i class="ti ti-plus" aria-hidden="true"></i>Crea</span>
+    <span class="f2-btn"><i class="ti ti-plus" aria-hidden="true"></i>Inizia</span>
   </button>
 
-  <!-- ===== BLOCCO SETTIMANA: calendario mensile (sotto il carosello) ===== -->
-  <button class="wk-cal press" (click)="go('agenda')" aria-label="Apri il calendario mensile">
-    <div class="wk-cal-hd">
-      <span class="wk-cal-t"><i class="ti ti-calendar-week" aria-hidden="true"></i>La tua settimana</span>
-      <span class="wk-cal-go">Calendario<i class="ti ti-chevron-right" aria-hidden="true"></i></span>
-    </div>
+    <!-- linea bianca leggera: divide le scelte rapide dal carosello -->
+  <div class="qa-sep"></div>
+  
+  <!-- ===== BLOCCO SETTIMANA: titolo + "Agenda ›" sulla stessa riga ===== -->
+  <div class="wk-head">
+    <span class="coach-eyebrow" style="margin:0">Settimana</span>
+    <button class="wk-agenda press" (click)="go('agenda')" aria-label="Apri l'agenda">Agenda<i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+  </div>
+
+  <button class="wk-cal press" (click)="go('agenda')" aria-label="Apri l'agenda">
     <div class="wk-days">
       @for (day of w.week; track $index; let i = $index) {
         <span class="wk-d" [class.is-today]="day.state === 'today'">
@@ -121,6 +125,9 @@
               @else { <span>{{ trainer.trainer.initials }}</span> }
             </span>
             <span class="wk-time" [class.done]="cs.status === 'done'">{{ cs.time }}</span>
+          } @else if (weekWorkout()[i]; as wk) {
+            <!-- Giorno allenato: icona della scheda fatta (colore+icona) -->
+            <span class="wk-workout tile-bd" [class]="TILE_CLASS[wk.accent]"><i class="ti" [class]="wk.icon" aria-hidden="true"></i></span>
           } @else if (day.state === 'done') {
             <i class="ti ti-flame-filled wk-fire" aria-hidden="true"></i>
           } @else if (day.state === 'today') {
@@ -134,14 +141,12 @@
   </button>
 
   <!-- ===== DIALOG DI AVVIO RAPIDO ===== -->
-  <!-- @if (startTarget(); as t): mostra il dialog se startTarget non è null -->
-  <!-- "as t": assegna il valore a una variabile locale "t" usabile nel blocco -->
-  @if (startTarget(); as t) {
-    <!-- scrim: sfondo semi-trasparente. (click) sul scrim chiude il dialog -->
-    <div class="scrim center" (click)="startTarget.set(null)">
-      <!-- $event.stopPropagation(): impedisce che il click sul dialog si propaghi allo scrim -->
-      <div class="dialog" (click)="$event.stopPropagation()">
-        <div class="itile" [class]="TILE_CLASS[t.accent]" style="width:60px;height:60px;border-radius:18px;margin:0 auto 16px"><i class="ti" [class]="t.icon" style="font-size:30px" aria-hidden="true"></i></div>
+  <!-- ff-modal: velo, top layer, Esc e tap-fuori li mette lui (vedi il suo file).
+       "as t" assegna il valore a una variabile locale usabile nel blocco. -->
+  <ff-modal [open]="!!startTarget()" [center]="true" (closed)="startTarget.set(null)">
+    @if (startTarget(); as t) {
+      <div class="dialog">
+        <div class="itile tile-bd" [class]="TILE_CLASS[t.accent]" style="width:60px;height:60px;border-radius:18px;margin:0 auto 16px"><i class="ti" [class]="t.icon" style="font-size:30px" aria-hidden="true"></i></div>
         <h2 style="font-size:21px;font-weight:800;letter-spacing:-0.4px">{{ t.name }}</h2>
         <p style="font-size:14px;color:var(--ink-3);font-weight:500;margin:6px 0 0;line-height:1.5">{{ t.focus }}</p>
         <div class="row center gap14" style="margin:14px 0 22px;font-size:12.5px;font-weight:700;color:var(--ink-2)">
@@ -159,6 +164,6 @@
           <i class="ti ti-pencil" style="font-size:17px" aria-hidden="true"></i> Apri e modifica scheda
         </button>
       </div>
-    </div>
-  }
+    }
+  </ff-modal>
 </div>

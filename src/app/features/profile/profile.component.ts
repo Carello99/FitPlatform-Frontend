@@ -97,6 +97,8 @@ export class ProfileComponent {
       { ic: 'ti-user-cog',       tile: 'slate',  t: 'Account e dati personali' },
       { ic: 'ti-adjustments-alt', tile: 'cyan',  t: 'Rivedi posizionamento', go: 'onboarding' },
       { ic: 'ti-target-arrow',   tile: 'amber',  t: 'Obiettivi settimanali', r: `${this.w.weekGoal} / sett.` },
+      // Le fasce in cui accetti sedute: configurazione, quindi vive qui e non in Agenda.
+      { ic: 'ti-calendar-cog',   tile: 'violet', t: 'Disponibilità', go: 'disponibilita' },
       { ic: 'ti-bell',           tile: 'cyan',   t: 'Notifiche e promemoria' },
       { ic: 'ti-device-watch',   tile: 'green',  t: 'Dispositivi connessi' },
       { ic: 'ti-lifebuoy',       tile: 'violet', t: 'Help Desk', go: 'help' },

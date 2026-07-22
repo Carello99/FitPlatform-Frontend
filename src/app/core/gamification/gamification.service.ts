@@ -84,6 +84,9 @@ interface GamificationState {
 
 /** Dati grezzi di una sessione conclusa, passati dal componente di allenamento. */
 export interface FinishedWorkout {
+  /** La scheda eseguita: viaggia fino allo Storico, che la usa per dire se
+   *  quella scheda sta funzionando. */
+  schedaId: string;
   schedaName: string;
   accent: Accent;
   icon: string;
@@ -423,6 +426,7 @@ export class GamificationService {
 
     const item: HistoryItem = {
       id: 'wk-' + now.getTime(),
+      schedaId: w.schedaId,
       name: w.schedaName,
       dateIso: this.dayKey(now),
       time: `${hh}:${mm}`,

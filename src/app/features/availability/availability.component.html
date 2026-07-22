@@ -1,0 +1,73 @@
+<div class="screen-pad screen-anim">
+  <ff-app-header></ff-app-header>
+
+  <div class="appbar">
+    <button class="iconbtn press" (click)="back()" aria-label="Indietro"><i class="ti ti-chevron-left" style="font-size:20px" aria-hidden="true"></i></button>
+    <div class="grow"><h1>Disponibilità</h1></div>
+  </div>
+
+  <p class="av-intro">Le fasce in cui accetti sedute col coach. Fuori da questi orari il coach non ti propone appuntamenti.</p>
+
+  <!-- Orari settimanali (riga-riassunto, tap per modificare) -->
+  <div class="wklist">
+    @for (d of avail.week(); track d.label; let i = $index) {
+      <div class="wkday" [class.open]="editDay() === i">
+        <div class="wk-row" (click)="toggleEditDay(i)">
+          <button class="avtoggle press" [class.on]="d.enabled" (click)="toggleDay(i); $event.stopPropagation()" [attr.aria-label]="'Attiva ' + d.label"><span class="knob"></span></button>
+          <span class="wk-name">{{ d.label }}</span>
+          <span class="wk-sum" [class.off]="!d.enabled">{{ daySummary(d) }}</span>
+          @if (d.enabled) { <i class="ti ti-chevron-down wk-chev" aria-hidden="true"></i> }
+        </div>
+        @if (d.enabled && editDay() === i) {
+          <div class="wk-edit">
+            @for (r of d.ranges; track $index; let j = $index) {
+              <div class="rangerow">
+                <input type="time" [value]="r.start" (change)="onStart(i, j, $event)" aria-label="Inizio" />
+                <span class="avdash">–</span>
+                <input type="time" [value]="r.end" (change)="onEnd(i, j, $event)" aria-label="Fine" />
+                <button class="rng-del press" (click)="removeRange(i, j)" aria-label="Rimuovi fascia"><i class="ti ti-trash" aria-hidden="true"></i></button>
+              </div>
+            }
+            <button class="add-range press" (click)="addRange(i)"><i class="ti ti-plus" aria-hidden="true"></i>Aggiungi fascia</button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Regole (durata + recupero) + Google Calendar -->
+  <div class="card block tight">
+    <div class="opt-row">
+      <span class="opt-lbl">Durata</span>
+      <div class="segbtns">@for (o of slotOpts; track o) { <button class="segb press" [class.on]="avail.slotMinutes() === o" (click)="avail.setSlotMinutes(o)">{{ o }}′</button> }</div>
+    </div>
+    <div class="opt-row">
+      <span class="opt-lbl">Recupero</span>
+      <div class="segbtns">@for (o of bufferOpts; track o) { <button class="segb press" [class.on]="avail.bufferMinutes() === o" (click)="avail.setBufferMinutes(o)">{{ o }}′</button> }</div>
+    </div>
+    <button class="gcal-link press" [class.on]="avail.gcalConnected()" (click)="avail.toggleGcal()">
+      <i class="ti ti-brand-google" aria-hidden="true"></i>{{ avail.gcalConnected() ? 'Google Calendar collegato' : 'Collega Google Calendar' }}
+      @if (avail.gcalConnected()) { <i class="ti ti-circle-check-filled ok" aria-hidden="true"></i> } @else { <i class="ti ti-chevron-right go" aria-hidden="true"></i> }
+    </button>
+  </div>
+
+  <!-- Chiusure / eccezioni -->
+  <div class="card block tight">
+    <div class="exadd">
+      <input type="date" [value]="newException()" (change)="onException($event)" aria-label="Data chiusura" />
+      <button class="ex-add press" (click)="addException()"><i class="ti ti-calendar-x" aria-hidden="true"></i>Blocca giorno</button>
+    </div>
+    @if (avail.exceptions().length) {
+      <div class="exlist">
+        @for (e of avail.exceptions(); track e.id) {
+          <div class="exrow">
+            <i class="ti ti-lock" aria-hidden="true"></i>
+            <span class="ex-date">{{ dowShort(e.date) }}</span>
+            <span class="ex-note">{{ e.note }}</span>
+            <button class="rng-del press" (click)="removeException(e.id)" aria-label="Rimuovi"><i class="ti ti-x" aria-hidden="true"></i></button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

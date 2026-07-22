@@ -63,6 +63,32 @@
   --shadow-pop:0 24px 60px -20px rgba(0,0,0,0.7);
   --shadow-amber:0 12px 30px -8px rgba(245,166,35,0.45);
   --shadow-green:0 12px 30px -8px rgba(57,197,110,0.4);
+
+  /* Cover flow — la copertina resta SCURA in entrambi i temi (DESIGN_SYSTEM);
+     a diventare theme-aware sono solo la profondità intorno alla card, così in
+     tema chiaro riflesso e ombra non lasciano una macchia scura sul fondo:
+       --cover-reflect-* = opacità del riflesso (carta centrale / laterali)
+       --cover-shadow-side = ombra neutra delle carte laterali */
+  --cover-reflect-front:0.8;
+  --cover-reflect-side:0.7;
+  --cover-shadow-side:rgba(67, 64, 64, 0.4);
+  /* Coda del gradiente di copertina + i due strati che le stanno SOPRA. In tema
+     scuro la copertina sfuma nel quasi-nero; in chiaro sfuma in un grigio caldo,
+     altrimenti la metà bassa sembra in ombra su un fondo crema. Watermark e velo
+     seguono la coda: se la copertina si schiarisce, un'icona bianca sparisce e un
+     velo nero diventa una macchia. */
+  --cover-end:#14141d;
+  --cover-watermark:#FFFFFF;
+  --cover-veil:rgba(8,8,14,0.42);
+  /* Nome scheda sotto il carosello: mix (accento × quantità) + tinta. In tema
+     scuro accento schiarito col bianco; in chiaro accento molto scuro (vedi light). */
+  --cover-name-amt:68%;
+  --cover-name-tint:#ffffff;
+  /* Frecce di navigazione del carosello (pillola + freccia). */
+  --cf-nav-bg:rgba(20,20,28,0.6);
+  --cf-nav-ink:var(--ink-2);
+  --cf-nav-border:var(--hairline);
+  --cf-nav-shadow:none;
 }
 
 /* =====================================================
@@ -105,6 +131,29 @@
   --shadow-pop:0 24px 60px -20px rgba(20,20,30,0.22);
   --shadow-amber:0 12px 30px -8px rgba(245,166,35,0.38);
   --shadow-green:0 12px 30px -8px rgba(57,197,110,0.32);
+
+  /* Cover flow — su fondo chiaro il riflesso scuro diventa una macchia: lo si
+     rende molto tenue e l'ombra laterale morbida, così la profondità resta
+     coerente con quella (invisibile) del tema scuro. */
+  --cover-reflect-front:1;
+  --cover-reflect-side:0.7;
+  --cover-shadow-side:rgba(173, 93, 93, 0.12);
+  /* Copertina illuminata: la coda sfuma in un grigio caldo invece che nel nero,
+     il watermark si inverte in scuro e il velo delle carte laterali diventa
+     chiaro — le spegne per sottrazione di colore, non aggiungendo ombra. */
+  --cover-end:#BDB4A7;
+  --cover-watermark:#2A2630;
+  --cover-veil:rgba(245,244,239,0.45);
+  /* Su fondo chiaro il nome dev'essere SCURO: accento molto scuro (poca quota
+     accento + tinta quasi nera) → resta l'identità del colore ma leggibile. */
+  --cover-name-amt:40%;
+  --cover-name-tint:#0E0E14;
+  /* Frecce carosello in tema chiaro: cerchio bianco SEMI-TRASPARENTE (come il
+     dark), freccia NERA. Il blur dietro fa il resto. */
+  --cf-nav-bg:rgba(255,255,255,0.6);
+  --cf-nav-ink:#000000;
+  --cf-nav-border:var(--hairline-strong);
+  --cf-nav-shadow:0 2px 8px -2px rgba(20,20,30,0.18);
 }
 
 /* Smooth cross-fade when toggling theme */

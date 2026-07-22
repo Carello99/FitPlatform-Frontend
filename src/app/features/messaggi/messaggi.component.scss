@@ -26,21 +26,23 @@
 .tm { align-self: flex-end; font-size: 9.5px; font-weight: 700; color: var(--ink-4); }
 .row.me .tm { color: rgba(26,14,0,.5); }
 
-/* ---- Bolla-azione: proposta/spostamento del coach (accetta/rifiuta) ---- */
-.bubble.action { max-width: 82%; padding: 12px 13px; gap: 0; border-color: rgba(245,166,35,.35); background: linear-gradient(150deg, rgba(245,166,35,.14), var(--surface-2) 62%); }
-.ac-hd { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px; color: var(--amber); }
-.ac-hd .ti { font-size: 15px; }
-.ac-txt { display: flex; flex-direction: column; gap: 2px; margin-top: 7px; font-size: 13px; font-weight: 600; color: var(--ink); }
-.ac-txt b { font-weight: 800; }
-.ac-when { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 3px 6px; font-size: 12px; font-weight: 700; color: var(--ink-2); }
-.ac-when .from { text-decoration: line-through; color: var(--ink-3); }
-.ac-when .to { color: var(--amber); font-weight: 800; }
-.ac-when .ti { font-size: 13px; color: var(--ink-3); }
-.ac-acts { display: flex; gap: 8px; margin-top: 11px; }
-.ac-ok, .ac-no { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 9px 14px; border-radius: 11px; font-family: inherit; font-size: 12.5px; font-weight: 800; border: none; cursor: pointer; }
-.ac-ok { background: var(--amber); color: var(--amber-ink); }
-.ac-ok .ti { font-size: 15px; }
-.ac-no { background: var(--surface-3); color: var(--ink-2); }
+/* ---- Allegato: piano alimentare ----
+   Sta DENTRO la bolla, sopra il testo: il coach manda le foto e poi le
+   commenta, ed è in quell'ordine che si leggono. Le miniature sono le prime
+   pagine vere, non un'icona: si deve vedere che è carta fotografata. */
+.att { display: flex; align-items: center; gap: 10px; width: 100%; margin-bottom: 7px; padding: 8px; border-radius: 12px; background: var(--surface-3); border: 1px solid var(--hairline); font-family: inherit; text-align: left; cursor: pointer; }
+.att-shots { display: flex; flex: none; }
+.att-shots img { width: 38px; height: 46px; object-fit: cover; border-radius: 6px; border: 1px solid var(--hairline-strong); background: var(--surface-4); }
+/* Le pagine successive spuntano da sotto la prima: dicono "sono più di una". */
+.att-shots img + img { margin-left: -22px; }
+.att-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.att-n { font-size: 13px; font-weight: 800; letter-spacing: -.2px; color: var(--ink); }
+.att-s { font-size: 11px; font-weight: 600; color: var(--ink-3); }
+
+/* ---- Richieste del coach in chat ----
+   Usano ff-request-card (variant="chat"), lo stesso componente dell'Agenda.
+   Gli stili della vecchia bolla-azione vivevano qui in copia: rimossi. */
+.msgs ff-request-card { max-width: 88%; }
 
 /* ---- Composer (sopra la bottom nav) ---- */
 .composer { flex: none; display: flex; align-items: flex-end; gap: 9px; padding: 10px 14px calc(100px + env(safe-area-inset-bottom)); border-top: 1px solid var(--hairline); background: var(--surface-0); }

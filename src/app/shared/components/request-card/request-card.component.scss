@@ -1,0 +1,355 @@
+/* ============================================================================
+ *  RequestCard — la card di una richiesta d'agenda, in tre densità.
+ *
+ *  GERARCHIA: una richiesta d'agenda è una DATA. Quindi la data è l'elemento
+ *  più grande, e tutto il resto la serve. Lo stato è scritto una volta sola, in
+ *  testa: ripeterlo come etichetta e come pill lo faceva litigare con sé stesso
+ *  e rubava larghezza alla data, che veniva troncata.
+ *
+ *  COLORE: ambra = tocca a te decidere · grigio = stai aspettando l'altro ·
+ *  rosa = c'è un problema (conflitto) o sta per scadere.
+ *  La richiesta FATTA DA TE è volutamente asettica — grigi e basta, nei due
+ *  temi: l'ambra in quest'app chiama all'azione, e su una cosa che hai già
+ *  fatto e che aspetta l'altro non c'è nessuna azione da chiamare. È anche il
+ *  modo più rapido per distinguere «ho chiesto io» da «mi hanno chiesto».
+ *
+ *  LEGGIBILITÀ IN TEMA SCURO: `--ink-4` (#4A4A5A) è un colore da CONTORNI, non
+ *  da testo — su una superficie scura sta sotto 2:1 e sparisce. Quindi qui
+ *  nessuna parola lo usa: le etichette (scopo, «orario», «da/a») stanno a
+ *  `--ink-2`, le icone di servizio e la maniglia a `--ink-3`. Vale nei due
+ *  temi: in tema chiaro gli stessi token restano ben sotto il nero pieno, e
+ *  un'etichetta di servizio non diventa mai un titolo.
+ * ========================================================================== */
+
+:host { display: block; }
+
+/* ---- Avatar del coach (comune alle varianti) ---- */
+.rc-av {
+  width: 34px; height: 34px; border-radius: 50%; flex: none; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-3); box-shadow: inset 0 0 0 1.5px var(--amber);
+}
+.rc-av img { width: 100%; height: 100%; object-fit: cover; }
+.rc-av span { font-size: 12px; font-weight: 800; color: var(--amber); }
+.rc-av.sm { width: 40px; height: 40px; }
+.rc-av.sm span { font-size: 13px; }
+
+/* ============================================================================
+ *  VARIANTE inline — l'evento "in prova" nella timeline del giorno
+ * ========================================================================== */
+.rc-wrap { margin: 6px 0; }
+.rc-event {
+  position: relative; border-radius: 16px;
+  background: color-mix(in srgb, var(--amber) 7%, var(--surface-2));
+  border: 1.5px dashed rgba(245, 166, 35, .55);
+  overflow: hidden;
+}
+/* Richiesta mia: non è una decisione da prendere, è un'attesa → si spegne. */
+.is-mine .rc-event {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
+}
+.is-urgent .rc-event { border-color: rgba(255, 107, 138, .6); }
+
+/* ---- La testata delle card che si spostano ----
+   Niente linguetta, né fuori né dentro: la testata è la card stessa. I puntini
+   della maniglia stanno sopra l'insegna, tutto centrato, e il filetto che già
+   separa testata e corpo fa da base. Gemella di `.pt-tab`.
+
+   Una superficie in più per dire una cosa sola era spazio verticale speso in
+   decorazione, e su quella colorata l'insegna gridava più forte del dato che
+   la card esiste per dire — la data.
+
+   LO STATO ORA LO PORTA L'ICONA: ambra = tocca a te · spenta = stai aspettando
+   lui · rosa = urgente. Il colore non è sparito, occupa 15px invece di una
+   fascia. La tipografia resta più piccola della pillola (`.rc-badge`, 16/19px):
+   questa è un invito a un gesto, non il titolo della card. */
+.rc-tab {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 3px 12px 8px;
+  color: var(--ink);
+}
+.rc-tgrip { font-size: 12px; line-height: 1; color: var(--ink-3); pointer-events: none; }
+.rc-tlbl {
+  display: flex; align-items: center; gap: 8px; min-width: 0; max-width: 100%;
+  font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rc-tlbl .ti { flex: none; font-size: 19px; color: var(--amber); }
+.is-mine .rc-tlbl .ti { color: var(--ink-3); }
+.is-urgent .rc-tlbl .ti { color: var(--rose); }
+
+/* ---- Testata: l'insegna e chi la manda ----
+   Niente fasce colorate: il colore sta tutto nella pillola, che è piccola e
+   quindi può permettersi di essere satura. Una fascia grande e tenue diceva la
+   stessa cosa occupando dieci volte lo spazio, e in tema chiaro finiva per
+   confondersi col fondo della pagina. */
+.rc-head { display: flex; justify-content: center; padding: 13px 12px 14px; }
+
+/* A 16px l'insegna è quasi larga quanto la card: letter-spacing ridotto e
+   padding contenuto, `min-width: 0` + ellissi come rete di sicurezza sugli
+   schermi da 320px, dove «NUOVA SESSIONE» arriva al bordo. */
+.rc-badge {
+  display: inline-flex; align-items: center; gap: 8px; min-width: 0; max-width: 100%;
+  padding: 7px 14px 7px 11px; border-radius: var(--r-pill);
+  font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: .1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  background: var(--amber); color: var(--amber-ink);
+}
+.rc-badge .ti { flex: none; font-size: 19px; }
+.is-mine .rc-badge { background: var(--surface-3); color: var(--ink-2); }
+.is-urgent .rc-badge { background: var(--rose); color: var(--on-accent); }
+
+/* Coach e luogo: una riga sola nel corpo, sopra l'orario. Chi è il coach lo si
+   impara in una settimana — sta qui perché a volte cambia, non perché si
+   cerca, ed è un attributo dell'appuntamento come il resto. */
+.rc-who { display: flex; align-items: center; gap: 9px; margin-bottom: 13px; }
+.rc-face {
+  flex: none; width: 26px; height: 26px; border-radius: 50%; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-3); box-shadow: inset 0 0 0 1.5px var(--amber);
+}
+.rc-face img { width: 100%; height: 100%; object-fit: cover; }
+/* Iniziali: mai più larghe del disco, qualunque sia il nome del coach. */
+.rc-face span {
+  font-size: 9px; font-weight: 800; letter-spacing: -.2px; line-height: 1;
+  color: var(--amber); white-space: nowrap;
+}
+.is-mine .rc-face { box-shadow: inset 0 0 0 1.5px var(--ink-4); }
+.is-mine .rc-face span { color: var(--ink-2); }
+.is-urgent .rc-face { box-shadow: inset 0 0 0 1.5px var(--rose); }
+/* Due righe, e l'avatar che si centra su entrambe (`align-items: center` sulla
+   riga che le contiene). Il nome porta il peso, il luogo sta sotto e più
+   spento: si guarda una volta, non a ogni apertura. */
+.rc-wtxt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.rc-wname, .rc-wplace { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rc-wname { font-size: 15px; font-weight: 700; color: var(--ink-2); }
+.rc-wplace { font-size: 11.5px; font-weight: 600; color: var(--ink-3); }
+/* Come sulla seduta concordata. Sta PRIMA del blocco `.is-leaving` di proposito:
+   a parità di specificità vince chi viene dopo, e su una card che se ne va il
+   nome deve restare spento. */
+:host-context([data-theme='dark']) .rc-wname { color: #fff; }
+
+/* L'orario di una richiesta MIA: in attesa non è ambra — l'ambra vuol dire
+   «tocca a te» — ma nemmeno grigio. È il dato della card, e su fondo scuro va
+   bianco come sulla seduta concordata: chi guarda cerca l'ora, non lo stato.
+   `:not(.is-leaving)` è esplicito perché qui la specificità è più alta del
+   blocco che spegne: senza, la card di partenza si riaccenderebbe proprio nel
+   punto più grande. */
+:host-context([data-theme='dark']) .is-mine:not(.is-leaving) .rc-time { color: #fff; }
+
+/* ---- Corpo: l'appuntamento ---- */
+.rc-content { padding: 13px 16px 14px; border-top: 1px solid var(--hairline); }
+
+/* ---- La data, etichettata a parole ---- */
+.rc-lbl {
+  display: block; font-size: 10px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .4px; color: var(--ink-2);
+  margin-bottom: 2px;
+}
+.rc-strike { text-decoration: line-through; }
+
+/* Il dato più importante della card. */
+.rc-to { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.rc-day {
+  font-size: 19px; font-weight: 800; letter-spacing: -.4px; color: var(--ink);
+  text-transform: capitalize;
+}
+.rc-time {
+  font-size: 19px; font-weight: 800; letter-spacing: -.4px; color: var(--amber);
+  font-variant-numeric: tabular-nums;
+}
+.is-mine .rc-time { color: var(--ink-2); }
+
+/* Il messaggio del coach: è la ragione umana della richiesta, si legge. */
+.rc-msg {
+  /* Sta sopra l'orario, quindi il margine è sotto: separa il perché dal quando. */
+  margin: 0 0 13px; padding: 10px 12px; border-radius: 12px;
+  background: var(--surface-1); border: 1px solid var(--hairline);
+  border-left: 2px solid var(--amber);
+  font-size: 12.5px; font-weight: 600; color: var(--ink-2); line-height: 1.45;
+}
+/* Il mio messaggio sta IN CIMA, sopra la faccia del coach: è la posizione a
+   dire che parla verso di lui, non da lui. Il filetto resta a sinistra come su
+   quello del coach — la posizione basta a distinguerli, e due filetti su lati
+   opposti sarebbero un secondo segnale per una cosa che già si vede. */
+/* Filetto grigio, non ambra: su una card mia l'ambra vuol dire «tocca a te»,
+   e qui non tocca a me — coerente col resto della card utente, già spenta. */
+.rc-msg.mine { margin: 0 0 13px; border-left-color: var(--ink-4); }
+
+.rc-warn {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11.5px; font-weight: 700; color: var(--rose);
+  margin: 10px 0 0;
+}
+.rc-warn .ti { font-size: 15px; flex: none; }
+.rc-warn.sm { margin: 3px 0 0; font-size: 10.5px; }
+.rc-warn.sm .ti { font-size: 13px; }
+
+/* ---- Il lato che se ne va ----
+   La card dello SPOSTAMENTO vista dal giorno di partenza racconta una cosa che
+   sta uscendo di scena: si spegne di due gradini — la superficie prima di
+   tutto, perché è quella che si vede da lontano, e poi ogni testo scende nella
+   scala d'inchiostro. Non un'opacità sull'intera card: quella avrebbe
+   schiacciato anche il contrasto, e a quel punto o si legge o sparisce.
+
+   Il giorno e l'ora sono il pezzo più grande, quindi il primo che si guarda: a
+   `--ink-2` restavano neri come prima e l'effetto non arrivava. A 19px in
+   grassetto `--ink-3` si legge benissimo — un testo grande ha bisogno di meno
+   contrasto di uno piccolo.
+
+   IL PIEDE NO: lì ci sono lo stato e i pulsanti, cioè la decisione. Una cosa
+   che sta sparendo si guarda meno, ma si decide con la stessa chiarezza. */
+.is-leaving .rc-event {
+  background: var(--surface-1);
+  border-color: var(--hairline-strong);
+}
+/* Testata: il glifo dell'icona non cambia — è lui il filo con la card d'arrivo
+   — ma perde l'ambra, che qui vuol dire «tocca a te». */
+.is-leaving .rc-tgrip { color: var(--ink-4); }
+.is-leaving .rc-tlbl { color: var(--ink-3); }
+.is-leaving .rc-tlbl .ti { color: var(--ink-3); }
+/* Corpo. */
+.is-leaving .rc-face { opacity: .72; box-shadow: inset 0 0 0 1.5px var(--ink-4); }
+.is-leaving .rc-face span { color: var(--ink-3); }
+.is-leaving .rc-wname,
+.is-leaving .rc-wplace { color: var(--ink-3); }
+.is-leaving .rc-lbl { color: var(--ink-3); }
+.is-leaving .rc-day,
+.is-leaving .rc-time { color: var(--ink-3); }
+.is-leaving .rc-msg { color: var(--ink-3); border-left-color: var(--ink-4); }
+
+/* Suggerimento al posto del pulsante «Proponi un altro giorno»: è un aiuto, non
+   un'azione, quindi è testo piccolo e spento, non un bottone. Sta nel piede,
+   sotto le due scelte, dove finiva il pulsante. */
+.rc-hint {
+  display: flex; align-items: center; gap: 6px; margin: 2px 0 0;
+  font-size: 11px; font-weight: 600; color: var(--ink-3); line-height: 1.35;
+}
+.rc-hint .ti { font-size: 14px; flex: none; color: var(--ink-4); }
+
+/* ---- Azioni ---- */
+.rc-foot {
+  display: flex; flex-direction: column; gap: 8px; padding: 11px 14px;
+  border-top: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--amber) 6%, transparent);
+}
+/* La scadenza, sopra ai bottoni: è la spinta a decidere adesso, quindi sta
+   dove si decide. In `--ink` e non in ambra perché su fondo chiaro l'ambra
+   come colore di testo scende a 2:1. */
+.rc-due {
+  display: flex; align-items: center; gap: 6px; margin: 0 0 2px;
+  font-size: 12px; font-weight: 800; color: var(--ink);
+}
+.rc-due .ti { flex: none; font-size: 15px; color: var(--amber); }
+.is-mine .rc-due { color: var(--ink-2); font-weight: 700; }
+.is-mine .rc-due .ti { color: var(--ink-3); }
+.is-urgent .rc-due, .is-urgent .rc-due .ti { color: var(--rose); }
+
+/* Sì e no: due metà esatte. */
+.rc-pair { display: flex; gap: 8px; }
+
+/* Testata e piede vestiti uguale anche qui: prima il piede restava scoperto e
+   la card sembrava colorata a metà. */
+.is-mine .rc-foot { background: color-mix(in srgb, var(--ink) 5%, transparent); }
+/* Il bottone torna al fondo della card, col filo marcato: sul velo del piede
+   si stacca in tutti e due i temi senza inventarsi un terzo grigio. */
+.is-mine .rc-btn { background: var(--surface-2); border-color: var(--hairline-strong); }
+.rc-btn {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 10px 8px; border-radius: var(--r-pill);
+  background: var(--surface-3); border: 1px solid var(--hairline); color: var(--ink);
+  font-family: inherit; font-size: 12.5px; font-weight: 800; cursor: pointer;
+}
+.rc-btn .ti { font-size: 16px; }
+.rc-btn.primary {
+  background: var(--amber); border-color: transparent; color: var(--amber-ink);
+  box-shadow: var(--shadow-amber);
+}
+.rc-btn.primary:disabled { opacity: .4; box-shadow: none; cursor: not-allowed; }
+.rc-btn.ghost { color: var(--ink-2); }
+/* Il no alla FitFlow: rosa tenue di fondo, rosa pieno d'inchiostro — la stessa
+   coppia soft/ink dei badge (.badge-rose). Niente ombra: non invita. */
+.rc-btn.deny { background: var(--rose-soft); border-color: transparent; color: var(--rose); }
+.rc-btn.ghost.wide { width: 100%; font-size: 12px; }
+
+/* ============================================================================
+ *  VARIANTI strip e chat — riga compatta
+ * ========================================================================== */
+.rc-compact {
+  display: flex; align-items: center; gap: 11px; padding: 11px 12px;
+  border-radius: 14px; background: var(--surface-2); border: 1px solid var(--hairline);
+}
+.rc-compact.is-mine { opacity: .8; }
+.rc-compact.is-mine .rc-av { box-shadow: inset 0 0 0 1.5px var(--ink-4); }
+.rc-compact.is-urgent { border-color: rgba(255, 107, 138, .45); background: color-mix(in srgb, var(--rose) 5%, var(--surface-2)); }
+.rc-compact.is-conflict { border-color: rgba(255, 107, 138, .35); }
+
+/* Il corpo è un <button> anche quando non è toccabile (disabled): così il
+   markup non cambia tra le varianti e non ci sono due alberi da mantenere. */
+.rc-body {
+  flex: 1; min-width: 0; display: block; text-align: left;
+  background: none; border: none; padding: 0; font-family: inherit; color: inherit;
+}
+.rc-body.tappable { cursor: pointer; }
+.rc-body:disabled { opacity: 1; } /* disabled qui vuol dire "non toccabile", non "spento" */
+
+/* Anche qui: la riga va a capo, non si comprime. */
+.rc-name {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px;
+  font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px;
+  color: var(--ink-2);
+}
+/* L'insegna del tipo, in scala di riga: stessa pastiglia della card
+   (`.rc-badge`), così l'elenco e la card si riconoscono. */
+.rc-name .ti {
+  flex: none; width: 22px; height: 22px; border-radius: 7px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; color: var(--amber);
+  background: color-mix(in srgb, var(--amber) 20%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--amber) 38%, transparent);
+}
+.rc-compact.is-mine .rc-name .ti {
+  color: var(--ink-2); background: var(--surface-3);
+  box-shadow: inset 0 0 0 1px var(--hairline-strong);
+}
+.rc-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); flex: none; }
+.rc-tag {
+  flex: none; font-size: 9px; font-weight: 800; letter-spacing: .2px;
+  padding: 2px 7px; border-radius: var(--r-pill);
+  background: var(--surface-3); color: var(--ink-2);
+}
+
+/* Le due date su righe distinte: affiancate, la destinazione si troncava. */
+.rc-line {
+  display: flex; align-items: center; gap: 5px;
+  font-variant-numeric: tabular-nums; margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rc-line .ti { font-size: 14px; color: var(--ink-3); flex: none; }
+/* L'etichetta a parole della card inline, in scala compatta. */
+.rc-mini {
+  flex: none; font-size: 9px; font-weight: 800; letter-spacing: .3px;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.rc-line.muted { font-size: 11.5px; font-weight: 600; color: var(--ink-3); }
+.rc-line.strong { font-size: 14px; font-weight: 800; color: var(--ink); letter-spacing: -.2px; text-transform: capitalize; }
+.rc-compact.is-urgent .rc-line.strong { color: var(--rose); }
+.rc-compact.is-mine .rc-line.strong { color: var(--ink-2); }
+
+.rc-acts { flex: none; display: flex; gap: 6px; }
+.rc-ab {
+  width: 34px; height: 34px; border-radius: 10px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none; cursor: pointer;
+}
+.rc-ab .ti { font-size: 18px; }
+.rc-ab.ok { background: var(--green-soft); color: var(--green); }
+.rc-ab.move { background: var(--amber-soft); color: var(--amber); }
+.rc-ab.no { background: var(--surface-3); color: var(--ink-3); }
+/* «Vai al giorno»: unica azione della strip, quindi la più grande e in ambra. */
+.rc-ab.go { width: 38px; height: 38px; background: var(--amber); color: var(--amber-ink); }
+.rc-ab.go .ti { font-size: 20px; }
+
+/* Nella chat la card è una bolla: prende la superficie delle bolle. */
+:host(.chat) .rc-compact { background: var(--surface-1); }

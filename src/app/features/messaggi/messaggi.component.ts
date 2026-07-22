@@ -13,40 +13,61 @@ import {
   AfterViewChecked, ChangeDetectionStrategy, Component, ElementRef, inject, signal, viewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
+import { DietPlan, PtMessage } from '../../core/data/trainer-mock';
 import { TrainerService } from '../../core/services/trainer.service';
+import { AgendaRequestStore } from '../../core/services/agenda-request.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AppHeaderComponent } from '../../layout/app-header/app-header.component';
+import { PhotoViewerComponent } from '../../shared/components/photo-viewer/photo-viewer.component';
+import { RequestCardComponent } from '../../shared/components/request-card/request-card.component';
 
-const GIORNI_BREVI = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'];
 const MESI_BREVI = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
 
 @Component({
   selector: 'ff-messaggi',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AppHeaderComponent],
+  imports: [AppHeaderComponent, PhotoViewerComponent, RequestCardComponent],
   templateUrl: './messaggi.component.html',
   styleUrl: './messaggi.component.scss',
 })
 export class MessaggiComponent implements AfterViewChecked {
   private readonly router = inject(Router);
   readonly trainer = inject(TrainerService);
+  readonly store = inject(AgendaRequestStore);
   private readonly toast = inject(ToastService);
 
   private readonly scrollEl = viewChild<ElementRef<HTMLElement>>('scrollEl');
   readonly draft = signal('');
 
-  /** Etichetta breve di una data ("gio 16 lug"). */
-  dowShort(iso: string): string {
-    const d = new Date(iso + 'T00:00:00');
-    return `${GIORNI_BREVI[d.getDay()]} ${d.getDate()} ${MESI_BREVI[d.getMonth()]}`;
+  /** Il piano alimentare aperto a tutto schermo (null = visore chiuso). */
+  readonly diet = signal<DietPlan | null>(null);
+
+  /** Il piano allegato a un messaggio, se ce n'è uno. */
+  dietOf(m: PtMessage): DietPlan | undefined {
+    const a = m.attachment;
+    return a?.kind === 'diet' ? this.trainer.diet(a.dietId) : undefined;
   }
 
-  // --- Conferme di ciò che propone il coach (proposte + spostamenti) ---
-  accept(id: string): void { this.trainer.acceptSession(id); this.toast.show('Seduta confermata', 'ti-calendar-check'); }
-  decline(id: string): void { this.trainer.declineSession(id); this.toast.show('Proposta rifiutata', 'ti-x'); }
-  confirmMove(id: string): void { this.trainer.confirmMove(id); this.toast.show('Spostamento confermato', 'ti-calendar-check'); }
-  rejectMove(id: string): void { this.trainer.rejectMove(id); this.toast.show('Spostamento rifiutato', 'ti-x'); }
+  openDiet(d: DietPlan): void { this.diet.set(d); }
+
+  /** '12 lug' — la data in cui il piano è stato mandato. */
+  short(iso: string): string {
+    const d = new Date(iso + 'T00:00:00');
+    return `${d.getDate()} ${MESI_BREVI[d.getMonth()]}`;
+  }
+
+  // --- Decisioni sulle richieste del coach (le stesse dell'Agenda) ---
+  accept(id: string): void { this.store.accept(id); this.toast.show('Seduta confermata', 'ti-calendar-check'); }
+  decline(id: string): void { this.store.decline(id); this.toast.show('Proposta rifiutata', 'ti-x'); }
+
+  /**
+   * Controproporre richiede un calendario, e il calendario sta in Agenda:
+   * si va lì, sul giorno della proposta, invece di infilare una griglia in chat.
+   */
+  toAgenda(date: string): void {
+    void this.router.navigate(['/agenda'], { queryParams: { day: date } });
+  }
 
   ngAfterViewChecked(): void {
     const el = this.scrollEl()?.nativeElement;

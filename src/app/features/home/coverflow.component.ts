@@ -63,6 +63,7 @@ import { Scheda } from '../../core/models/workout.models';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [], // Nessun componente figlio — solo HTML puro
   templateUrl: './coverflow.component.html',
+  styleUrl: './coverflow.component.scss',
 })
 export class CoverflowComponent {
   // @Input({ required: true }): proprietà OBBLIGATORIA ricevuta dal padre.
@@ -126,6 +127,14 @@ export class CoverflowComponent {
   /** Getter: la scheda attualmente al centro del carosello. */
   get center(): Scheda {
     return this.schede[this.cur()];
+  }
+
+  /** Colore del NOME sotto il carosello: l'accento della scheda centrale,
+   *  mixato con una tinta theme-aware (token). In tema scuro accento schiarito
+   *  (verso il bianco); in tema chiaro accento molto scuro. Cambia con la scheda
+   *  e la transizione CSS rende morbido lo swipe. */
+  get nameColor(): string {
+    return `color-mix(in srgb, ${this.ACCENT_VAR[this.center.accent]} var(--cover-name-amt), var(--cover-name-tint))`;
   }
 
   /** Calcola le serie totali di una scheda. */
@@ -279,14 +288,15 @@ export class CoverflowComponent {
 
   /** Gradiente di sfondo della carta in base all'accento della scheda. */
   coverBg(s: Scheda): string {
-    return `linear-gradient(155deg, ${this.ACCENT_VAR[s.accent]} -10%, #14141d 115%)`;
+    return `linear-gradient(155deg, ${this.ACCENT_VAR[s.accent]} -10%, var(--cover-end) 115%)`;
   }
 
-  /** Ombra della carta (più prominente per la carta centrale). */
+  /** Ombra della carta (più prominente per la carta centrale) — tenuta leggera.
+   *  La laterale usa un'ombra neutra theme-aware (soft su fondo chiaro). */
   coverShadow(s: Scheda, front: boolean): string {
     return front
-      ? `0 18px 40px -12px ${this.ACCENT_VAR[s.accent]}66` // Ombra colorata per la carta in primo piano
-      : '0 12px 26px -10px rgba(0,0,0,0.7)';                 // Ombra neutra per le carte laterali
+      ? `0 16px 34px -14px ${this.ACCENT_VAR[s.accent]}4d` // Ombra colorata per la carta in primo piano
+      : '0 10px 22px -12px var(--cover-shadow-side)';       // Ombra neutra (theme-aware) per le laterali
   }
 
   // ---- Gestione drag (trascinamento) ----

@@ -154,6 +154,15 @@ export const routes: Routes = [
       import('./features/profile/profile.component').then((m) => m.ProfileComponent),
   },
   {
+    // Le fasce in cui accetti sedute. È configurazione, non agenda: si tocca
+    // una volta ogni mesi, quindi vive sotto il Profilo.
+    path: 'disponibilita',
+    title: 'Disponibilità',
+    data: { chrome: true },
+    loadComponent: () =>
+      import('./features/availability/availability.component').then((m) => m.AvailabilityComponent),
+  },
+  {
     path: 'personal-trainer',
     title: 'Personal Trainer',
     data: { chrome: true },

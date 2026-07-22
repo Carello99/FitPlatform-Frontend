@@ -15,6 +15,12 @@
 }
 .seg {
   flex: 1;
+  /* Icona e parola sono una cosa sola: gap stretto e riga centrata, così la
+     coppia resta un bersaglio unico anche quando il testo va stretto. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: 10px 0;
   border-radius: var(--r-pill);
   background: none;
@@ -26,11 +32,15 @@
   cursor: pointer;
   transition: background .16s, color .16s;
 }
+.seg .ti { font-size: 16px; flex: none; }
 .seg.on {
   background: var(--surface-4);
   color: var(--ink);
   box-shadow: var(--shadow-card);
 }
+/* Sul segmento attivo l'icona prende l'accento: il colore fa da secondo
+   segnale dopo il fondo, per chi il contrasto lo distingue male. */
+.seg.on .ti { color: var(--amber); }
 
 /* ---------- Divisore "Archiviate" ---------- */
 .arch-hd {
@@ -157,3 +167,29 @@
   max-width: 30ch;
   margin-bottom: 4px;
 }
+
+/* FAB "nuova scheda": quadrato con angoli stondati, bordo colorato, FISSO in
+   basso a destra sopra la bottom nav (z-index sotto la nav = 40), a portata di
+   pollice. position:fixed → resta ancorato mentre la lista scorre. */
+.fab-new {
+  position: absolute;
+  right: 20px;
+  bottom: calc(104px + env(safe-area-inset-bottom));
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  /* Stile tile: fondo tenue + BORDO COLORATO (accento amber pieno) + icona amber.
+     Bordo colorato inequivocabile, coerente con le tile scheda/allenamento. */
+  background: var(--amber-soft);
+  color: var(--amber);
+  border: 2.5px solid var(--amber);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-amber);
+  z-index: 35;
+  cursor: pointer;
+  transition: transform .16s;
+}
+.fab-new .ti { font-size: 28px; }
+.fab-new:active { transform: scale(.94); }

@@ -129,9 +129,9 @@
   </div>
 
   <!-- ===== EDITOR NUMERICO (peso / ripetizioni) ===== -->
-  @if (numEditor(); as ne) {
-    <div class="scrim" (click)="numEditor.set(null)">
-      <div class="sheet" (click)="$event.stopPropagation()">
+  <ff-modal [open]="!!numEditor()" (closed)="numEditor.set(null)">
+    @if (numEditor(); as ne) {
+      <div class="sheet">
         <div class="sheet-grip"></div>
         <div class="row between" style="align-items:center;margin-bottom:4px">
           <div>
@@ -169,13 +169,13 @@
           <i class="ti ti-check" style="font-size:18px" aria-hidden="true"></i> Applica
         </button>
       </div>
-    </div>
-  }
+    }
+  </ff-modal>
 
   <!-- ===== EDITOR TEMPO DI RECUPERO ===== -->
-  @if (restEditor() !== null) {
-    <div class="scrim" (click)="restEditor.set(null)">
-      <div class="sheet" (click)="$event.stopPropagation()">
+  <ff-modal [open]="restEditor() !== null" (closed)="restEditor.set(null)">
+    @if (restEditor() !== null) {
+      <div class="sheet">
         <div class="sheet-grip"></div>
         <div class="row between" style="align-items:center;margin-bottom:4px">
           <div>
@@ -205,13 +205,13 @@
           <i class="ti ti-check" style="font-size:18px" aria-hidden="true"></i> Imposta recupero
         </button>
       </div>
-    </div>
-  }
+    }
+  </ff-modal>
 
   <!-- ===== DIALOG CONFERMA FINE SESSIONE ===== -->
-  @if (confirmExit()) {
-    <div class="scrim center" (click)="confirmExit.set(false)">
-      <div class="dialog" (click)="$event.stopPropagation()">
+  <ff-modal [open]="confirmExit()" [center]="true" (closed)="confirmExit.set(false)">
+    @if (confirmExit()) {
+      <div class="dialog">
         <div class="itile" [class]="pct() >= 1 ? 't-green' : 't-amber'" style="width:56px;height:56px;border-radius:18px;margin:0 auto 14px"><i class="ti ti-flag-filled" style="font-size:26px" aria-hidden="true"></i></div>
         <h2 style="font-size:20px;font-weight:800;letter-spacing:-0.3px">Terminare l'allenamento?</h2>
         <p style="font-size:14px;color:var(--ink-3);font-weight:500;margin:8px 0 4px;line-height:1.5">
@@ -223,7 +223,7 @@
         <button class="btn btn-ghost btn-block" style="margin-top:10px" (click)="confirmExit.set(false)">Continua ad allenarti</button>
         <button class="btn btn-block" style="margin-top:4px;color:var(--rose);font-size:13.5px" (click)="exit()">Esci senza salvare</button>
       </div>
-    </div>
-  }
+    }
+  </ff-modal>
 </div>
 }

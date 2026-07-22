@@ -1,27 +1,48 @@
 /* ============================================================================
- *  Agenda (lato utente) — layout ripreso da FitPlatform PT, adattato.
+ *  Agenda (lato utente) — calendario, timeline del giorno, negoziazione.
  *  Lo scroll è gestito dalla shell (.screen); qui solo la presentazione.
+ *
+ *  IL LINGUAGGIO DEI BORDI:
+ *    pieno       = concordato (una seduta esiste)
+ *    tratteggiato= proposto   (una richiesta aperta, non ancora accettata)
+ *    spento      = in uscita  (una seduta che una richiesta vorrebbe spostare)
+ *  Vale nella griglia, nella timeline e nella legenda: si impara una volta.
  * ========================================================================== */
 
 /* Host a blocco: così il calendario riempie (e non sfora) il contenitore. */
 :host { display: block; }
 
-/* ---- Header mese + azione "Richiedi" ---- */
+/* ---- Header mese ---- */
 .ahead { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 2px 6px 8px; }
 .mtitle { background: none; border: none; padding: 0; font-family: inherit; font-size: 24px; font-weight: 800; letter-spacing: -.6px; cursor: pointer; }
 .mtitle .mn { color: var(--ink); }
 .mtitle .my { color: var(--amber); }
-.gpill { position: relative; flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 10px 16px; border-radius: var(--r-pill); background: var(--amber); color: var(--amber-ink); border: none; font-family: inherit; font-size: 13.5px; font-weight: 800; box-shadow: var(--shadow-amber); cursor: pointer; }
-.gpill .ti { font-size: 18px; }
-.gpill:disabled { opacity: .4; box-shadow: none; cursor: not-allowed; }
 
 .subhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 6px 10px; }
-.mstat { font-size: 11.5px; font-weight: 700; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mctl { display: flex; align-items: center; gap: 7px; flex: none; }
 .oggi-mini { display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px; border-radius: var(--r-pill); background: var(--amber-soft); border: 1px solid rgba(245,166,35,.35); color: var(--amber); font-family: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }
 .om-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); }
 .navb { width: 32px; height: 32px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--hairline); color: var(--ink); cursor: pointer; }
 .navb .ti { font-size: 17px; }
+
+/* ---- Legenda: cosa significano i badge ---- */
+.legend { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.lg { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--ink-3); white-space: nowrap; }
+.lg-sq { width: 14px; height: 14px; border-radius: 4px; background: var(--surface-3); box-shadow: inset 0 0 0 1px var(--hairline-strong); }
+.lg-av { width: 14px; height: 14px; border-radius: 50%; overflow: hidden; box-shadow: inset 0 0 0 1.5px var(--amber); background: var(--surface-3); }
+.lg-av img { width: 100%; height: 100%; object-fit: cover; }
+.lg-gh { width: 14px; height: 14px; border-radius: 50%; border: 1.5px dashed var(--amber); background: color-mix(in srgb, var(--amber) 12%, transparent); }
+
+/* ---- Barra "scegli un giorno" (alternativa al drag, accessibile) ---- */
+.pickbar {
+  display: flex; align-items: center; gap: 9px; margin: 0 2px 10px;
+  padding: 11px 13px; border-radius: 14px;
+  background: var(--amber-soft); border: 1px solid rgba(245,166,35,.4);
+  font-size: 12.5px; font-weight: 700; color: var(--ink);
+}
+.pickbar > .ti { font-size: 17px; color: var(--amber); flex: none; }
+.pickbar > span { flex: 1; min-width: 0; }
+.pick-x { flex: none; padding: 6px 12px; border-radius: var(--r-pill); background: var(--surface-2); border: 1px solid var(--hairline); color: var(--ink-2); font-family: inherit; font-size: 11.5px; font-weight: 800; cursor: pointer; }
 
 /* ---- Calendario ---- */
 .cal { padding: 4px 2px 6px; }
@@ -31,20 +52,38 @@
 .cell { aspect-ratio: 1 / 1.05; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border: none; background: none; border-radius: 12px; cursor: pointer; color: var(--ink); transition: background .14s; }
 .cell .dnum { font-size: 13.5px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .cell.out .dnum { color: var(--ink-3); opacity: .55; }
-/* Oggi: contornato d'arancione. */
-.cell.today { box-shadow: inset 0 0 0 2px var(--amber); }
-.cell.today .dnum { color: var(--amber); }
-/* Giorno con proposta/spostamento del coach: "illuminato" (glow ambra pulsante). */
-.cell.proposed { background: var(--amber-soft); box-shadow: inset 0 0 0 1.5px var(--amber); animation: cellGlow 1.6s ease-in-out infinite; }
-.cell.proposed .dnum { color: var(--amber); }
+
+/* Oggi: ARANCIONE PIENO, sempre — è l'ancora del calendario, non cambia con la
+   selezione. Vince su "proposto" e sul bordo di selezione: kill di border e
+   pulse così un giorno-oggi che è anche dentro uno spostamento resta pieno e
+   pulito. */
+.cell.today { background: var(--amber); box-shadow: none; animation: none; }
+.cell.today .dnum { color: var(--amber-ink); }
+.cell.today .bd-sq, .cell.today .bd-av { box-shadow: 0 0 0 1.5px rgba(0,0,0,.14); }
+.cell.today .bd-ghost { box-shadow: none; border-color: rgba(0,0,0,.3); }
+
+/* Giorno con una proposta aperta: tratteggio ambra. Il pulse richiama per tre
+   cicli e poi si ferma — un'animazione infinita è rumore, non informazione. */
+.cell.ghost { background: color-mix(in srgb, var(--amber) 8%, transparent); box-shadow: inset 0 0 0 1.5px rgba(245,166,35,.6); animation: cellGlow 1.6s ease-in-out 3; }
+.cell.ghost .dnum { color: var(--amber); }
 @keyframes cellGlow {
-  0%, 100% { box-shadow: inset 0 0 0 1.5px var(--amber), 0 0 0 0 rgba(245,166,35,.0); }
-  50% { box-shadow: inset 0 0 0 1.5px var(--amber), 0 0 10px 1px rgba(245,166,35,.45); }
+  0%, 100% { box-shadow: inset 0 0 0 1.5px rgba(245,166,35,.6), 0 0 0 0 rgba(245,166,35,0); }
+  50% { box-shadow: inset 0 0 0 1.5px rgba(245,166,35,.6), 0 0 10px 1px rgba(245,166,35,.45); }
 }
-/* Giorno selezionato: arancione pieno (precede "oggi" e "proposto"). */
-.cell.sel { background: var(--amber); box-shadow: none; animation: none; }
-.cell.sel .dnum { color: var(--amber-ink); }
-/* Badge del giorno: quadrati = allenamenti (colore+icona scheda), tondo = coach */
+@media (prefers-reduced-motion: reduce) { .cell.ghost { animation: none; } }
+
+/* Giorno selezionato (che non sia oggi): SOLO IL BORDO. È lo stesso linguaggio
+   della cornice di uno spostamento — bordo = giorno puntato — così quando
+   selezioni una card spostata e il calendario accende i due giorni collegati,
+   la selezione e il legame parlano la stessa lingua invece di litigare (uno
+   pieno, uno a bordo). Il pieno resta un privilegio di oggi. */
+.cell.sel:not(.today) { box-shadow: inset 0 0 0 2px var(--amber); animation: none; }
+.cell.sel:not(.today) .dnum { color: var(--amber); }
+
+/* Durante la scelta del giorno, ciò che non accetta il rilascio si spegne. */
+.cal.picking .cell.nodrop { opacity: .3; cursor: not-allowed; }
+
+/* Badge del giorno: quadrati = allenamenti, tondo = coach, tratteggiato = proposta */
 .badges { display: flex; gap: 3px; height: 20px; align-items: center; justify-content: center; }
 .bd-sq { width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; }
 .bd-sq .ti { font-size: 11px; }
@@ -54,16 +93,25 @@
 /* Sessione col coach già svolta: anello verde */
 .bd-av.done { box-shadow: inset 0 0 0 1.5px var(--green); }
 .bd-av.done span { color: var(--green); }
+/* Una trattativa aperta, sia nel giorno che lascia sia in quello che riceve:
+   stesso contorno tratteggiato. Un fatto solo, un segno solo. */
+.bd-ghost { box-shadow: none; border: 1.5px dashed var(--amber); opacity: .75; }
 .bd-more { font-size: 9px; font-weight: 800; color: var(--ink-3); }
-/* Sul giorno selezionato (fondo ambra) i badge restano leggibili con un contorno */
-.cell.sel .bd-sq, .cell.sel .bd-av { box-shadow: 0 0 0 1.5px rgba(0,0,0,.14); }
+
 
 /* ---- Agenda del giorno: intestazione ---- */
-.dayhead { display: flex; align-items: baseline; justify-content: space-between; margin: 16px 2px 12px; }
-.dh-day { font-size: 16px; font-weight: 800; letter-spacing: -.3px; text-transform: capitalize; }
-.dh-count { font-size: 11.5px; font-weight: 700; color: var(--ink-3); }
+/* `scroll-margin-top`: quando la strip ci porta qui, l'intestazione non si
+   incolla al bordo alto dello schermo. */
+.dayhead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 18px 2px 12px; scroll-margin-top: 12px; }
+/* Il giorno è il titolo di ciò che sta sotto, come il mese lo è del calendario:
+   stessa scala di `.mtitle`, stesso bicolore. Più piccolo, il nome del coach
+   dentro le card pesava più del giorno che le contiene. */
+.dh-day { flex: 1; min-width: 0; font-size: 24px; font-weight: 800; letter-spacing: -.6px; text-transform: capitalize; }
+/* Il numero è il dato che si cerca leggendo la riga: prende l'accento FitFlow. */
+.dh-num { color: var(--amber); }
+.dh-count { flex: none; font-size: 11.5px; font-weight: 700; color: var(--ink-3); text-align: right; }
 
-/* ---- Timeline sedute ---- */
+/* ---- Timeline ---- */
 .timeline { display: flex; flex-direction: column; }
 .tl { display: flex; gap: 11px; }
 .t { width: 44px; flex: none; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; }
@@ -71,19 +119,12 @@
 .conn { width: 13px; flex: none; display: flex; flex-direction: column; align-items: center; }
 .conn::before { content: ''; flex: 1; width: 2px; background: var(--hairline); min-height: 6px; }
 .d { width: 11px; height: 11px; border-radius: 50%; flex: none; margin: 3px 0; }
+/* Il pallino di una proposta è vuoto: non è ancora successo niente. */
+.d.dashed { background: none; border: 1.5px dashed var(--amber); }
 .line { flex: 1; width: 2px; background: var(--hairline); min-height: 6px; }
 .tl:first-child .conn::before { visibility: hidden; }
 .tl:last-child .line { visibility: hidden; }
-
-.c-card { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; gap: 11px; margin: 6px 0; padding: 12px 14px 12px 16px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--hairline); overflow: hidden; }
-.c-card.done { opacity: .62; }
-.c-card .bar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
-.c-card .info { flex: 1; min-width: 0; }
 .nm { font-size: 13.5px; font-weight: 800; letter-spacing: -.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.meta { font-size: 11.5px; font-weight: 600; color: var(--ink-3); margin-top: 2px; }
-.pend { flex: none; font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .2px; color: var(--amber); background: var(--amber-soft); padding: 3px 8px; border-radius: var(--r-pill); }
-.pend.ok { color: var(--green); background: var(--green-soft); }
-.pend.hold { color: var(--ink-3); background: var(--surface-3); }
 
 /* ---- Stato vuoto ---- */
 .dp-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 26px 4px; color: var(--ink-3); }
@@ -92,67 +133,56 @@
 .ff-req { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; padding: 10px 16px; border-radius: var(--r-pill); background: var(--amber); color: var(--amber-ink); border: none; font-family: inherit; font-size: 12.5px; font-weight: 800; box-shadow: var(--shadow-amber); cursor: pointer; }
 .ff-req .ti { font-size: 16px; }
 
-/* ---- Bottom-sheet: richiesta seduta ---- */
-.sheet-bg { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.5); backdrop-filter: blur(2px); animation: ag-fade .18s cubic-bezier(.16,1,.3,1) backwards; }
-.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 61; background: var(--surface-1); border-top: 1px solid var(--hairline-strong); border-radius: 22px 22px 0 0; padding: 12px 18px calc(22px + env(safe-area-inset-bottom)); box-shadow: 0 -16px 40px -18px rgba(0,0,0,.8); animation: ag-up .24s cubic-bezier(.16,1,.3,1) backwards; }
+/* ---- Bottom-sheet (richiesta seduta · spostamento · controproposta) ---- */
+.sheet { width: 100%; max-height: 100%; overflow-y: auto; background: var(--surface-1); border-top: 1px solid var(--hairline-strong); border-radius: 22px 22px 0 0; padding: 12px 18px calc(22px + env(safe-area-inset-bottom)); box-shadow: 0 -16px 40px -18px rgba(0,0,0,.8); animation: ag-up .24s cubic-bezier(.16,1,.3,1) backwards; }
 @keyframes ag-up { from { transform: translateY(100%); } to { transform: none; } }
-@keyframes ag-fade { from { opacity: 0; } to { opacity: 1; } }
 .sheet-grip { width: 40px; height: 4px; border-radius: 999px; background: var(--hairline-strong); margin: 0 auto 14px; }
-.sheet-hd { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 800; letter-spacing: -.3px; text-transform: capitalize; }
+.sheet-hd { display: flex; align-items: baseline; gap: 8px; font-size: 16px; font-weight: 800; letter-spacing: -.3px; }
+.sheet-hd small { display: block; margin-top: 4px; font-size: 12.5px; font-weight: 700; color: var(--ink-3); text-transform: capitalize; font-variant-numeric: tabular-nums; letter-spacing: 0; }
 .sheet-hd .ti { font-size: 19px; color: var(--amber); }
 .sheet-sub { font-size: 12.5px; font-weight: 600; color: var(--ink-3); margin: 8px 0 14px; }
 .timegrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .tslot { padding: 12px 0; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--hairline); color: var(--ink); font-family: inherit; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; cursor: pointer; }
-.tslot:active { background: var(--amber); color: var(--amber-ink); border-color: transparent; }
+.tslot.on { background: var(--amber); color: var(--amber-ink); border-color: transparent; }
 .tslot:disabled { opacity: .3; text-decoration: line-through; cursor: not-allowed; }
 .ff-cancel { width: 100%; margin-top: 14px; padding: 13px 0; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--hairline); color: var(--ink-2); font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
-
-/* ============================================================================
- *  DRAG & DROP: sposta una seduta su un altro giorno → richiesta al PT
- *  (stile ripreso 1:1 da FitPlatform PT)
- * ========================================================================== */
-
-/* Cella drop-target durante il drag (identica a PT) */
-.cell.dragover { background: var(--amber-soft); box-shadow: inset 0 0 0 2px var(--amber); }
-
-/* Card seduta trascinabile: maniglia + stato "in trascinamento" (come PT) */
-.c-card[draggable='true'] { cursor: grab; }
-.c-card[draggable='true']:active { cursor: grabbing; }
-.c-card.dragging { opacity: .45; border-style: dashed; }
-.grip { flex: none; display: flex; align-items: center; color: var(--ink-4); margin-left: -2px; }
-.grip .ti { font-size: 18px; }
-
-/* Slot orario selezionato nello sheet (stessa resa dell':active di PT) */
-.tslot.on { background: var(--amber); color: var(--amber-ink); border-color: transparent; }
-
-/* Nota informativa nello sheet (identica a PT) */
 .sheet-note { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--ink-3); margin: 13px 0 14px; }
 .sheet-note .ti { font-size: 15px; color: var(--amber); }
 .sheet-note b { color: var(--amber); }
-
-/* Textarea messaggio: usa il campo .input globale, solo resize disattivato */
 .sheet textarea.input { resize: none; }
 .sheet .ff-req { width: 100%; justify-content: center; }
 .sheet .ff-req:disabled { opacity: .4; box-shadow: none; cursor: not-allowed; }
 
-/* ============================================================================
- *  DIARIO: legenda badge, card allenamento (deep-link), card coach
- * ========================================================================== */
+/* ---- Drag & drop: non muove niente, chiede ---- */
+.cell.dragover { background: var(--amber-soft); box-shadow: inset 0 0 0 2px var(--amber); }
+.pt-wrap[draggable='true'], .rq-slot[draggable='true'] { cursor: grab; }
+.pt-wrap[draggable='true']:active, .rq-slot[draggable='true']:active { cursor: grabbing; }
+.pt-wrap.dragging, .rq-slot.dragging { opacity: .45; }
 
-/* Legenda sotto l'header: cosa significano i badge */
-.legend { display: flex; align-items: center; gap: 14px; min-width: 0; }
-.lg { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--ink-3); white-space: nowrap; }
-.lg-sq { width: 14px; height: 14px; border-radius: 4px; background: var(--surface-3); box-shadow: inset 0 0 0 1px var(--hairline-strong); }
-.lg-av { width: 14px; height: 14px; border-radius: 50%; overflow: hidden; box-shadow: inset 0 0 0 1.5px var(--amber); background: var(--surface-3); }
-.lg-av img { width: 100%; height: 100%; object-fit: cover; }
-
-/* Card allenamento svolto (riepilogo, deep-link allo Storico) */
+/* ---- Card allenamento svolto (deep-link allo Storico) ---- */
 .wk-card { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; margin: 6px 0; padding: 12px 14px 12px 16px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--hairline); box-shadow: var(--shadow-card); overflow: hidden; text-align: left; font-family: inherit; cursor: pointer; transition: border-color .15s, transform .1s; }
 .wk-card:active { transform: scale(.985); }
+/* Variante "seduta col coach conclusa": stessa card, non cliccabile — di una
+   seduta non c'è (ancora) un dettaglio da aprire. */
+.wk-card.is-pt { cursor: default; }
+.wk-card.is-pt:active { transform: none; }
+/* Al posto della piastrella della scheda, la faccia del coach: è l'unica
+   differenza che conta tra un allenamento da solo e uno fatto insieme. */
+.pt-pav {
+  width: 42px; height: 42px; border-radius: 50%; flex: none; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-3); box-shadow: inset 0 0 0 2px var(--green);
+}
+.pt-pav img { width: 100%; height: 100%; object-fit: cover; }
+.pt-pav span { font-size: 14px; font-weight: 800; color: var(--green); }
+/* Occhiello con icona: il calendario spuntato dice «fatta», in verde come
+   l'anello dell'avatar e come ogni cosa conclusa nell'app. */
+.wk-eyebrow.ic { display: inline-flex; align-items: center; gap: 5px; }
+.wk-eyebrow.ic .ti { font-size: 13px; color: var(--green); }
 .wk-card .bar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
 .wk-ic { width: 42px; height: 42px; border-radius: 13px; flex: none; display: flex; align-items: center; justify-content: center; font-size: 20px; }
 .wk-main { flex: 1; min-width: 0; }
-.wk-eyebrow { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; color: var(--ink-4); margin-bottom: 3px; }
+.wk-eyebrow { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; color: var(--ink-2); margin-bottom: 3px; }
 .wk-top { display: flex; align-items: center; gap: 8px; }
 .wk-pr { flex: none; display: inline-flex; align-items: center; gap: 3px; font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .2px; color: var(--amber); background: var(--amber-soft); padding: 2px 7px; border-radius: var(--r-pill); }
 .wk-pr .ti { font-size: 12px; }
@@ -161,38 +191,73 @@
 .wk-stats .ti { font-size: 13px; color: var(--ink-3); }
 .wk-link { color: var(--amber); }
 .wk-link .ti { color: var(--amber) !important; font-size: 13px; }
-.wk-go { flex: none; font-size: 18px; color: var(--ink-4); }
+.wk-go { flex: none; font-size: 18px; color: var(--ink-3); }
 
-/* ---- Card sessione col coach: gerarchia chiara, molto spazio ---- */
-.pt-card { position: relative; flex: 1; min-width: 0; margin: 6px 0; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--hairline); box-shadow: var(--shadow-card); overflow: hidden; }
-.pt-card[draggable='true'] { cursor: grab; }
-.pt-card[draggable='true']:active { cursor: grabbing; }
-.pt-card.dragging { opacity: .45; border-style: dashed; }
-.pt-card.is-done { opacity: .82; }
-.pt-row { display: flex; align-items: center; gap: 14px; padding: 15px 16px; }
-.pt-av { width: 48px; height: 48px; border-radius: 50%; flex: none; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--surface-3); box-shadow: inset 0 0 0 2px var(--amber); }
-.pt-av.done { box-shadow: inset 0 0 0 2px var(--green); }
-.pt-av img { width: 100%; height: 100%; object-fit: cover; }
-.pt-av span { font-size: 15px; font-weight: 800; color: var(--amber); }
-.pt-av.done span { color: var(--green); }
-.pt-main { flex: 1; min-width: 0; }
-.pt-eyebrow { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; color: var(--ink-4); }
-.pt-title { font-size: 18px; font-weight: 800; letter-spacing: -.4px; color: var(--ink); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pt-coach { font-size: 12.5px; font-weight: 600; color: var(--ink-3); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pt-side { flex: none; align-self: stretch; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 10px; }
-.pt-status { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .2px; padding: 4px 9px; border-radius: var(--r-pill); white-space: nowrap; }
-.pt-status.st-done { color: var(--green); background: var(--green-soft); }
-.pt-status.st-planned { color: var(--cyan); background: var(--cyan-soft); }
+/* ---- Card seduta concordata col coach ---- */
+.pt-wrap { flex: 1; min-width: 0; margin: 6px 0; }
+.pt-card { position: relative; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--hairline); box-shadow: var(--shadow-card); overflow: hidden; }
+/* Testata: la riga dove stanno le etichette, mai il nome. Va a capo invece di
+   comprimere — una pill che si accorcia perde lettere, una riga in più no. */
+/* ---- Testata: insegna a pillola, poi coach e luogo — gemella di `.rc-head`.
+   Niente fasce: il colore sta tutto nella pillola. */
+/* Coach e luogo, una riga sola nel corpo — gemella di `.rc-who`. Porta lei il
+   divisorio: è il primo dato della card, come l'orario che le sta sotto. */
+.pt-who { display: flex; align-items: center; gap: 9px; padding: 13px 16px 0; border-top: 1px solid var(--hairline); }
+.pt-face {
+  flex: none; width: 26px; height: 26px; border-radius: 50%; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-3); box-shadow: inset 0 0 0 1.5px var(--amber);
+}
+.pt-face img { width: 100%; height: 100%; object-fit: cover; }
+.pt-face span {
+  font-size: 9px; font-weight: 800; letter-spacing: -.2px; line-height: 1;
+  color: var(--amber); white-space: nowrap;
+}
+/* Due righe, con l'avatar centrato su entrambe. Gemella di `.rc-wtxt`. */
+.pt-wtxt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pt-wname, .pt-wplace { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pt-wname { font-size: 15px; font-weight: 700; color: var(--ink-2); }
+.pt-wplace { font-size: 11.5px; font-weight: 600; color: var(--ink-3); }
+
+/* Sul fondo scuro il bianco pieno per i due DATI che si cercano — con chi e
+   quando — un gradino sopra `--ink`, che è avorio. Solo lì: in tema chiaro il
+   corrispettivo sarebbe il nero pieno, che su carta chiara è duro e stanca.
+   L'etichetta «ORARIO» resta a `--ink-2`: è il nome del dato, non il dato, e
+   accendere tutti e due li mette sullo stesso piano. */
+:host-context([data-theme='dark']) .pt-wname,
+:host-context([data-theme='dark']) .pt-span { color: #fff; }
+
+/* Quando finisce: il dato che né l'intestazione del giorno né la colonna della
+   timeline danno. Stessa anatomia di `.rc-slot`. */
+.pt-when { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 16px 14px; }
+.pt-wcol { display: flex; flex-direction: column; min-width: 0; }
+.pt-lbl { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; color: var(--ink-2); margin-bottom: 2px; }
+.pt-span { font-size: 19px; font-weight: 800; letter-spacing: -.4px; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* Con chi e dove: riga piccola, come su `.rc-who`. */
+.pt-status { flex: none; font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .2px; padding: 4px 9px; border-radius: var(--r-pill); white-space: nowrap; }
 .pt-status.st-soon { color: var(--amber-ink); background: var(--amber); }
-.pt-status.st-pending { color: var(--amber); background: var(--amber-soft); }
-.pt-grip { color: var(--ink-4); display: inline-flex; }
-.pt-grip .ti { font-size: 18px; }
-/* Footer (solo sessione spostata): nota + annulla */
-.pt-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 16px; border-top: 1px solid var(--hairline); background: color-mix(in srgb, var(--amber) 6%, transparent); }
-.pt-note { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--ink-2); }
-.pt-note .ti { font-size: 15px; color: var(--amber); flex: none; }
-.pt-cancel { flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 8px 13px; border-radius: var(--r-pill); background: var(--surface-2); border: 1px solid var(--hairline); color: var(--ink); font-family: inherit; font-size: 11.5px; font-weight: 800; cursor: pointer; }
-.pt-cancel .ti { font-size: 15px; }
+/* ---- La testata delle sedute che si spostano ----
+   Gemella di `.rc-tab`: nessuna superficie propria, i puntini della maniglia
+   sopra l'insegna, tutto centrato sulla card. L'icona resta ambra — su una
+   seduta concordata non dice «tocca a te», dice solo di che cosa si tratta.
+   Tipografia più piccola di quella del corpo per la stessa ragione spiegata su
+   `.rc-tab`: è la presa del mobile, non il mobile. */
+.pt-tab {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 3px 12px 8px;
+  color: var(--ink);
+}
+.pt-tgrip { font-size: 12px; line-height: 1; color: var(--ink-3); pointer-events: none; }
+.pt-tlbl {
+  display: flex; align-items: center; gap: 8px; min-width: 0; max-width: 100%;
+  font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pt-tlbl .ti { flex: none; font-size: 19px; color: var(--amber); }
+
+/* La richiesta nella timeline: contenitore trascinabile della card condivisa. */
+.rq-slot { flex: 1; min-width: 0; }
 
 /* Riga-azione "Richiedi una sessione" sotto la timeline */
 .ff-req-line { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; margin-top: 8px; padding: 12px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--hairline); color: var(--ink-2); font-family: inherit; font-size: 12.5px; font-weight: 800; cursor: pointer; }

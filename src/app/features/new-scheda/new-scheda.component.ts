@@ -184,7 +184,7 @@ export class NewSchedaComponent {
 
   // Gradiente di sfondo della preview card (identico a quello del coverflow)
   readonly cardBg = computed(() =>
-    `linear-gradient(155deg, ${ACCENT_VAR[this.accent()]} -10%, #14141d 115%)`
+    `linear-gradient(155deg, ${ACCENT_VAR[this.accent()]} -10%, var(--cover-end) 115%)`
   );
 
   // ---- Event handlers ----

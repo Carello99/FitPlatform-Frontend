@@ -22,6 +22,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ACCENT_VAR, LEVEL_LABEL, MOTIVATION, TILE_CLASS } from '../../core/constants/ui.constants';
+import { isoDay } from '../../core/utils/date.utils';
 import { Scheda } from '../../core/models/workout.models';
 import { SessionService } from '../../core/services/session.service';
 import { WorkoutStore } from '../../core/services/workout-store.service';
@@ -30,6 +31,7 @@ import { CoverflowComponent } from './coverflow.component';
 import { AppHeaderComponent } from '../../layout/app-header/app-header.component';
 import { TrainerService } from '../../core/services/trainer.service';
 import { ToastService } from '../../core/services/toast.service';
+import { ModalComponent } from '../../shared/components/modal/modal.component';
 
 /**
  * Dashboard principale — il cuore dell'app.
@@ -45,20 +47,20 @@ import { ToastService } from '../../core/services/toast.service';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Tutti i componenti usati nel template devono essere qui negli imports
-  imports: [DiffComponent, CoverflowComponent, AppHeaderComponent],
+  imports: [DiffComponent, CoverflowComponent, AppHeaderComponent, ModalComponent],
   // templateUrl: il template è in un file .html separato (per componenti con HTML lungo)
   templateUrl: './home.component.html',
   styles: [`
     /* ===== BLOCCO SETTIMANA: calendario (→ mensile) fuso con le schede (→ allena) ===== */
 
-    /* Striscia calendario: superficie tappabile con cue esplicito "Calendario ›" */
-    .wk-cal { -webkit-appearance: none; appearance: none; display: block; width: 100%; text-align: left; margin-top: 24px; padding: 13px 15px; border-radius: var(--r-md); background: var(--surface-2); border: 1px solid var(--hairline); font-family: inherit; color: inherit; cursor: pointer; transition: border-color .16s; overflow: hidden; }
-    .wk-cal:active { border-color: var(--hairline-strong); }
-    .wk-cal-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 13px; }
-    .wk-cal-t { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 800; letter-spacing: -.2px; }
-    .wk-cal-t .ti { font-size: 17px; color: var(--ink-2); }
-    .wk-cal-go { display: inline-flex; align-items: center; gap: 2px; font-size: 11.5px; font-weight: 800; color: var(--amber); }
-    .wk-cal-go .ti { font-size: 15px; }
+    /* Riga titolo settimana: "Settimana" a sinistra, "Agenda ›" tutto a destra */
+    .wk-head { display: flex; align-items: center; justify-content: space-between; margin: 16px 2px 12px; }
+    .wk-agenda { display: inline-flex; align-items: center; gap: 2px; background: none; border: none; padding: 2px; font-family: inherit; font-size: 13px; font-weight: 800; color: var(--amber); cursor: pointer; }
+    .wk-agenda .ti { font-size: 17px; }
+
+    /* Striscia settimana: superficie tappabile → Agenda. Solo i giorni. */
+    .wk-cal { -webkit-appearance: none; appearance: none; display: block; width: 100%; text-align: left; margin-top: 0; padding: 14px 15px; border-radius: var(--r-lg); background: var(--surface-2); border: 1px solid var(--hairline); box-shadow: var(--shadow-card); font-family: inherit; color: inherit; cursor: pointer; transition: border-color .16s, transform .16s; overflow: hidden; }
+    .wk-cal:active { border-color: var(--hairline-strong); transform: scale(.992); }
 
     /* Giorni della settimana (design ripreso da FitPlatform PT): dow + numero,
        colonna di oggi evidenziata. */
@@ -78,6 +80,10 @@ import { ToastService } from '../../core/services/toast.service';
     .wk-time { font-size: 9px; font-weight: 800; color: var(--amber); font-variant-numeric: tabular-nums; margin-top: -2px; }
     .wk-time.done { color: var(--green); }
     .wk-fire { font-size: 19px; color: var(--amber); }
+    /* Giorno allenato: tessera con icona+colore della scheda fatta (come nel
+       calendario dell'Agenda). Sostituisce il generico fuoco. */
+    .wk-workout { width: 23px; height: 23px; border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+    .wk-workout .ti { font-size: 14px; }
     .wk-dot-today { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); }
     .wk-dot-rest { width: 5px; height: 5px; border-radius: 50%; background: var(--ink-4); opacity: .55; }
 
@@ -203,6 +209,25 @@ export class HomeComponent {
     });
   });
 
+  /**
+   * Allenamento svolto per ciascun giorno di questa settimana (lun→dom), o null.
+   * Serve alla strip della settimana: sul giorno allenato mostra l'ICONA della
+   * scheda fatta (colore+icona), non un generico fuoco.
+   */
+  readonly weekWorkout = computed(() => {
+    const hist = this.w.history;
+    const now = new Date();
+    const monday = new Date(now);
+    monday.setHours(0, 0, 0, 0);
+    monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      return hist.find((h) => h.dateIso === iso) ?? null;
+    });
+  });
+
   // Costanti esposte come proprietà del componente per usarle nel template HTML.
   // Nel template non si può importare direttamente da altri moduli,
   // quindi si "passa" la costante come proprietà.
@@ -217,16 +242,10 @@ export class HomeComponent {
   // getDay() restituisce 0=Dom, 1=Lun, ..., 6=Sab
   readonly motiv = MOTIVATION[new Date().getDay() % MOTIVATION.length];
 
-  /** Data ISO locale di oggi ('YYYY-MM-DD'). */
-  private get todayIso(): string {
-    const n = new Date();
-    return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
-  }
-
   /** La sessione col coach se è OGGI (altrimenti null). */
   readonly coachToday = computed(() => {
     const s = this.trainer.nextSession();
-    return s && s.date === this.todayIso ? s : null;
+    return s && s.date === isoDay() ? s : null;
   });
 
   /**

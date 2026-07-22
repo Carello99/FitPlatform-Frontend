@@ -1,0 +1,217 @@
+<!-- ============================================================
+     VARIANTE inline: la richiesta come EVENTO "in prova" nella
+     timeline del giorno.
+
+     L'ordine è quello in cui si legge una richiesta:
+       testata (chi · cosa) → chi e dove → perché → QUANDO → decidi
+     Il "quando" è il dato più grande della card, perché una
+     richiesta d'agenda è una data.
+
+     UNO SPOSTAMENTO SI VEDE IN DUE GIORNI e qui si racconta come lo
+     vive il giorno che lo ospita: il 21 è una seduta che se ne va
+     («spostamento», si sposta a...), il 22 è una seduta che prima non
+     c'era («nuova sessione», quando...) — identica a una prenotazione
+     proposta dal coach. Sotto è la stessa richiesta con lo stesso id:
+     stesse azioni da entrambi i lati, e rispondere da uno chiude
+     l'altro. Il perché resta nel messaggio del coach.
+     ============================================================ -->
+@if (variant() === 'inline') {
+  <div class="rc-wrap" [class.is-mine]="mine()" [class.is-urgent]="urgent() && !mine()"
+       [class.is-leaving]="side() === 'origin'">
+
+    <!-- ---- L'INSEGNA ----
+         Se la card si può spostare, l'insegna esce dalla card e diventa una
+         LINGUETTA: stretta quanto la sua parola, appoggiata sul bordo alto,
+         coi puntini della maniglia sopra. È la stessa forma delle linguette di
+         un raccoglitore — la cosa che si prende per spostare la scheda — e dice
+         il gesto senza spiegarlo.
+         Se la card NON si può spostare (giorno passato, seduta già fatta) la
+         linguetta non ha senso: l'insegna resta una pillola dentro la card.
+         In tutti e due i casi porta il colore dello stato: ambra = tocca a te ·
+         grigio = stai aspettando · rosa = urgente. Lo stato per esteso è sopra
+         ai bottoni, dove si decide. -->
+    <div class="rc-event">
+      @if (grip()) {
+        <div class="rc-tab">
+          <i class="ti ti-grip-horizontal rc-tgrip" aria-hidden="true"></i>
+          <span class="rc-tlbl">
+            <i class="ti" [class]="kindIcon()" aria-hidden="true"></i>{{ kindLabel() }}
+          </span>
+        </div>
+      }
+      @if (!grip()) {
+        <div class="rc-head">
+          <span class="rc-badge">
+            <i class="ti" [class]="kindIcon()" aria-hidden="true"></i>{{ kindLabel() }}
+          </span>
+        </div>
+      }
+
+      <div class="rc-content">
+        <!-- LA POSIZIONE DEL MESSAGGIO DICE CHI PARLA.
+             Se la richiesta è MIA, il messaggio è mio VERSO il coach: sta sopra
+             la sua faccia, altrimenti — appiccicato al suo nome — sembrerebbe
+             una cosa che ha detto lui. Se la richiesta è SUA, il messaggio è la
+             sua ragione: sta sotto il nome, dove si legge come parola di chi
+             sta appena sopra. Stesso riquadro, due posti, due autori. -->
+        @if (mine() && req().message) {
+          <p class="rc-msg mine">{{ req().message }}</p>
+        }
+
+        <!-- Chi manda la richiesta e dove: sta col resto dei dati, non nella
+             testata — è un attributo dell'appuntamento come l'orario. -->
+        <div class="rc-who">
+          <span class="rc-face">
+            @if (trainer.trainer.photoUrl) { <img [src]="trainer.trainer.photoUrl" [alt]="trainer.trainer.name" /> }
+            @else { <span>{{ trainer.trainer.initials }}</span> }
+          </span>
+          <!-- Nome e luogo su due righe: sono due fatti diversi, e in fila su una
+               riga sola il luogo veniva mangiato dall'ellissi per primo. -->
+          <span class="rc-wtxt">
+            <span class="rc-wname">{{ trainer.trainer.name }}</span>
+            <span class="rc-wplace">{{ req().payload.place }}</span>
+          </span>
+        </div>
+
+        <!-- IL PERCHÉ del coach, prima del quando: la ragione umana della
+             richiesta si legge mentre si guarda chi la manda, e l'orario
+             proposto si valuta sapendo già perché è quello. -->
+        @if (!mine() && req().message) {
+          <p class="rc-msg">{{ req().message }}</p>
+        }
+
+        <!-- IL QUANDO — solo ciò che il contesto non dice già: l'intervallo, e
+             il giorno soltanto quando è un altro (vedi `showDay`). Fuori dal
+             calendario la data serve tutta: la riga compatta della strip la
+             scrive per intero. È l'ultima cosa prima dei pulsanti, perché è il
+             dato su cui si decide. -->
+        <div class="rc-slot">
+          <span class="rc-lbl">{{ slotLabel() }}</span>
+          <div class="rc-to">
+            @if (showDay()) { <span class="rc-day">{{ to().day }}</span> }
+            <span class="rc-time">{{ span() }}</span>
+          </div>
+        </div>
+
+        @if (conflict(); as c) {
+          <p class="rc-warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i>{{ c }}</p>
+        }
+      </div>
+
+      <div class="rc-foot">
+        <!-- La scadenza vive con la decisione: è il motivo per cui si decide
+             adesso, e la legge chi sta già guardando i due tasti. -->
+        <p class="rc-due">
+          <i class="ti" [class]="mine() ? 'ti-hourglass-high' : 'ti-clock'" aria-hidden="true"></i>{{ dueLine() }}
+        </p>
+        @if (mine()) {
+          <!-- Una richiesta mia ha una sola azione: ritirarla. Cambiare giorno
+               si fa trascinandola — e chi non trascina ritira e richiede, che
+               è il percorso che c'è sempre stato. -->
+          <button class="rc-btn ghost" (click)="withdraw.emit(req().id)">
+            <i class="ti ti-x" aria-hidden="true"></i>Annulla la richiesta
+          </button>
+        } @else {
+          <!-- Sì e no sono la stessa scelta vista da due lati: stesso peso, stessa
+               forma, solo il colore le distingue. Con l'etichetta accanto
+               all'icona: un'icona nuda su una decisione irreversibile chiede di
+               indovinare. «Altro giorno» non è un terzo sì/no — è un'altra
+               strada, e sta su una riga sua. -->
+          <div class="rc-pair">
+            <button class="rc-btn primary" [disabled]="!!conflict()" (click)="accept.emit(req().id)">
+              <i class="ti ti-check" aria-hidden="true"></i>Accetto
+            </button>
+            <button class="rc-btn deny" (click)="decline.emit(req().id)">
+              <i class="ti ti-x" aria-hidden="true"></i>Rifiuto
+            </button>
+          </div>
+          <!-- Nessun pulsante «Proponi un altro giorno»: controproporre è già un
+               gesto, si trascina la card su un altro giorno del calendario.
+               Qui resta solo il suggerimento, in piccolo, per chi non lo sa. In
+               chat invece il calendario non c'è: là il pulsante serve (variante
+               compatta), e non passa da qui. -->
+          @if (canCounter()) {
+            <p class="rc-hint">
+              <i class="ti ti-hand-move" aria-hidden="true"></i>Un altro giorno? Trascina la card sul calendario.
+            </p>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ============================================================
+     VARIANTI strip e chat: riga compatta.
+     Stesso ordine di lettura, densità maggiore. Anche qui le due
+     date di uno spostamento stanno su righe diverse.
+     ============================================================ -->
+@else {
+  <div class="rc-compact" [class.is-mine]="mine()" [class.is-urgent]="urgent() && !mine()" [class.is-conflict]="!!conflict()">
+    <span class="rc-av sm">
+      @if (trainer.trainer.photoUrl) { <img [src]="trainer.trainer.photoUrl" [alt]="trainer.trainer.name" /> }
+      @else { <span>{{ trainer.trainer.initials }}</span> }
+    </span>
+
+    <button
+      class="rc-body"
+      [class.tappable]="bodyTappable()"
+      [attr.disabled]="bodyTappable() ? null : true"
+      (click)="openDay.emit(req().payload.date)"
+      [attr.aria-label]="bodyTappable() ? 'Vedi il giorno della richiesta' : null"
+    >
+      <div class="rc-name">
+        @if (unseen()) { <span class="rc-dot" aria-label="Non letta"></span> }
+        <i class="ti" [class]="KIND_ICON[req().kind]" aria-hidden="true"></i>
+        {{ KIND_SHORT[req().kind] }}
+        @if (mine()) { <span class="rc-tag">In attesa</span> }
+      </div>
+
+      <!-- Uno spostamento si dice «da … a …»: è la preposizione del gesto, e
+           regge le due righe meglio di «ora/nuovo». Il barrato accompagna. -->
+      @if (from(); as f) {
+        <div class="rc-line muted"><span class="rc-mini">da</span><span class="rc-strike">{{ f.day }} · {{ f.time }}</span></div>
+      }
+      <div class="rc-line strong">
+        @if (from()) { <span class="rc-mini">a</span> }
+        {{ to().day }} · {{ to().time }}
+      </div>
+
+      @if (conflict(); as c) {
+        <div class="rc-warn sm"><i class="ti ti-alert-triangle" aria-hidden="true"></i>{{ c }}</div>
+      } @else if (urgent() && !mine() && countdown()) {
+        <div class="rc-warn sm"><i class="ti ti-clock-exclamation" aria-hidden="true"></i>Rispondi {{ countdown() }}</div>
+      }
+    </button>
+
+    <!-- ---- Azioni della riga compatta ----
+         `open`: la riga è un indice, non un banco di decisione. Un solo tasto,
+         la freccia, che porta al giorno dove la richiesta si vede intera e si
+         decide col calendario davanti.
+         `decide`: in chat il calendario non c'è, quindi sì e no stanno qui. -->
+    <div class="rc-acts">
+      @if (actions() === 'open') {
+        <button class="rc-ab go" (click)="openDay.emit(req().payload.date)" aria-label="Vai al giorno della richiesta">
+          <i class="ti ti-chevron-right" aria-hidden="true"></i>
+        </button>
+      } @else if (mine()) {
+        <button class="rc-ab no" (click)="withdraw.emit(req().id)" aria-label="Annulla la richiesta">
+          <i class="ti ti-x" aria-hidden="true"></i>
+        </button>
+      } @else {
+        @if (conflict()) {
+          <button class="rc-ab move" (click)="counter.emit(req().id)" aria-label="Proponi un altro giorno">
+            <i class="ti ti-calendar-share" aria-hidden="true"></i>
+          </button>
+        } @else {
+          <button class="rc-ab ok" (click)="accept.emit(req().id)" aria-label="Accetta">
+            <i class="ti ti-check" aria-hidden="true"></i>
+          </button>
+        }
+        <button class="rc-ab no" (click)="decline.emit(req().id)" aria-label="Rifiuta">
+          <i class="ti ti-x" aria-hidden="true"></i>
+        </button>
+      }
+    </div>
+  </div>
+}
